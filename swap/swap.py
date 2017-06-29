@@ -64,9 +64,6 @@ class SWAP:
         self.users = Bureau(User)
         self.subjects = Bureau(Subject)
 
-        self.users.reference_bureau(self.subjects)
-        self.subjects.reference_bureau(self.users)
-
         # Directive to update - if True, then a volunteer agent's posterior
         # probability of containing an interesting object will be updated
         # whenever an expertly classified "gold standard" subject is
@@ -110,6 +107,9 @@ class SWAP:
 
         subject = self.subjects.get(cl.subject)
         user = self.users.get(cl.user)
+
+        if not config.back_update:
+            user.ledger.recalculate()
 
         subject.classify(cl, user)
         user.classify(cl, subject)
@@ -168,6 +168,8 @@ class SWAP:
 
         with_bar = config.back_update
 
+        # TODO make sure notify_agents is called on each ledger
+
         def run(bureau):
             if with_bar:
                 name = bureau.agent_type.class_name
@@ -181,7 +183,14 @@ class SWAP:
             else:
                 bureau.process_changes()
 
+        logger.info('Notifying user agents of subject changes')
+        self.subjects.notify_changes(self.users)
+
         run(self.users)
+
+        logger.info('Notifying subject agents of user changes')
+        self.users.notify_changes(self.subjects)
+
         run(self.subjects)
 
         # logger.info('processing user score changes')
@@ -243,7 +252,7 @@ class SWAP:
     #     """ Get Subject Bureau object """
     #     return self.subjects
 
-    def set_gold_labels(self, golds):
+    def set_gold_labels(self, golds, with_bar=True):
         """
             Defines the subjects explicitly that should be
             treated as gold standards
@@ -259,14 +268,21 @@ class SWAP:
                 (subject id : gold label) Mapping of subject to its gold label
         """
         # Removes gold label from all subjects not in the golds list
+        logger.info('Processing gold labels')
+        if with_bar:
+            bar = progressbar.ProgressBar(max_value=len(self.subjects))
         for subject in self.subjects:
             if subject.id not in golds:
-                subject.set_gold_label(-1)
+                subject.set_gold_label(-1, self.subjects, self.users)
+
+            if with_bar:
+                bar.update(bar.value + 1)
         # Assigns the new gold label to subjects in the list
         # Also tells the Bureau to make a new subject agent if it
         # doesn't exist yet
         for id_, gold in golds.items():
-            self.subjects.get(id_, make_new=True).set_gold_label(gold)
+            subject = self.subjects.get(id_, make_new=True)
+            subject.set_gold_label(gold, self.subjects, self.users)
 
         # self.process_changes()
 
@@ -449,13 +465,6 @@ class SWAP:
         s += str(self.stats) + '\n'
 
         return s
-
-    def __setstate__(self, state):
-        # Restore cyclic references to transactions
-        self.__dict__.update(state)
-
-        self.subjects.reference_bureau(self.users)
-        self.users.reference_bureau(self.subjects)
 
 
 class DummySWAP:

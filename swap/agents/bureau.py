@@ -24,7 +24,6 @@ class Bureau:
         self.agent_type = agent_type
         # dictionary to store all agents, key is agent-ID
         self._agents = dict()
-        self.other_bureau = None
 
     def add(self, agent, override=True):
         """
@@ -39,9 +38,6 @@ class Bureau:
             raise TypeError(
                 'Agent type %s is not of type %s' %
                 (type(agent), self.agent_type))
-
-        # Add reference to other bureau to agent's ledger
-        agent.ledger.set_bureau(self.other_bureau)
 
         # Add agent to collection
         if agent.id in self._agents and not override:
@@ -98,6 +94,10 @@ class Bureau:
 
             agent.ledger.recalculate()
 
+    def notify_changes(self, other_bureau):
+        for agent in self:
+            agent.ledger.notify_agents(self, other_bureau)
+
     def calculate_changes(self):
         return len([1 for i in self if i.ledger.stale])
 
@@ -122,11 +122,6 @@ class Bureau:
     def iter_ids(self, ids):
         return AgentIterator(self, ids)
 
-    def reference_bureau(self, other_bureau):
-        self.other_bureau = other_bureau
-        for agent in self:
-            agent.ledger.set_bureau(other_bureau)
-
     def __iter__(self):
         return iter(self._agents.values())
 
@@ -147,10 +142,6 @@ class Bureau:
     def __repr__(self):
         return '%d agents of type %s' %\
             (len(self._agents), str(self.agent_type))
-
-    def __getstate__(self):
-        self.other_bureau = None
-        return self.__dict__.copy()
 
 
 class AgentIterator:

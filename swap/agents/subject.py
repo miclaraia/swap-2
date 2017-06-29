@@ -66,10 +66,10 @@ class Subject(Agent):
         id_ = user.id
 
         if id_ not in self.ledger.transactions:
-            t = Transaction(id_, user, annotation)
+            t = Transaction(user, annotation)
             self.ledger.add(t)
 
-    def set_gold_label(self, gold_label):
+    def set_gold_label(self, gold_label, subjects, users):
         """
             Set a subject's gold label
 
@@ -84,7 +84,7 @@ class Subject(Agent):
 
         if old != new:
             self._gold = gold_label
-            self.ledger.notify_agents()
+            self.ledger.notify_agents(subjects, users)
 
     def isgold(self):
         return self.gold in [0, 1]
@@ -113,8 +113,12 @@ class Subject(Agent):
     #     return data
 
     def __str__(self):
+        score = self.score
+        if score is None:
+            score = -1.
+
         return 'id: %s score: %.2f gold label: %d' % \
-            (self.id, self.score, self.gold)
+            (self.id, score, self.gold)
 
 
 class Ledger(ledger.Ledger):
@@ -132,21 +136,33 @@ class Ledger(ledger.Ledger):
         transaction = self.first_change
 
         if transaction is None:
-            score = config.p0
+            # Assume nothing has changed since last backupdate
+            if len(self.transactions) == 0:
+                # nothing has changed and there are no transactions
+                # score is prior
+                score = config.p0
+            else:
+                # nothing has changed and there are transactions
+                # score is current score
+                score = self._score
         else:
-            score = transaction.get_prior()
+            prior = transaction.get_prior()
             while transaction is not None:
-                score = transaction.calculate(score)
+                transaction.commit_change()
+
+                prior = transaction.calculate(prior)
                 transaction = transaction.right
 
-            super().recalculate()
+            score = prior
 
         self._score = score
+        super().recalculate()
         return score
 
     def add(self, transaction):
         if transaction.id in self.transactions:
             return None
+
         # Link last transaction to this one
         if self.last is not None:
             self.last.right = transaction
@@ -156,7 +172,10 @@ class Ledger(ledger.Ledger):
         id_ = super().add(transaction)
 
         if not config.back_update:
-            self.recalculate()
+            self._score = transaction.calculate()
+            # TODO
+            # calculate new score
+            # but not by calling recalcluate
 
         # Determine if most first change in cascade
         # self._change(transaction)
@@ -194,21 +213,33 @@ class Ledger(ledger.Ledger):
 
 
 class Transaction(ledger.Transaction):
-    def __init__(self, id_, user, annotation):
-        super().__init__(id_, user)
-        self.annotation = annotation
-        self.score = None
+    def __init__(self, user, annotation):
+        super().__init__(user, annotation)
 
+        self.user_score = None
         self.right = None
         self.left = None
+
+        self.notify(user)
+        self.commit_change()
+
+    def commit_change(self):
+        self.user_score = self.change
+
+    def notify(self, agent):
+        try:
+            self.change = agent.score
+        except ledger.StaleException:
+            # ledger is stale, continuing by using stale score
+            # for now
+            self.change = agent.ledger._score
 
     def get_prior(self):
         if self.left is None:
             return config.p0
-        else:
-            return self.left.score
+        return self.left.score
 
-    def calculate(self, prior):
+    def calculate(self, prior=None):
         # Calculation when annotation 1
         #           s*u1
         # -------------------------
@@ -219,7 +250,10 @@ class Transaction(ledger.Transaction):
         # -------------------------
         #    s*(1-u1) + (1-s)*u0
 
-        u0, u1 = self.agent.score
+        if prior is None:
+            prior = self.get_prior()
+        u0, u1 = self.user_score
+
         if self.annotation == 1:
             a = prior * u1
             b = (1 - prior) * (1 - u0)
@@ -239,15 +273,12 @@ class Transaction(ledger.Transaction):
         self.score = score
         return score
 
-    def _get_user_score(self):
-        self.user_score = self.agent.score
-
     def __str__(self):
         score = self.score
         if score is None:
             score = -1
 
         s = super().__str__()
-        s += ' annotation %d score %.5f' % \
-            (self.annotation, score)
+        s += ' score %.5f user_score %.3f %.3f' % \
+            (score, self.user_score[0], self.user_score[1])
         return s

@@ -1,6 +1,9 @@
 ################################################################
 #
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 class Ledger:
     """
@@ -16,6 +19,12 @@ class Ledger:
     for use with online bureaus to reduce memory load, and can dereference
     agents and rebuild reference trees arbitrarily from a bureau
     """
+
+    # TODO
+    # Make sure back_update works properly with this setup!
+    # Naiive recalculate vs real recalculate...
+    # Logic for reclassification needs to be in the higher levels
+    # in order to provide bureaus at the appropriate time
 
     def __init__(self, id_):
         """
@@ -36,14 +45,6 @@ class Ledger:
 
         self._score = None
 
-    def set_bureau(self, bureau):
-        """
-        Provides a bureau to the ledger so it can rebuild agent references
-        in its transactions on the fly. If this is a user ledger, provide a
-        subject bureau and vice versa
-        """
-        self.bureau = bureau
-
     def _change(self, id_):
         """
         Mark a transaction as having changed
@@ -56,8 +57,8 @@ class Ledger:
         Get the current score from the ledger
         Recalculates the score if this ledger is stale
         """
-        if self.stale or self._score is None:
-            self.recalculate()
+        # if self.stale or self._score is None:
+        #     raise StaleException(self)
         return self._score
 
     def add(self, transaction):
@@ -67,10 +68,7 @@ class Ledger:
         id_ = transaction.id
         # Record the transactions order
         transaction.order = len(self.transactions)
-        # Provide the transaction with a callback function to
-        # rebuild its agent reference
-        transaction.set_restore_callback(
-            lambda: self.restore_agent(transaction.id))
+
         # Store this transaction
         self.transactions[id_] = transaction
 
@@ -93,13 +91,22 @@ class Ledger:
         # Clear the record of changes
         self.clear_changes()
 
-    def notify_agents(self):
+    def notify_agents(self, this_bureau, other_bureau):
         """
         Have all transactions notify the connected agents
         that this agent has changed
         """
+        # TODO
+
         for t in self:
-            t.notify(self.id)
+            agent = t.agent(other_bureau)
+            agent.ledger.notify(self.id, this_bureau)
+            # t.notify(self.id)
+
+    def notify(self, id_, bureau):
+        agent = bureau.get(id_)
+        self.update(id_)
+        self.transactions[id_].notify(agent)
 
     def clear_changes(self):
         """
@@ -115,36 +122,6 @@ class Ledger:
         self.stale = True
         self._change(id_)
         # self.transactions[id_].notify()
-
-    def nuke(self):
-        """
-        Nuke this ledger. Delete all references to this agent in all
-        the connected transactions
-        """
-        for t in self:
-            t.agent.ledger.delrefs(self.id)
-
-    def delrefs(self, id_):
-        """
-        Delete references to agent with id_ in this ledger
-        """
-        self.get(id_).delref()
-
-    def delete_all_agents(self):
-        """
-        Delete all agent references in the transactions
-        """
-        for t in self:
-            t.agent = None
-
-    def restore_agent(self, id_):
-        """
-        Restore agent reference in transaction with id_
-        """
-        if self.bureau is None:
-            raise MissingReference('Missing reference to bureau!')
-
-        self.transactions[id_].restore(self.bureau.get(id_, make_new=False))
 
     def __str__(self):
         s = 'id %s transactions %d stale %s score %s\n' % \
@@ -168,21 +145,6 @@ class Ledger:
     def __len__(self):
         return len(self.transactions)
 
-    def __getstate__(self):
-        self.bureau = None
-        return self.__dict__.copy()
-
-    def __setstate__(self, d):
-        self.__dict__ = d
-
-        def restore(transaction):
-            def f():
-                self.restore_agent(transaction.id)
-            return f
-
-        for t in self:
-            t.set_restore_callback(restore(t))
-
 
 class MissingReference(AttributeError):
     """
@@ -196,53 +158,22 @@ class Transaction:
     Records an interaction from an agent with this ledger
     """
 
-    def __init__(self, id_, agent):
-        self.id = id_
-        self._agent = agent
+    def __init__(self, agent, annotation):
+        self.id = agent.id
+        self.annotation = annotation
         # stores the order this transaction has in the ledger
         self.order = None
-        # a callback to restore the agent reference
-        self.restore_callback = None
+        self.score = None
+        self.change = None
 
-    @property
-    def agent(self):
-        """
-        Restores the agent reference if it is missing
-        """
-        if self._agent is None:
-            if self.restore_callback is None:
-                raise MissingReference()
-            else:
-                self.restore_callback()
-        return self._agent
+    def agent(self, bureau):
+        return bureau.get(self.id)
 
-    @agent.setter
-    def agent(self, agent):
-        self._agent = agent
+    def notify(self, agent):
+        pass
 
-    def notify(self, id_):
-        """
-        Notify connected nodes that this transaction changed
-        """
-        self.agent.ledger.update(id_)
-
-    def delref(self):
-        """
-        Remove references to relevant agent
-        """
-        self.agent = None
-
-    def restore(self, agent):
-        """
-        Restore a reference to an agent
-        """
-        self.agent = agent
-
-    def set_restore_callback(self, callback):
-        """
-        A callback function to restore the agent reference
-        """
-        self.restore_callback = callback
+    def commit_change(self):
+        pass
 
     def __str__(self):
         id_ = self.id
@@ -250,10 +181,15 @@ class Transaction:
             id_ = id_.split('-')[-1]
         if self.order is None:
             self.order = -1
-        s = 'id %20s order %2d' % (str(id_), self.order)
+        s = 'id %20s order %2d annotation %d' % \
+            (str(id_), self.order, self.annotation)
         return s
 
-    def __getstate__(self):
-        self.agent = None
-        self.restore_callback = None
-        return self.__dict__.copy()
+
+class StaleException(Exception):
+
+    def __init__(self, ledger):
+        msg = 'Ledger is stale: %s' % str(ledger)
+        # logger.error(msg)
+        super().__init__(msg)
+        self.ledger = ledger

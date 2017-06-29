@@ -94,7 +94,10 @@ class ScoreExport:
         """
         golds = self.get_real_golds()
         for score in scores.values():
-            score.gold = golds[score.id]
+            if score.id in golds:
+                score.gold = golds[score.id]
+            else:
+                score.gold = -1
         return scores
 
     @staticmethod
@@ -176,9 +179,11 @@ class ScoreExport:
             counts[score.gold] -= 1
 
             _purity = self._purity(counts)
-            print(_purity, score, counts)
+            # print(_purity, score, counts)
 
             if _purity is not None and _purity > desired_purity:
+                logger.info('found purity')
+                logger.info('%f %s %s', _purity, str(score), str(counts))
                 return score.p
 
         logger.info('Couldn\'t find purity above %f!', desired_purity)
@@ -244,6 +249,14 @@ class ScoreExport:
         def func(score):
             return (score.id, score.gold, score.p)
         return ScoreIterator(list(self.sorted_scores), func)
+
+    def full_dict(self):
+        d = {}
+        for i in self.scores:
+            score = self.scores[i]
+            d[score.id] = score.dict()
+
+        return d
 
     def dict(self):
         return self.scores.copy()

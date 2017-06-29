@@ -4,12 +4,15 @@ import swap.app.caesar_app as app
 import swap.agents.subject
 from swap.utils.classification import Classification
 from swap.utils.golds import GoldGetter
+
 import json
+import os
 
 from unittest.mock import MagicMock, patch
 
-
-with open('mock_request.json', 'r') as file:
+path = os.path.dirname(__file__)
+path = os.path.join(path, 'mock_request.json')
+with open(path, 'r') as file:
     _json = json.load(file)
 
 
@@ -27,6 +30,7 @@ class TestCaesarApp:
 
     @patch.object(control.OnlineControl, 'run')
     @patch.object(GoldGetter, 'golds', return_value=[])
+    @patch('swap.config.back_update', False)
     def test_classify(self, run, golds):
         oc = control.OnlineControl()
         oc.init_swap()

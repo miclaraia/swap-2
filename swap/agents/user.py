@@ -40,7 +40,7 @@ class User(Agent):
         annotation = cl.annotation
 
         if subject.id not in self.ledger.transactions:
-            t = Transaction(subject.id, subject, annotation)
+            t = Transaction(subject, annotation)
             self.ledger.add(t)
 
     # def export(self):
@@ -166,12 +166,12 @@ class Ledger(ledger.Ledger):
         self.no = Counter()
         self.yes = Counter()
 
+        self.recalculate()
+
     @ledger.Ledger.score.setter
     def score(self, new):
         if self._score != new:
             self._score = new
-            if config.back_update:
-                self.notify_agents()
 
     def add(self, transaction):
         # Remove gold label from transaction, will be put back in when
@@ -213,8 +213,10 @@ class Ledger(ledger.Ledger):
 
             if t.changed:
                 self.action(t, 'old')
-                t.gold = t.agent.gold
+                t.commit_change()
                 self.action(t, 'new')
+
+                t.score = self._calculate()
 
         score = self._calculate()
 
@@ -228,23 +230,37 @@ class Ledger(ledger.Ledger):
 
 
 class Transaction(ledger.Transaction):
-    def __init__(self, id_, subject, annotation):
-        super().__init__(id_, subject)
-        self.annotation = annotation
-        self.gold = subject.gold
+    def __init__(self, subject, annotation):
+        super().__init__(subject, annotation)
+
+        self.gold = None
+
+        # TODO store current score
+
+        self.notify(subject)
+
+    def commit_change(self):
+        self.gold = self.change
+
+    def notify(self, agent):
+        self.change = agent.gold
 
     @property
     def changed(self):
-        return self.gold != self.agent.gold
+        return self.gold != self.change
 
     @property
     def matched(self):
         return self.annotation == self.gold
 
     def __str__(self):
+        g = self.gold
+        if g is None:
+            g = -1
+
         s = super().__str__()
-        s += ' gold %d annotation %d' % \
-            (self.gold, self.annotation)
+        s += ' gold %d score %s' % \
+            (g, self.score)
         return s
 
 
