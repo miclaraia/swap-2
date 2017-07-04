@@ -27,6 +27,7 @@ def main() :
 
     argParser = argparse.ArgumentParser()
     argParser.add_argument('panoptes-dumpfile')
+    argParser.add_argument('limit-records', nargs='?', const=1, type=int, default=-1)
     args = argParser.parse_args()
     print("Using file %s" % args.file)
 
@@ -36,7 +37,7 @@ def main() :
         raise ValueError("File '%s' not a valid csv file" % args.file)
 
     csvParser = CsvDumpParser(file)
-    flattenedData = csvParser.getUnpackedData(skipUpackingFor = config.database.panoptes_builder.skip_unpack_columns)
+    flattenedData = csvParser.getUnpackedData(skipUpackingFor = config.database.panoptes_builder.skip_unpack_columns, rowRange = (0, args.limit_records))
 
     dataForUpload = []
     for _, data in flattenedData.iterrows() :

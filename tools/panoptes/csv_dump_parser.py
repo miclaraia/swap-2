@@ -86,6 +86,8 @@ class CsvDumpParser(object) :
         return pd.Series({key : value for (key, value) in parsedList})
 
     def __unpackJsonColumns(self, skipColumns = [], rowRange = (0, -1)) :
+        if self.__parsedCsvData is None :
+            self.__readCsv()
         print('Flattening JSON columns...')
         print('Will not flatten {}.'.format(', '.join(skipColumns)))
         self.__flattenedCsvData = self.__parsedCsvData.iloc[rowRange[0]:rowRange[1]]
