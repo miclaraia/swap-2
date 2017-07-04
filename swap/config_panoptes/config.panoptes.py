@@ -35,7 +35,7 @@ class database:
             'subject_id': {'type': int},
         }
 
-        db_to_panoptes_csv_map = { {key : { 'panoptes_key' : None, 'converter_func' : None } } }
+        db_to_panoptes_csv_map = { {key : { 'panoptes_key' : None, 'converter_func' : lambda x : x } } }
 
         db_to_panoptes_csv_map['classification_id']['panoptes_key'] = 'classification_id'
         db_to_panoptes_csv_map['user_id']['panoptes_key'] = 'user_id'

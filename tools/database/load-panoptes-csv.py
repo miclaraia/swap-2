@@ -39,10 +39,10 @@ def main() :
     flattenedData = csvParser.getUnpackedData(skipUpackingFor = config.database.panoptes_builder.skip_unpack_columns)
 
     dataForUpload = []
-    for index, data in flattenedData.iterrows() :
+    for _, data in flattenedData.iterrows() :
         datumForUpload = {}
         for dbKey, mappings in config.database.db_to_panoptes_csv_map.items() :
-            datumForUpload.update({'panoptes_key' : mappings['converter_func'](data.loc['panoptes_key']) if mappings['panoptes_key'] in data else None})
+            datumForUpload.update({dbKey : mappings['converter_func'](data.loc['panoptes_key']) if mappings['panoptes_key'] in data else None})
         dataForUpload.append(datumForUpload)
 
     upload(dataForUpload)
