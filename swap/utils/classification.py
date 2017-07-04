@@ -8,8 +8,7 @@ class Classification:
         Object to represent each individual classification
     """
 
-    def __init__(self, user, subject, annotation,
-                 gold_label=-1, metadata={}):
+    def __init__(self, user, subject, annotation):
         """
             Parameters
             ----------
@@ -28,51 +27,14 @@ class Classification:
         if type(annotation) is not int:
             raise ClValueError('annotation', int, annotation)
 
-        if type(gold_label) is not int:
-            raise ClValueError('gold_label', int, gold_label)
-
-        if type(metadata) is not dict:
-            raise ClValueError('metadata', dict, metadata)
-
         self.user = user
         self.subject = subject
         self.annotation = annotation
 
-        self.gold_label = None
-        self.gold = gold_label
-
-        self.metadata = metadata
-
-    @property
-    def gold(self):
-        """
-            Get the gold label
-        """
-        if self.gold_label is not None:
-            return self.gold_label
-        else:
-            return False
-
-    @gold.setter
-    def gold(self, gold):
-        if gold in [0, 1]:
-            self.gold_label = gold
-        else:
-            self.gold_label = None
-
-    def isgold(self):
-        """
-        If the classification has a gold label associated with it
-        """
-        if self.gold_label is not None:
-            return True
-        else:
-            return False
-
     def __str__(self):
-        return 'user %s subject %s annotation %d gold %s' % \
+        return 'user %s subject %s annotation %d' % \
             (str(self.user), str(self.subject),
-             self.annotation, str(self.gold))
+             self.annotation)
 
     @staticmethod
     def generate(cl):
@@ -83,19 +45,14 @@ class Classification:
         Classification.Validate(cl)
 
         user = cl['user_id']
-        if user == -1:
+        if user is None:
             user = cl['session_id']
 
         subject = cl['subject_id']
         annotation = cl['annotation']
 
         c = Classification(user, subject, annotation)
-
-        if 'gold_label' in cl:
-            c.gold_label = cl['gold_label']
-
-        if 'metadata' in cl:
-            c.metadata = cl['metadata']
+        logger.debug(c)
 
         return c
 

@@ -1,15 +1,7 @@
 ################################################################
 # Methods for classification collection
 
-from swap.db import DB, Cursor
-from swap.db.query import Query
-
-from collections import OrderedDict
-
-import logging
-logger = logging.getLogger(__name__)
-
-__doc__ = """
+"""
     Manages interactions with the classification collection in the database.
 
     Module level variables:
@@ -18,6 +10,18 @@ __doc__ = """
         aggregate
             reference to the pymongo aggregation method of the collection
 """
+
+from swap.db import DB, Cursor
+from swap.db.query import Query
+import swap.utils.parsers as parsers
+import swap.config as config
+
+from collections import OrderedDict
+
+import sys
+import csv
+import logging
+logger = logging.getLogger(__name__)
 
 subject_count = None
 collection = DB().classifications
@@ -196,3 +200,31 @@ def getNSubjects():
         subject_count = cursor.next()['num']
 
     return subject_count
+
+
+def upload_project_dump(fname):
+    logger.info('dropping collection')
+    DB()._db.classifications.drop()
+    DB()._init_classifications()
+
+    logger.info('parsing csv dump')
+    data = []
+    pp = parsers.ClassificationParser(config.database.builder)
+
+    with open(fname, 'r') as file:
+        reader = csv.DictReader(file)
+
+        for i, row in enumerate(reader):
+            cl = pp.process(row)
+            data.append(cl)
+
+            sys.stdout.flush()
+            sys.stdout.write("%d records processed\r" % i)
+
+            if len(data) > 100000:
+                collection.insert_many(data)
+                data = []
+
+    collection.insert_many(data)
+    DB()._gen_stats()
+    logger.debug('done')
