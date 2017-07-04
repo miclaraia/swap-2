@@ -3,7 +3,7 @@ import datetime
 
 # Database config options
 class database:
-    name = 'swapDB'
+    name = 'swapDB_panoptesTest'
     host = 'localhost'
     port = 27017
     max_batch_size = 1e5
