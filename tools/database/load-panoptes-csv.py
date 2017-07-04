@@ -28,6 +28,7 @@ def main() :
     argParser = argparse.ArgumentParser()
     argParser.add_argument('panoptes-dumpfile')
     argParser.add_argument('limit-records', nargs='?', const=1, type=int, default=-1)
+    argParser.add_argument('dryrun', nargs='?', const=True, type=bool, default=False)
     args = argParser.parse_args()
     print("Using file %s" % args.file)
 
@@ -42,7 +43,7 @@ def main() :
     dataForUpload = []
     for _, data in flattenedData.iterrows() :
         datumForUpload = {}
-        for dbKey, mappings in config.database.db_to_panoptes_csv_map.items() :
+        for dbKey, mappings in config.database.panoptes_builder.db_to_panoptes_csv_map.items() :
             datumForUpload.update({dbKey : mappings['converter_func'](data.loc['panoptes_key']) if mappings['panoptes_key'] in data else None})
         dataForUpload.append(datumForUpload)
 
@@ -50,5 +51,11 @@ def main() :
 
 
 def upload(dataForUpload):
-    db = swap.db.DB()
-    db.classifications.insert_many(dataForUpload)
+    print(dataForUpload)
+    if not dryrun :
+        db = swap.db.DB()
+        db.classifications.insert_many(dataForUpload)
+
+
+if __name__ == '__main__' :
+    main()
