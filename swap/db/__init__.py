@@ -33,6 +33,8 @@ class _DB:
         db_name = cdb.name
         port = cdb.port
 
+        print('Database Handler initializing:\nHost => {}\nDB => {}\nPort => {}'.format(host, db_name, port))
+
         self._client = MongoClient('%s:%d' % (host, port))
         self._db = self._client[db_name]
         self.batch_size = int(cdb.max_batch_size)
