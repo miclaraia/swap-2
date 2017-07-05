@@ -38,7 +38,7 @@ def main() :
         raise ValueError("File '%s' not a valid csv file" % args.panoptesdumpfile)
 
     csvParser = CsvDumpParser(args.panoptesdumpfile)
-    flattenedData = csvParser.getUnpackedData(skipUpackingFor = config.database.panoptes_builder.skip_unpack_columns, rowRange = (0, args.limit_records))
+    flattenedData = csvParser.getUnpackedData(skipUpackingFor = config.panoptes_database.panoptes_builder.skip_unpack_columns, rowRange = (0, args.limit_records))
 
     dataForUpload = []
     for _, data in flattenedData.iterrows() :
