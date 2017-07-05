@@ -47,10 +47,10 @@ def main() :
             datumForUpload.update({dbKey : mappings['converter_func'](data.loc[mappings['panoptes_key']]) if mappings['panoptes_key'] in data else None})
         dataForUpload.append(datumForUpload)
 
-    upload(dataForUpload)
+    upload(dataForUpload, args)
 
 
-def upload(dataForUpload):
+def upload(dataForUpload, args):
     print(dataForUpload)
     if not args.dryrun :
         print('Writing to DB...')
