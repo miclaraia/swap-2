@@ -63,6 +63,7 @@ def upload(dataForUpload, args):
         blockSize = 100000
         numRecords = len(dataForUpload)
         for startRecord in range(0, numRecords, blockSize) :
+            logger.info('Uploading record numbers {} to {}'.format(startRecord, min(startRecord + blockSize, numRecords)))
             db.classifications.insert_many(dataForUpload[startRecord: min(startRecord + blockSize, numRecords)])
         db._gen_stats()
         logger.info('Done.')
