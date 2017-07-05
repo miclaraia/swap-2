@@ -52,9 +52,9 @@ def main() :
 
 def upload(dataForUpload, args):
     print(dataForUpload)
+    db = swap.db.DB()
     if not args.dryrun :
         print('Writing to DB...')
-        db = swap.db.DB()
         db.classifications.insert_many(dataForUpload)
         print('Done.')
     else :
