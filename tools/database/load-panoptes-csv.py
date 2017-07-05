@@ -26,18 +26,18 @@ def main() :
     db = swap.db.DB()
 
     argParser = argparse.ArgumentParser(prefix_chars='-')
-    argParser.add_argument('panoptes-dumpfile', dest='file')
+    argParser.add_argument('panoptes-dumpfile')
     argParser.add_argument('--limit-records', nargs='?', const=1, type=int, default=-1)
     argParser.add_argument('--dryrun', nargs='?', const=True, type=bool, default=False)
     args = argParser.parse_args()
-    print("Using file %s" % args.file)
+    print("Using file %s" % args.panoptes_dumpfile)
 
     if not os.path.isfile(args.file):
-        raise FileNotFoundError("Couldn't find file at '%s'" % args.file)
+        raise FileNotFoundError("Couldn't find file at '%s'" % args.panoptes_dumpfile)
     if args.file.split('.')[-1] != 'csv':
-        raise ValueError("File '%s' not a valid csv file" % args.file)
+        raise ValueError("File '%s' not a valid csv file" % args.panoptes_dumpfile)
 
-    csvParser = CsvDumpParser(file)
+    csvParser = CsvDumpParser(panoptes_dumpfile)
     flattenedData = csvParser.getUnpackedData(skipUpackingFor = config.database.panoptes_builder.skip_unpack_columns, rowRange = (0, args.limit_records))
 
     dataForUpload = []
