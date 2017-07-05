@@ -1,5 +1,5 @@
 from tools.panoptes.csv_dump_parser import CsvDumpParser
-from config_panoptes import panoptes_database
+from swap.config_panoptes import panoptes_database
 
 import swap.db
 import swap.config_panoptes as config
