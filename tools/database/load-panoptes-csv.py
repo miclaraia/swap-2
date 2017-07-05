@@ -44,7 +44,7 @@ def main() :
     for _, data in flattenedData.iterrows() :
         datumForUpload = {}
         for dbKey, mappings in config.panoptes_database.panoptes_builder.db_to_panoptes_csv_map.items() :
-            datumForUpload.update({dbKey : mappings['converter_func'](data.loc['panoptes_key']) if mappings['panoptes_key'] in data else None})
+            datumForUpload.update({dbKey : mappings['converter_func'](data.loc[mappings['panoptes_key']]) if mappings['panoptes_key'] in data else None})
         dataForUpload.append(datumForUpload)
 
     upload(dataForUpload)
@@ -58,7 +58,7 @@ def upload(dataForUpload):
         db.classifications.insert_many(dataForUpload)
         print('Done.')
     else :
-        print('Running with --dryrun. DB will not be modified.')
+        print('Running with --dryrun. DB will not be modified. Data dump follows:\n\n{}'.format(repr(dataForUpload)))
 
 
 if __name__ == '__main__' :
