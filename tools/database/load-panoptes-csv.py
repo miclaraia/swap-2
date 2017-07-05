@@ -8,6 +8,9 @@ import os
 import sys
 import argparse
 
+import logging
+logger = logging.getLogger(__name__)
+
 # DB SCHEMA
 # {
 #     'classification_id': 15935073,
@@ -53,15 +56,15 @@ def main() :
 def upload(dataForUpload, args):
     db = swap.db.DB()
     if not args.dryrun :
-        print('Dropping classifications collection.')
-        DB()._db.classifications.drop()
-        DB()._init_classifications()
+        logger.info('Dropping classifications collection.')
+        db._db.classifications.drop()
+        db._init_classifications()
         print('Writing to DB...')
         db.classifications.insert_many(dataForUpload)
-        DB()._gen_stats()
-        print('Done.')
+        db._gen_stats()
+        logger.info('Done.')
     else :
-        print('Running with --dryrun. DB will not be modified. Data dump follows:\n\n{}'.format(repr(dataForUpload)))
+        logger.info('Running with --dryrun. DB will not be modified. Data dump follows:\n\n{}'.format(repr(dataForUpload)))
 
 
 if __name__ == '__main__' :
