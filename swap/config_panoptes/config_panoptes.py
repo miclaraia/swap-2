@@ -55,3 +55,5 @@ class database:
 
         db_to_panoptes_csv_map['time_stamp']['converter_func'] = convertTimeString
         db_to_panoptes_csv_map['annotation']['converter_func'] = parseAnnotationString
+
+        skip_unpack_columns = ['subject_data']
