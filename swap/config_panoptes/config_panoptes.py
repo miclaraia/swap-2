@@ -35,7 +35,7 @@ class database:
             'subject_id': {'type': int},
         }
 
-        db_to_panoptes_csv_map = { key : { 'panoptes_key' : None, 'converter_func' : lambda x : x }  for key in db_schema.keys() }
+        db_to_panoptes_csv_map = { key : { 'panoptes_key' : None, 'converter_func' : lambda x : x } for key in db_schema.keys() }
 
         db_to_panoptes_csv_map['classification_id']['panoptes_key'] = 'classification_id'
         db_to_panoptes_csv_map['user_id']['panoptes_key'] = 'user_id'
@@ -48,7 +48,7 @@ class database:
         db_to_panoptes_csv_map['subject_id']['panoptes_key'] = 'subject_ids'
 
         def convertTimeString(string) :
-            return datetime.strptime(string, '%Y-%m-%dT%H:%M:%S')
+            return datetime.datetime.strptime(string, '%Y-%m-%dT%H:%M:%S')
 
         def parseAnnotationString(string) :
             return True if string.startswith('Yes') else False
