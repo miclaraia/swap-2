@@ -25,8 +25,6 @@ class _DB:
         db_name = config.database.name
         port = config.database.port
 
-        print('Database Handler initializing:\nHost => {}\nDB => {}\nPort => {}'.format(host, db_name, port))
-
         self._client = MongoClient('%s:%d' % (host, port))
         self._db = self._client[db_name]
         self.batch_size = int(self._cfg.database.max_batch_size)

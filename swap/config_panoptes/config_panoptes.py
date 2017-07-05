@@ -58,3 +58,10 @@ class database:
         db_to_panoptes_csv_map['annotation']['converter_func'] = parseAnnotationString
 
         skip_unpack_columns = ['subject_data']
+
+
+def override(config) :
+    # Database configuration
+    config.database.name = database.name
+    config.database.host = database.host
+    config.database.port = database.port

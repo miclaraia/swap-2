@@ -51,7 +51,6 @@ def main() :
 
 
 def upload(dataForUpload, args):
-    print(dataForUpload)
     db = swap.db.DB()
     if not args.dryrun :
         print('Writing to DB...')
