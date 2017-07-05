@@ -44,7 +44,7 @@ class database:
         db_to_panoptes_csv_map['session_id']['panoptes_key'] = 'metadata.session'
         db_to_panoptes_csv_map['live_project']['panoptes_key'] = 'metadata.live_project'
         db_to_panoptes_csv_map['seen_before']['panoptes_key'] = 'metadata.seen_before'
-        db_to_panoptes_csv_map['annotation']['panoptes_key'] = 'annotations.zero.value'
+        db_to_panoptes_csv_map['annotation']['panoptes_key'] = 'annotations.0.value'
         db_to_panoptes_csv_map['subject_id']['panoptes_key'] = 'subject_ids'
 
         def convertTimeString(string) :
