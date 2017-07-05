@@ -26,7 +26,7 @@ def main() :
     db = swap.db.DB()
 
     argParser = argparse.ArgumentParser(prefix_chars='-')
-    argParser.add_argument('--panoptes-dumpfile')
+    argParser.add_argument('panoptes-dumpfile', dest='file')
     argParser.add_argument('--limit-records', nargs='?', const=1, type=int, default=-1)
     argParser.add_argument('--dryrun', nargs='?', const=True, type=bool, default=False)
     args = argParser.parse_args()
