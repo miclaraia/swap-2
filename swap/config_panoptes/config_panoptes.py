@@ -48,7 +48,8 @@ class database:
         db_to_panoptes_csv_map['subject_id']['panoptes_key'] = 'subject_ids'
 
         def convertTimeString(string) :
-            return datetime.datetime.strptime(string, '%Y-%m-%dT%H:%M:%S')
+            # PATTERNS LIKE: 2016-08-22 16:09:01 UTC
+            return datetime.datetime.strptime(string, '%Y-%m-%d %H:%M:%S %Z')
 
         def parseAnnotationString(string) :
             return True if string.startswith('Yes') else False
