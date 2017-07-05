@@ -34,7 +34,7 @@ def main() :
 
     if not os.path.isfile(args.panoptesdumpfile):
         raise FileNotFoundError("Couldn't find file at '%s'" % args.panoptesdumpfile)
-    if args.file.split('.')[-1] != 'csv':
+    if args.panoptesdumpfile.split('.')[-1] != 'csv':
         raise ValueError("File '%s' not a valid csv file" % args.panoptesdumpfile)
 
     csvParser = CsvDumpParser(args.panoptesdumpfile)
