@@ -42,6 +42,11 @@ def main() :
 
     csvParser = CsvDumpParser(args.panoptesdumpfile)
 
+    if not args.dryrun :
+        logger.info('Dropping classifications collection.')
+        db._db.classifications.drop()
+        db._init_classifications()
+
     for startRow in range(args.record_range[0], args.record_range[1], config.panoptes_database.panoptes_builder.upload_chunk_size) :
 
         rowRange = (startRow, startRow + config.panoptes_database.panoptes_builder.upload_chunk_size)
@@ -55,6 +60,7 @@ def main() :
                 datumForUpload.update({dbKey : mappings['converter_func'](data.loc[mappings['panoptes_key']]) if mappings['panoptes_key'] in data else None})
             dataForUpload.append(datumForUpload)
         upload(dataForUpload, args)
+        csvParser.reset()
 
 
 def upload(dataForUpload, args):
@@ -62,10 +68,7 @@ def upload(dataForUpload, args):
     numRecords = len(dataForUpload)
     logger.info('Uploading {} records'.format(numRecords))
     if not args.dryrun :
-        logger.info('Dropping classifications collection.')
-        db._db.classifications.drop()
-        db._init_classifications()
-        print('Writing to DB...')
+        logger.info('Writing to DB...')
         db.classifications.insert_many(dataForUpload)
         db._gen_stats()
     else :

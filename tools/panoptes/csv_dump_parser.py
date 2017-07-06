@@ -113,3 +113,6 @@ class CsvDumpParser(object) :
         if self.__flattenedCsvData is None :
             self.__unpackJsonColumns(skipColumns = skipUpackingFor, rowRange = rowRange)
         return self.__flattenedCsvData
+
+    def reset(self) :
+        self.__reset()
