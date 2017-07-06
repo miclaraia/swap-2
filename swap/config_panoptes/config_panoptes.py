@@ -73,9 +73,10 @@ class database:
                 else :
                     return -1
 
-            db_to_panoptes_csv_map['time_stamp']['converter_func'] = getGoldLabelState
+            db_to_panoptes_csv_map['gold']['converter_func'] = getGoldLabelState
 
             skip_unpack_columns = ['metadata']
+
 
 def override(config) :
     # Database configuration
