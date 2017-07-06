@@ -15,6 +15,12 @@ class database:
         class shared :
             upload_chunk_size = 100000
 
+            def NanToNone(self, datum) :
+                if ((isinstance(datum, numbers.Number) and np.isnan(datum)) or (isinstance(datum, str) and (datum.upper() == 'NAN'))) :
+                    return None
+                else :
+                    return datum
+
         class classifications(shared) :
             db_schema = {
                 'classification_id': {'type': int},
@@ -28,7 +34,7 @@ class database:
                 'subject_id': {'type': int},
             }
 
-            db_to_panoptes_csv_map = { key : { 'panoptes_key' : None, 'converter_func' : lambda x : x if (not isinstance(x, numbers.Number)) or (isinstance(x, numbers.Number) and not np.isnan(x)) else None } for key in db_schema.keys() }
+            db_to_panoptes_csv_map = { key : { 'panoptes_key' : None, 'converter_func' : lambda x : self.NanToNone(x) } for key in db_schema.keys() }
 
             db_to_panoptes_csv_map['classification_id']['panoptes_key'] = 'classification_id'
             db_to_panoptes_csv_map['user_id']['panoptes_key'] = 'user_id'
@@ -62,7 +68,7 @@ class database:
                 'gold': {'type': int},
             }
 
-            db_to_panoptes_csv_map = { key : { 'panoptes_key' : None, 'converter_func' : lambda x, *argv : x if (not isinstance(x, numbers.Number)) or (isinstance(x, numbers.Number) and not np.isnan(x)) else None } for key in db_schema.keys() }
+            db_to_panoptes_csv_map = { key : { 'panoptes_key' : None, 'converter_func' : lambda x, *argv : self.NanToNone(x) } for key in db_schema.keys() }
 
             db_to_panoptes_csv_map['subject']['panoptes_key'] = 'subject_id'
             db_to_panoptes_csv_map['gold']['panoptes_key'] = 'subject_id'
