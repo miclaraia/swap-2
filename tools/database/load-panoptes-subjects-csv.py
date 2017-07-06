@@ -74,14 +74,15 @@ def main() :
 def upload(dataForUpload, args):
     db = swap.db.DB()
     numRecords = len(dataForUpload)
-    logger.info('Uploading {} records'.format(numRecords))
-    if not args.dryrun :
-        logger.info('Writing to DB...')
-        db.subjects.insert_many(dataForUpload)
-        db._gen_stats()
-    else :
-        logger.info('Running with --dryrun. DB will not be modified.')
-    logger.info('Done.')
+    if numRecords > 0 :
+        logger.info('Uploading {} records'.format(numRecords))
+        if not args.dryrun :
+            logger.info('Writing to DB...')
+            db.subjects.insert_many(dataForUpload)
+            db._gen_stats()
+        else :
+            logger.info('Running with --dryrun. DB will not be modified.')
+        logger.info('Done.')
 
 
 def loadSubjectList(listFilePath) :
