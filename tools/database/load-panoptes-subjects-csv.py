@@ -49,8 +49,6 @@ def main() :
     trueGoldSubjects = [] if args.true_gold_subjects == '' else loadSubjectList(args.true_gold_subjects)
     falseGoldSubjects = [] if args.false_gold_subjects == '' else loadSubjectList(args.false_gold_subjects)
 
-    #print('{}: trueGoldSubjects\n{}'.format(__file__, repr(trueGoldSubjects)))
-
     csvParser = CsvDumpParser(args.panoptesdumpfile)
 
     if not args.dryrun :
