@@ -31,6 +31,7 @@ class Object:
 # Prior probabilities
 p0 = 0.12
 epsilon = 0.5
+gamma = 5
 
 # Retirement Thresholds
 mdr = 0.1
@@ -47,7 +48,7 @@ controversial_version = 'pow'
 
 # Database config options
 class database:
-    name = 'swapDB'
+    name = 'swapDBtest'
     host = 'localhost'
     port = 27017
     max_batch_size = 1e5
@@ -81,11 +82,11 @@ class database:
         ]
 
         class annotation:
-            task = 'T0'
-            value_key = 'details.0.value.0'
+            task = 'T1'
+            value_key = None
             value_separator = '.'
-            true = ['Real', 'yes', 1]
-            false = ['Bogus', 'no', 0]
+            true = ['Yes!']
+            false = ['No.']
 
 
 class online_swap:

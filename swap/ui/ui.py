@@ -1,5 +1,6 @@
 
 import swap.config as config
+import swap.db
 from swap.ui.utils import save_pickle, load_pickle
 
 import argparse
@@ -74,6 +75,11 @@ class UI:
             metavar='path_to_config_override',
             help='Override config options with custom python module')
 
+        parser.add_argument(
+            '--db', nargs=1,
+            help='Override database name in config'
+        )
+
     def call(self, args):
         """
             Called when executing args
@@ -104,6 +110,10 @@ class UI:
 
         if args.config_file:
             config.import_config(args.config_file[0])
+
+        if args.db:
+            config.database.name = args.db[0]
+            swap.db.DB._reset()
 
         if 'func' in args:
             args.func(args)

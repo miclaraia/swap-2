@@ -1,6 +1,6 @@
 
-import swap.db.classifications as db
 import swap.config as config
+from swap.utils.golds import GoldGetter
 
 import csv
 
@@ -134,7 +134,7 @@ class ScoreExport:
         Fetch gold labels from database
         """
         logger.debug('Getting real gold labels from db')
-        return db.getAllGolds()
+        return GoldGetter().all()()
 
     def counts(self, threshold):
         """
@@ -264,7 +264,7 @@ class ScoreExport:
                 count += 1
 
                 _fpr = 1 - count / totals[0]
-                print(_fpr, count, totals[0], score)
+                # print(_fpr, count, totals[0], score)
                 if _fpr < fpr:
                     real = score.p
                     break
@@ -277,7 +277,7 @@ class ScoreExport:
                 count += 1
 
                 _mdr = 1 - count / totals[1]
-                print(_mdr, count, totals[1], score)
+                # print(_mdr, count, totals[1], score)
                 if _mdr < mdr:
                     bogus = score.p
                     break
@@ -293,10 +293,10 @@ class ScoreExport:
         for score in self.scores.values():
             history = history_export.get(score.id)
 
-            print(score.id)
+            # print(score.id)
             for p in history.scores:
                 if p < bogus or p > real:
-                    print(p, bogus, real)
+                    # print(p, bogus, real)
                     score.retired = p
                     break
         logger.debug('done')
