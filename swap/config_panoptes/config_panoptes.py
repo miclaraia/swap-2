@@ -67,8 +67,6 @@ class database:
 
             def getGoldLabelState(subject, *argv) :
                 (gold_label_true_subjects, gold_label_false_subjects) = argv
-                print('{}: gold_label_true_subjects\n{}'.format(__file__, repr(gold_label_true_subjects)))
-                print(type(subject), type(gold_label_true_subjects[0]))
                 if subject in gold_label_true_subjects :
                     return 1
                 elif subject in gold_label_false_subjects :
