@@ -54,7 +54,6 @@ def main() :
     if not args.dryrun :
         logger.info('Dropping subjects collection.')
         db._db.subjects.drop()
-        db._init_subjects()
 
     for startRow in range(args.record_range[0], args.record_range[1], config.panoptes_database.panoptes_builder.subjects.upload_chunk_size) :
 
