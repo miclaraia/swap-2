@@ -80,6 +80,8 @@ class ScoreExport:
 
         self.thresholds = thresholds
 
+        self._stats = None
+
         if history is not None:
             self.retire(history)
 
@@ -110,6 +112,17 @@ class ScoreExport:
         for score in self.scores.values():
             if score.is_retired:
                 yield score
+
+    @property
+    def stats(self):
+        if self._stats is None:
+            self._stats = self._gen_stats()
+        return self._stats
+
+    def _gen_stats(self):
+        scores = self.sorted_scores
+        thresholds = self.thresholds
+        return ScoreStats(scores, thresholds)
 
     def _init_golds(self, scores):
         """
@@ -301,6 +314,8 @@ class ScoreExport:
                     break
         logger.debug('done')
 
+        self._stats = None
+
     def __len__(self):
         return len(self.scores)
 
@@ -338,6 +353,92 @@ class ScoreExport:
 
     def dict(self):
         return self.scores.copy()
+
+
+class ScoreStats:
+
+    def __init__(self, sorted_scores, thresholds):
+        if type(sorted_scores) is not list:
+            sorted_scores = list(sorted_scores)
+
+        stats = self.calculate(sorted_scores, thresholds)
+
+        self.tpr = stats['tpr']
+        self.tnr = stats['tnr']
+        self.fpr = stats['fpr']
+        self.fnr = stats['fnr']
+
+        self.purity = stats['purity']
+        self.retired = stats['retired']
+        self.retired_correct = stats['retired_correct']
+
+    @property
+    def completeness(self):
+        return self.tpr
+
+    @classmethod
+    def calculate(cls, scores, thresholds):
+        bogus, real = thresholds
+        low = cls.counts(scores, 0, bogus)
+        high = cls.counts(scores, real, 1)
+        total = cls.counts(scores)
+
+        stats = {
+            'tpr': high[1] / total[1],
+            'tnr': low[0] / total[0],
+            'fpr': high[0] / total[0],
+            'fnr': low[1] / total[1],
+
+            'purity': high[1] / cls.total(high),
+            'retired': (cls.total(low) + cls.total(high)) / cls.total(total),
+            'retired_correct': (high[1] + low[0]) / cls.total(total)
+        }
+
+        stats.update({
+            'completeness': stats['tpr'],
+            'mdr': 1 - stats['tpr']
+        })
+
+        return stats
+
+    @staticmethod
+    def total(counts):
+        return counts[0] + counts[1]
+
+    @staticmethod
+    def counts(sorted_scores, left=0, right=1):
+        counts = {-1: 0, 0: 0, 1: 0}
+        for score in sorted_scores:
+            if score.is_retired:
+                p = score.retired
+            else:
+                p = score.p
+            if score.gold == -1 or p is None or p < left or p > right:
+                continue
+
+            counts[score.gold] += 1
+
+        return counts
+
+    def dict(self):
+        stats = {
+            'tpr': self.tpr,
+            'tnr': self.tnr,
+            'fpr': self.fpr,
+            'fnr': self.fnr,
+            'purity': self.purity,
+            'retired': self.retired,
+            'retired_correct': self.retired_correct
+        }
+
+        return stats
+
+    def __str__(self):
+        s = ''
+        stats = self.dict()
+        for key, value in sorted(stats.items(), key=lambda x: x):
+            s += '%s: %.3f ' % (key, value)
+        return '{%s}' % s[:-1]
 
 
 class ScoreIterator:

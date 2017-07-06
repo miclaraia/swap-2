@@ -1,6 +1,6 @@
 ################################################################
 
-from swap.utils.scores import ScoreExport, Score, ScoreIterator
+from swap.utils.scores import ScoreExport, Score, ScoreIterator, ScoreStats
 from swap.utils.golds import GoldGetter
 from swap.db.classifications import Classifications
 from swap.agents.subject import Subject
@@ -148,6 +148,180 @@ class TestScoreExport:
         c = se.completeness(0.5)
 
         assert c == 0.4
+
+
+class TestScoreStats:
+
+    def gen_scores(self, scores):
+        out = {}
+        for i, score in enumerate(scores):
+            g, p = score
+            score = Score(i, g, p)
+
+            if p < .2 or p > .8:
+                score.retired = p
+
+            out[i] = score
+
+        scores = out
+        print(scores)
+        print(scores[1])
+        scores = ScoreExport(scores, False)
+
+        return scores
+
+    def test_stats(self):
+        scores = [
+            (1, .1),
+            (1, .1),
+            (1, .1),
+            (1, .1),
+            (0, .1),
+            (0, .1),
+
+            (0, .5),
+            (0, .5),
+            (1, .5),
+            (1, .5),
+
+            (1, .9),
+            (1, .9),
+            (0, .9),
+            (0, .9),
+            (0, .9),
+            (0, .9)
+        ]
+
+        scores = self.gen_scores(scores)
+        scores = list(scores.sorted_scores)
+        stats = ScoreStats(scores, (.2, .8))
+
+        assert stats.tpr == .25
+        assert stats.fpr == .5
+        assert stats.tnr == .25
+        assert stats.fnr == .5
+
+        assert stats.purity == 1 / 3
+        assert stats.retired == .75
+        assert stats.retired_correct == .25
+
+        assert stats.completeness == stats.tpr
+
+    def test_counts_left(self):
+        scores = [
+            (1, .1),
+            (1, .1),
+            (1, .1),
+            (0, .1),
+            (0, .1),
+            (1, .9),
+            (1, .9),
+            (1, .9),
+            (0, .9),
+            (0, .9),
+        ]
+        scores = self.gen_scores(scores)
+
+        counts = ScoreStats.counts(scores.sorted_scores, 0, .2)
+
+        assert counts == {-1: 0, 0: 2, 1: 3}
+
+    def test_counts_right(self):
+        scores = [
+            (1, .1),
+            (1, .1),
+            (1, .1),
+            (0, .1),
+            (0, .1),
+            (1, .9),
+            (1, .9),
+            (0, .9),
+            (0, .9),
+            (0, .9),
+        ]
+        scores = self.gen_scores(scores)
+
+        counts = ScoreStats.counts(scores.sorted_scores, .8, 1)
+
+        assert counts == {-1: 0, 0: 3, 1: 2}
+
+    def test_counts_all(self):
+        scores = [
+            (1, .1),
+            (1, .1),
+            (1, .1),
+            (0, .1),
+            (0, .1),
+            (1, .9),
+            (1, .9),
+            (1, .9),
+            (0, .9),
+            (0, .9),
+        ]
+        scores = self.gen_scores(scores)
+
+        counts = ScoreStats.counts(scores.sorted_scores)
+
+        assert counts == {-1: 0, 0: 4, 1: 6}
+
+    def test_stats_str(self):
+        scores = [
+            (1, .1),
+            (1, .1),
+            (1, .1),
+            (1, .1),
+            (0, .1),
+            (0, .1),
+
+            (0, .5),
+            (0, .5),
+            (1, .5),
+            (1, .5),
+
+            (1, .9),
+            (1, .9),
+            (0, .9),
+            (0, .9),
+            (0, .9),
+            (0, .9)
+        ]
+        scores = self.gen_scores(scores)
+        scores = list(scores.sorted_scores)
+        stats = ScoreStats(scores, (.2, .8))
+        print(stats)
+
+    def test_stats_property(self):
+        scores = [
+            (1, .1),
+            (1, .1),
+            (1, .1),
+            (1, .1),
+            (0, .1),
+            (0, .1),
+
+            (0, .5),
+            (0, .5),
+            (1, .5),
+            (1, .5),
+
+            (1, .9),
+            (1, .9),
+            (0, .9),
+            (0, .9),
+            (0, .9),
+            (0, .9)
+        ]
+        scores = self.gen_scores(scores)
+        stats = scores.stats
+
+        assert stats.tpr == .25
+        assert stats.fpr == .5
+        assert stats.tnr == .25
+        assert stats.fnr == .5
+
+        assert stats.purity == 1 / 3
+        assert stats.retired == .75
+        assert stats.retired_correct == .25
 
 
 class TestScoreIterator:
