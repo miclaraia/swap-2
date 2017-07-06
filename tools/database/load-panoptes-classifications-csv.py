@@ -47,16 +47,16 @@ def main() :
         db._db.classifications.drop()
         db._init_classifications()
 
-    for startRow in range(args.record_range[0], args.record_range[1], config.panoptes_database.panoptes_builder.upload_chunk_size) :
+    for startRow in range(args.record_range[0], args.record_range[1], config.panoptes_database.panoptes_builder.classifications.upload_chunk_size) :
 
-        rowRange = (startRow, startRow + config.panoptes_database.panoptes_builder.upload_chunk_size)
+        rowRange = (startRow, startRow + config.panoptes_database.panoptes_builder.classifications.upload_chunk_size)
 
-        flattenedData = csvParser.getUnpackedData(skipUpackingFor = config.panoptes_database.panoptes_builder.skip_unpack_columns, rowRange = rowRange)
+        flattenedData = csvParser.getUnpackedData(skipUpackingFor = config.panoptes_database.panoptes_builder.classifications.skip_unpack_columns, rowRange = rowRange)
 
         dataForUpload = []
         for _, data in flattenedData.iterrows() :
             datumForUpload = {}
-            for dbKey, mappings in config.panoptes_database.panoptes_builder.db_to_panoptes_csv_map.items() :
+            for dbKey, mappings in config.panoptes_database.panoptes_builder.classifications.db_to_panoptes_csv_map.items() :
                 datumForUpload.update({dbKey : mappings['converter_func'](data.loc[mappings['panoptes_key']]) if mappings['panoptes_key'] in data else None})
             dataForUpload.append(datumForUpload)
         upload(dataForUpload, args)
