@@ -47,6 +47,7 @@ def main() :
         db._db.classifications.drop()
         db._init_classifications()
 
+    logger.info('{}'.format(list(range(args.record_range[0], args.record_range[1], config.panoptes_database.panoptes_builder.classifications.upload_chunk_size))))
     for startRow in range(args.record_range[0], args.record_range[1], config.panoptes_database.panoptes_builder.classifications.upload_chunk_size) :
 
         rowRange = (startRow, startRow + config.panoptes_database.panoptes_builder.classifications.upload_chunk_size)
