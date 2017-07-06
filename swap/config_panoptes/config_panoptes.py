@@ -59,7 +59,6 @@ class database:
 
         skip_unpack_columns = ['subject_data']
 
-        flatten_chunk_size = 100000
         upload_chunk_size = 100000
 
 
