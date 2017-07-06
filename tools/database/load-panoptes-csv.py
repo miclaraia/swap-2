@@ -30,7 +30,7 @@ def main() :
 
     argParser = argparse.ArgumentParser(prefix_chars='-')
     argParser.add_argument('panoptesdumpfile')
-    argParser.add_argument('--limit-records', nargs='?', const=1, type=int, default=-1)
+    argParser.add_argument('--record-range', nargs='2', const=1, type=int, default=[0,-1])
     argParser.add_argument('--dryrun', nargs='?', const=True, type=bool, default=False)
     args = argParser.parse_args()
     print("Using file %s" % args.panoptesdumpfile)
@@ -41,16 +41,21 @@ def main() :
         raise ValueError("File '%s' not a valid csv file" % args.panoptesdumpfile)
 
     csvParser = CsvDumpParser(args.panoptesdumpfile)
-    flattenedData = csvParser.getUnpackedData(skipUpackingFor = config.panoptes_database.panoptes_builder.skip_unpack_columns, rowRange = (0, args.limit_records))
 
-    dataForUpload = []
-    for _, data in flattenedData.iterrows() :
-        datumForUpload = {}
-        for dbKey, mappings in config.panoptes_database.panoptes_builder.db_to_panoptes_csv_map.items() :
-            datumForUpload.update({dbKey : mappings['converter_func'](data.loc[mappings['panoptes_key']]) if mappings['panoptes_key'] in data else None})
-        dataForUpload.append(datumForUpload)
+    for startRow in range(args.record_range[0], args.record_range[1], config.panoptes_database.panoptes_builder.upload_chunk_size) :
 
-    upload(dataForUpload, args)
+        rowRange = (startRow, startRow + config.panoptes_database.panoptes_builder.upload_chunk_size)
+
+        flattenedData = csvParser.getUnpackedData(skipUpackingFor = config.panoptes_database.panoptes_builder.skip_unpack_columns, rowRange = rowRange)
+
+        dataForUpload = []
+        for _, data in flattenedData.iterrows() :
+            datumForUpload = {}
+            for dbKey, mappings in config.panoptes_database.panoptes_builder.db_to_panoptes_csv_map.items() :
+                datumForUpload.update({dbKey : mappings['converter_func'](data.loc[mappings['panoptes_key']]) if mappings['panoptes_key'] in data else None})
+            dataForUpload.append(datumForUpload)
+
+        upload(dataForUpload, args)
 
 
 def upload(dataForUpload, args):
@@ -60,11 +65,9 @@ def upload(dataForUpload, args):
         db._db.classifications.drop()
         db._init_classifications()
         print('Writing to DB...')
-        blockSize = 100000
         numRecords = len(dataForUpload)
-        for startRecord in range(0, numRecords, blockSize) :
-            logger.info('Uploading record numbers {} to {}'.format(startRecord, min(startRecord + blockSize, numRecords)))
-            db.classifications.insert_many(dataForUpload[startRecord: min(startRecord + blockSize, numRecords)])
+        logger.info('Uploading {} records'.format(numRecords))
+        db.classifications.insert_many(dataForUpload)
         db._gen_stats()
         logger.info('Done.')
     else :
