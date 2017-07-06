@@ -1,5 +1,6 @@
 import datetime
 import numpy as np
+import numbers
 
 
 # Database config options
@@ -27,7 +28,7 @@ class database:
                 'subject_id': {'type': int},
             }
 
-            db_to_panoptes_csv_map = { key : { 'panoptes_key' : None, 'converter_func' : lambda x : x if not np.isnan(x) else None } for key in db_schema.keys() }
+            db_to_panoptes_csv_map = { key : { 'panoptes_key' : None, 'converter_func' : lambda x : x if (isinstance(x, Number) and not np.isnan(x)) else None } for key in db_schema.keys() }
 
             db_to_panoptes_csv_map['classification_id']['panoptes_key'] = 'classification_id'
             db_to_panoptes_csv_map['user_id']['panoptes_key'] = 'user_id'
