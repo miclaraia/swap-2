@@ -88,7 +88,7 @@ def upload(dataForUpload, args):
 def loadSubjectList(listFilePath) :
     if os.path.exists(listFilePath) :
         with open(listFilePath) as path :
-            return [line for lines in listFilePath if '#' not in line]
+            return [line for line in listFilePath if '#' not in line]
     else :
         logger.warn('Could not find {}, returning zero length list.'.format(listFilePath))
         return []
