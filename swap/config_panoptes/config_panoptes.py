@@ -52,6 +52,9 @@ class database:
             return datetime.datetime.strptime(string, '%Y-%m-%d %H:%M:%S %Z')
 
         def parseAnnotationString(string) :
+            if not isinstance(string, str) :
+                print('Non-string type: {}'.format(string))
+                return False
             return True if string.startswith('Yes') else False
 
         db_to_panoptes_csv_map['time_stamp']['converter_func'] = convertTimeString

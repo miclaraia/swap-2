@@ -50,7 +50,6 @@ class CsvDumpParser(object) :
 
     def __readCsv(self, rowRange = (0, -1)) :
         print('Parsing CSV file...')
-        print(rowRange)
         self.__parsedCsvData = pd.read_csv(self.dumpFile,
                                            skiprows=lambda iRow : iRow > 0 and iRow < rowRange[0],
                                            nrows=(None if rowRange[1] < 0 else (rowRange[1] - rowRange[0])))

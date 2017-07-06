@@ -54,7 +54,6 @@ def main() :
             for dbKey, mappings in config.panoptes_database.panoptes_builder.db_to_panoptes_csv_map.items() :
                 datumForUpload.update({dbKey : mappings['converter_func'](data.loc[mappings['panoptes_key']]) if mappings['panoptes_key'] in data else None})
             dataForUpload.append(datumForUpload)
-
         upload(dataForUpload, args)
 
 
