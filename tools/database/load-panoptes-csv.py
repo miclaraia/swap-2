@@ -60,18 +60,18 @@ def main() :
 
 def upload(dataForUpload, args):
     db = swap.db.DB()
+    numRecords = len(dataForUpload)
+    logger.info('Uploading {} records'.format(numRecords))
     if not args.dryrun :
         logger.info('Dropping classifications collection.')
         db._db.classifications.drop()
         db._init_classifications()
         print('Writing to DB...')
-        numRecords = len(dataForUpload)
-        logger.info('Uploading {} records'.format(numRecords))
         db.classifications.insert_many(dataForUpload)
         db._gen_stats()
-        logger.info('Done.')
     else :
-        logger.info('Running with --dryrun. DB will not be modified. Data dump follows:\n\n{}'.format(repr(dataForUpload)))
+        logger.info('Running with --dryrun. DB will not be modified.')
+    logger.info('Done.')
 
 
 if __name__ == '__main__' :
