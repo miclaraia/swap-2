@@ -54,8 +54,8 @@ class database:
             def parseAnnotationString(string) :
                 if not isinstance(string, str) :
                     print('Non-string type: {}'.format(string))
-                    return False
-                return True if string.startswith('Yes') else False
+                    return 0
+                return 1 if string.startswith('Yes') else 0
 
             db_to_panoptes_csv_map['time_stamp']['converter_func'] = convertTimeString
             db_to_panoptes_csv_map['annotation']['converter_func'] = parseAnnotationString
