@@ -30,7 +30,7 @@ def main() :
 
     argParser = argparse.ArgumentParser(prefix_chars='-')
     argParser.add_argument('panoptesdumpfile')
-    argParser.add_argument('--record-range', nargs=2, type=int, default=[0, -1], metavar=('first', 'last'))
+    argParser.add_argument('--record-range', nargs=2, type=int, default=[0, sys.maxsize], metavar=('first', 'last'))
     argParser.add_argument('--dryrun', nargs='?', type=bool, default=False)
     args = argParser.parse_args()
     print("Using file %s" % args.panoptesdumpfile)
@@ -47,7 +47,6 @@ def main() :
         db._db.classifications.drop()
         db._init_classifications()
 
-    logger.info('{}'.format(list(range(args.record_range[0], args.record_range[1], config.panoptes_database.panoptes_builder.classifications.upload_chunk_size))))
     for startRow in range(args.record_range[0], args.record_range[1], config.panoptes_database.panoptes_builder.classifications.upload_chunk_size) :
 
         rowRange = (startRow, startRow + config.panoptes_database.panoptes_builder.classifications.upload_chunk_size)
@@ -60,7 +59,8 @@ def main() :
             for dbKey, mappings in config.panoptes_database.panoptes_builder.classifications.db_to_panoptes_csv_map.items() :
                 datumForUpload.update({dbKey : mappings['converter_func'](data.loc[mappings['panoptes_key']]) if mappings['panoptes_key'] in data else None})
             dataForUpload.append(datumForUpload)
-        upload(dataForUpload, args)
+        if not upload(dataForUpload, args) :
+            break
         csvParser.reset()
 
 
@@ -76,6 +76,9 @@ def upload(dataForUpload, args):
         else :
             logger.info('Running with --dryrun. DB will not be modified.')
         logger.info('Done.')
+        return True
+    else :
+        return False
 
 
 if __name__ == '__main__' :
