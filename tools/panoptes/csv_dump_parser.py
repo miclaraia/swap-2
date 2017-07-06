@@ -48,9 +48,12 @@ class CsvDumpParser(object) :
     def __get_nonJsonKeys(self) :
         return self.__nonJsonKeys
 
-    def __readCsv(self) :
+    def __readCsv(self, rowRange = (0, -1)) :
         print('Parsing CSV file...')
-        self.__parsedCsvData = pd.read_csv(self.dumpFile)
+        print(rowRange)
+        self.__parsedCsvData = pd.read_csv(self.dumpFile,
+                                           skiprows=lambda iRow : iRow > 0 and iRow < rowRange[0],
+                                           nrows=(None if rowRange[1] < 0 else (rowRange[1] - rowRange[0])))
         print('Done.')
 
     def __get_parsedCsv(self) :
@@ -87,10 +90,10 @@ class CsvDumpParser(object) :
 
     def __unpackJsonColumns(self, skipColumns = [], rowRange = (0, -1)) :
         if self.__parsedCsvData is None :
-            self.__readCsv()
+            self.__readCsv(rowRange)
         print('Flattening JSON columns...')
         print('Will not flatten {}.'.format(', '.join(skipColumns)))
-        self.__flattenedCsvData = self.__parsedCsvData.iloc[rowRange[0]:rowRange[1]]
+        self.__flattenedCsvData = self.__parsedCsvData
         for column in list(set(self.jsonKeys) - set(skipColumns)) :
             self.__currentState = None  # Initialize to None as this might highlight semantic errors
             applied = self.__flattenedCsvData[column].apply(json.loads).apply(self.__unpackParsedJson, args=(column, True)).apply(self.__upackedListToSeries)

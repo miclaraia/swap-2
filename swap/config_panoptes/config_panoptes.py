@@ -59,6 +59,8 @@ class database:
 
         skip_unpack_columns = ['subject_data']
 
+        upload_chunk_size = 100000
+
 
 def override(config) :
     # Database configuration
