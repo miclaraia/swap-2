@@ -60,12 +60,13 @@ class database:
                 'gold': {'type': int},
             }
 
-            db_to_panoptes_csv_map = { key : { 'panoptes_key' : None, 'converter_func' : lambda x : x } for key in db_schema.keys() }
+            db_to_panoptes_csv_map = { key : { 'panoptes_key' : None, 'converter_func' : lambda x, *argv : x } for key in db_schema.keys() }
 
             db_to_panoptes_csv_map['subject']['panoptes_key'] = 'subject_id'
             db_to_panoptes_csv_map['gold']['panoptes_key'] = 'subject_id'
 
-            def getGoldLabelState(subject, gold_label_true_subjects, gold_label_false_subjects) :
+            def getGoldLabelState(subject, *argv) :
+                (gold_label_true_subjects, gold_label_false_subjects) = argv
                 if subject in gold_label_true_subjects :
                     return 1
                 elif subject in gold_label_false_subjects :
