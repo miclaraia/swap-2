@@ -383,6 +383,8 @@ class ScoreStats:
         high = cls.counts(scores, real, 1)
         total = cls.counts(scores)
 
+        logger.debug('low %s high %s total %s', low, high, total)
+
         stats = {
             'tpr': high[1] / total[1],
             'tnr': low[0] / total[0],
