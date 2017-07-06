@@ -30,7 +30,7 @@ def main() :
 
     argParser = argparse.ArgumentParser(prefix_chars='-')
     argParser.add_argument('panoptesdumpfile')
-    argParser.add_argument('--record-range', nargs='2', type=int, default=[0, -1], metavar=('first', 'last'))
+    argParser.add_argument('--record-range', nargs=2, type=int, default=[0, -1], metavar=('first', 'last'))
     argParser.add_argument('--dryrun', nargs='?', type=bool, default=False)
     args = argParser.parse_args()
     print("Using file %s" % args.panoptesdumpfile)
