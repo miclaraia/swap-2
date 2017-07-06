@@ -57,7 +57,7 @@ def main() :
 
     for startRow in range(args.record_range[0], args.record_range[1], config.panoptes_database.panoptes_builder.subjects.upload_chunk_size) :
 
-        rowRange = (startRow, startRow + config.panoptes_database.panoptes_builder.upload_chunk_size)
+        rowRange = (startRow, startRow + config.panoptes_database.panoptes_builder.subjects.upload_chunk_size)
 
         flattenedData = csvParser.getUnpackedData(skipUpackingFor = config.panoptes_database.panoptes_builder.subjects.skip_unpack_columns, rowRange = rowRange)
 
