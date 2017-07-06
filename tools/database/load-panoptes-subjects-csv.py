@@ -34,10 +34,10 @@ def main() :
     argParser.add_argument('--dryrun', nargs='?', type=bool, default=False)
     argParser.add_argument('--true_gold_subjects',
                            help='Path to file containing a newline-separated list of true-label gold standard subjects',
-                           nargs=?, type=str, default='')
+                           nargs='?'', type=str, default='')
     argParser.add_argument('--false_gold_subjects',
                            help='Path to file containing a newline-separated list of false-label gold standard subjects',
-                           nargs=?, type=str, default='')
+                           nargs='?', type=str, default='')
     args = argParser.parse_args()
     print("Using file %s" % args.panoptesdumpfile)
 
