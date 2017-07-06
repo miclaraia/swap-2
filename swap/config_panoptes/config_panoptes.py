@@ -59,7 +59,7 @@ class database:
 
             db_to_panoptes_csv_map['time_stamp']['converter_func'] = convertTimeString
             db_to_panoptes_csv_map['annotation']['converter_func'] = parseAnnotationString
-            db_to_panoptes_csv_map['already_seen']['converter_func'] = lambda x : replaceNan(x, False)
+            db_to_panoptes_csv_map['seen_before']['converter_func'] = lambda x : replaceNan(x, False)
 
             skip_unpack_columns = ['subject_data']
 
