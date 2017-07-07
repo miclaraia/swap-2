@@ -78,7 +78,7 @@ def upload(dataForUpload, args):
         logger.info('Uploading {} records'.format(numRecords))
         if not args.dryrun :
             logger.info('Writing to DB...')
-            db.subjects.insert_many(dataForUpload)
+            db.subjects.collection.insert_many(dataForUpload)
             db._gen_stats()
         else :
             logger.info('Running with --dryrun. DB will not be modified.')
