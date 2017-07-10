@@ -2,11 +2,10 @@
 ################################################################
 # Script to test db functionality
 
-from swap.db.classifications import Classifications
 from swap.db.db import Collection
 from swap.db import DB
 from swap.db.db import Cursor
-from swap.db.query import Query
+import swap.config as config
 
 from unittest.mock import MagicMock, patch
 from collections import OrderedDict
@@ -48,7 +47,8 @@ class Test_DB:
 
 class Test_Cursor:
     def test_length(self):
-        DB._instances = {}
+        DB._reset()
+        config.database.name='swapDB'
         db = DB()._db
         query = [{'$limit': 5}]
 
