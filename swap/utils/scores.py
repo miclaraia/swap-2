@@ -59,7 +59,9 @@ class ScoreExport:
     Used to generate plots like ROC curves.
     """
 
-    def __init__(self, scores, new_golds=True, history=None, thresholds=None):
+    def __init__(self, scores,
+                 new_golds=True, thresholds=None,
+                 gold_getter=None):
         """
         Pararmeters
         -----------
@@ -69,8 +71,14 @@ class ScoreExport:
             Flag to indicate whether to fetch gold labels from database
             or to use the gold labels already in score objects
         """
+        if gold_getter is None:
+            gold_getter = GoldGetter()
+            gold_getter.all()
+        self.gold_getter = gold_getter
+
         if new_golds:
             scores = self._init_golds(scores)
+
         self.scores = scores
         self._sorted_ids = sorted(scores, key=lambda id_: scores[id_].p)
         self.class_counts = self.counts(0)
@@ -79,9 +87,6 @@ class ScoreExport:
             thresholds = self.find_thresholds(config.fpr, config.mdr)
 
         self.thresholds = thresholds
-
-        if history is not None:
-            self.retire(history)
 
     @staticmethod
     def from_csv(fname):
@@ -128,13 +133,12 @@ class ScoreExport:
                 score.gold = -1
         return scores
 
-    @staticmethod
-    def get_real_golds():
+    def get_real_golds(self):
         """
         Fetch gold labels from database
         """
         logger.debug('Getting real gold labels from db')
-        return GoldGetter().all()()
+        return self.gold_getter.golds
 
     def counts(self, threshold):
         """
