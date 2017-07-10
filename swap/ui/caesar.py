@@ -17,7 +17,8 @@
 """
 
 import swap.config as config
-import swap.app.caesar_app as caesar
+import swap.caesar.app as caesar
+from swap.caesar.app import AuthCaesar
 from swap.ui.ui import Interface
 
 import logging
@@ -41,13 +42,31 @@ class CaesarInterface(Interface):
 
     def options(self, parser):
         parser.add_argument(
-            '--load', nargs=1)
+            '--load', nargs=1,
+            help='NOT IMPLEMENTED Pre-load a swap instance from db')
 
         parser.add_argument(
-            '--run', action='store_true')
+            '--register', action='store_true',
+            help='Register swap as an external extractor/reducer'
+        )
+
+        # TODO ability to unregister swap
+        # parser.add_argument(
+        #     '--unregister', action='store_true',
+        #     help='Clear swap registration from caesar'
+        # )
 
         parser.add_argument(
-            '--port', nargs=1)
+            '--run', action='store_true',
+            help='Run the app')
+
+        parser.add_argument(
+            '--port', nargs=1,
+            help='Modify the port used by the app')
+
+        parser.add_argument(
+            '--login', action='store_true'
+        )
 
     def call(self, args):
         """
@@ -60,6 +79,12 @@ class CaesarInterface(Interface):
 
         if args.load:
             swap = self.load(args.load[0])
+
+        if args.login:
+            AuthCaesar().login()
+
+        if args.register:
+            caesar.register_swap()
 
         if args.run:
             self.run(swap)

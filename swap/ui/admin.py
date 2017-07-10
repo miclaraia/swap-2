@@ -26,7 +26,17 @@ class AdminInterface(Interface):
 
         parser.add_argument(
             '--upload-dump', nargs=1,
-            help='Upload project dump to mongo database')
+            help='Upload panoptes project dump to mongo database')
+
+        parser.add_argument(
+            '--upload-golds', nargs=1,
+            help='Upload gold data from csv with subject id and gold label. '
+                 'Doesn\'t need every subject, only the ones with a gold label')
+
+        parser.add_argument(
+            '--gen-stats', action='store_true',
+            help='Force regeneration of classification stats in db for swap'
+        )
 
     def call(self, args):
         """
@@ -36,3 +46,10 @@ class AdminInterface(Interface):
         if args.upload_dump:
             fname = args.upload_dump[0]
             DB().classifications.upload_project_dump(fname)
+
+        if args.upload_golds:
+            fname = args.upload_golds[0]
+            DB().golds.upload_golds_csv(fname)
+
+        if args.gen_stats:
+            DB().classifications._gen_stats()

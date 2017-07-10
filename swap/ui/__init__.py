@@ -19,7 +19,7 @@
 from swap.control import Control
 import swap.config as config
 import swap.plots as plots
-import swap.app.caesar_app as caesar
+import swap.caesar.app as caesar
 
 from swap.utils.scores import ScoreExport
 from swap.swap import SWAP
@@ -42,6 +42,25 @@ logger = logging.getLogger(__name__)
 __author__ = "Michael Laraia"
 
 
+def _init_ui(interfaces=None):
+    ui = UI()
+    AdminInterface(ui)
+    SWAPInterface(ui)
+    CaesarInterface(ui)
+    ScoresInterface(ui)
+    RocInterface(ui)
+
+    if interfaces is not None:
+        for interface in interfaces:
+            interface(ui)
+
+    return ui
+
+
+def _get_parser():
+    return _init_ui().parser
+
+
 def run(*interfaces):
     """
         Run the interface
@@ -49,16 +68,8 @@ def run(*interfaces):
         Args:
             interface: Custom interface subclass to use
     """
-    ui = UI()
-    RocInterface(ui)
-    SWAPInterface(ui)
-    ScoresInterface(ui)
-    CaesarInterface(ui)
-    AdminInterface(ui)
 
-    for interface in interfaces:
-        interface()
-
+    ui = _init_ui(interfaces)
     ui.run()
 
 

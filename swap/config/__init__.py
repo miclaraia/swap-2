@@ -45,10 +45,16 @@ back_update = False
 # Operator used in controversial and consensus score calculation
 controversial_version = 'pow'
 
+# Activate debug mode for control
+# limits how many classifications Control will iterate through
+class control:
+    debug = False
+    amount = 100000
+
 
 # Database config options
 class database:
-    name = 'swapDBtest'
+    name = 'caesarTest'
     host = 'localhost'
     port = 27017
     max_batch_size = 1e5
@@ -56,7 +62,7 @@ class database:
     class builder:
 
         subject_metadata = {
-            'subject_id': int,
+            'subject': (int,'subject_id'),
             'gold': (int, 'gold_label'),
             'object_id': int,
             'machine_score': float,
@@ -91,25 +97,42 @@ class database:
 
 class online_swap:
     # Flask app config
+    host = 'northdown.spa.umn.edu'
+    ext_port = '443'
     port = '5000'
     bind = '0.0.0.0'
     debug = False
 
-    workflow = 1737
+    workflow = 1646
 
     class caesar:
         # Address configuration for accessing caesar
-        host = 'localhost'
-        port = '3000'
+        host = 'caesar-staging.zooniverse.org'
+        port = '443'
+
         # Authorization token for panoptes
         OAUTH = None
         # Response data for reductions
         reducer = 'swap'
         field = 'swap_score'
 
-    # Caesar URL format
-    _addr_format = 'http://%(host)s:%(port)s/workflows/%(workflow)s' + \
-                   '/reducers/%(reducer)s/reductions'
+    class address:
+        # Caesar URL format
+        _base = 'https://%(host)s:%(port)s/workflows/%(workflow)s'
+        _reducer = '/reducers/%(reducer)s/reductions'
+        _swap = 'https://%(user)s:%(pass)s@%(host)s:%(port)s/classify'
+
+        #     {
+        #               extractors_config: {"ext": {"type": "external", "url": "https://user:pass@myserver.com"}},
+        #               reducers_config: {"%(reducer)": {"type": "external"}},
+        #               rules_config: []
+        #             }
+        #
+        # {''}
+        # workflow:
+
+    _auth_username = 'caesar'
+    _auth_key = 'A7z9z2KwRVt4jXhXvRDy753SbBjCLNBB'
 
 
 class logging:

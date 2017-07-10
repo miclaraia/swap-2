@@ -1,9 +1,8 @@
 
-import swap.app.control as control
-import swap.app.caesar_app as app
+import swap.caesar.control as control
+import swap.caesar.app as app
 import swap.agents.subject
 from swap.db import DB
-from swap.utils.classification import Classification
 from swap.utils.golds import GoldGetter
 
 import json
@@ -42,15 +41,40 @@ class TestCaesarApp:
     @patch.object(GoldGetter, 'golds', {})
     @patch('swap.config.back_update', False)
     @patch('swap.config.database.name', 'swapDBtest')
+    @patch('swap.config.database.builder.annotation.true', [1])
+    @patch('swap.config.database.builder.annotation.false', [0])
     def test_classify(self, run):
         DB._reset()
         oc = control.OnlineControl()
         oc.init_swap()
-        ret = oc.classify(Classification(0, 1, 1))
+        ret = oc.classify(self.mock_classification)
 
         assert isinstance(ret, swap.agents.subject.Subject)
         assert ret.score == 0.12
 
-    def test_generate_address(self):
-        assert app.generate_address() == \
-            'http://localhost:3000/workflows/1737/reducers/swap/reductions'
+    def test_reducer_address(self):
+        address = 'https://caesar-staging.zooniverse.org:443/' \
+                  'workflows/1646/reducers/swap/reductions'
+        assert app.Address.reducer() == address
+
+    def test_root_address(self):
+        address = 'https://caesar-staging.zooniverse.org:443/' \
+                  'workflows/1646'
+        assert app.Address.root() == address
+
+    @patch('swap.config.online_swap._auth_key', 'TEST')
+    def test_classify_address(self):
+        address = 'https://caesar:TEST@northdown.spa.umn.edu:443/classify'
+        assert app.Address.swap_classify() == address
+
+    @patch('swap.config.online_swap.caesar.reducer', 'name')
+    @patch('swap.config.online_swap._auth_key', 'TEST')
+    def test_config_caesar(self):
+        addr = app.Address.swap_classify()
+        data = {'workflow': {
+            'extractors_config': {'name': {'type': 'external', 'url': addr}},
+            'reducers_config': {'name': {'type': 'external'}},
+            'rules_config': []
+        }}
+
+        assert app.Address.config_caesar() == data

@@ -59,7 +59,9 @@ class ScoreExport:
     Used to generate plots like ROC curves.
     """
 
-    def __init__(self, scores, new_golds=True, history=None, thresholds=None):
+    def __init__(self, scores,
+                 new_golds=True, thresholds=None,
+                 gold_getter=None):
         """
         Pararmeters
         -----------
@@ -69,8 +71,14 @@ class ScoreExport:
             Flag to indicate whether to fetch gold labels from database
             or to use the gold labels already in score objects
         """
+        if gold_getter is None:
+            gold_getter = GoldGetter()
+            gold_getter.all()
+        self.gold_getter = gold_getter
+
         if new_golds:
             scores = self._init_golds(scores)
+
         self.scores = scores
         self._sorted_ids = sorted(scores, key=lambda id_: scores[id_].p)
         self.class_counts = self.counts(0)
@@ -81,9 +89,6 @@ class ScoreExport:
         self.thresholds = thresholds
 
         self._stats = None
-
-        if history is not None:
-            self.retire(history)
 
     @staticmethod
     def from_csv(fname):
@@ -141,13 +146,12 @@ class ScoreExport:
                 score.gold = -1
         return scores
 
-    @staticmethod
-    def get_real_golds():
+    def get_real_golds(self):
         """
         Fetch gold labels from database
         """
         logger.debug('Getting real gold labels from db')
-        return GoldGetter().all()()
+        return self.gold_getter.golds
 
     def counts(self, threshold):
         """
@@ -462,18 +466,22 @@ class ScoreIterator:
             self.cond = cond
         self.i = 0
 
-    def next(self):
+    def _step(self):
         if self.i >= len(self):
             raise StopIteration
 
         score = self.scores[self.i]
         self.i += 1
+        return score
 
-        if self.cond(score):
-            obj = self.func(score)
-            return obj
-        else:
-            return self.next()
+    def next(self):
+        score = self._step()
+
+        while not self.cond(score):
+            score = self._step()
+
+        obj = self.func(score)
+        return obj
 
     def __iter__(self):
         return self
