@@ -11,7 +11,7 @@
             reference to the pymongo aggregation method of the collection
 """
 
-from swap.db.db import Collection
+from swap.db.db import Collection, Schema
 import swap.utils.parsers as parsers
 import swap.config as config
 
@@ -29,6 +29,10 @@ class Classifications(Collection):
     @staticmethod
     def _collection_name():
         return 'classifications'
+
+    @staticmethod
+    def _schema():
+        return Schema(config.parser.classification)
 
     #######################################################################
 
@@ -50,9 +54,17 @@ class Classifications(Collection):
         # Generate a default query if not specified
 
         # TODO: Parse session id if no user_id exists
+        # query = [
+        #     {'$sort': OrderedDict(
+        #         [('seen_before', 1), ('classification_id', 1)])},
+        #     {'$match': {'seen_before': False}},
+        #     # {'$match': {'classification_id': {'$lt': 25000000}}},
+        #     {'$project': {'user_id': 1, 'subject_id': 1,
+        #                   'annotation': 1, 'session_id': 1}}
+        # ]
         query = [
-            {'$sort': OrderedDict([('seen_before', 1), ('classification_id', 1)])},
             {'$match': {'seen_before': False}},
+            {'$sort': {'classification_id': 1}},
             # {'$match': {'classification_id': {'$lt': 25000000}}},
             {'$project': {'user_id': 1, 'subject_id': 1,
                           'annotation': 1, 'session_id': 1}}
@@ -88,7 +100,7 @@ class Classifications(Collection):
 
         logger.info('parsing csv dump')
         data = []
-        pp = parsers.ClassificationParser(config.database.builder)
+        pp = parsers.ClassificationParser('csv')
 
         with open(fname, 'r') as file:
             reader = csv.DictReader(file)
@@ -110,7 +122,7 @@ class Classifications(Collection):
         self._gen_stats()
         logger.debug('done')
 
-    def _gen_stats(self):
+    def _gen_stats(self, upload=True):
 
         def count(query):
             cursor = self.aggregate(query)
@@ -139,9 +151,28 @@ class Classifications(Collection):
         }
 
         logger.info('stats: %s', str(stats))
-        self._db.stats.insert_one(stats)
+        if upload:
+            logger.critical('Uploading stats')
+            self._db.stats.insert_one(stats)
         return stats
 
     def get_stats(self):
         stats = self._db.stats
         return stats.find().sort('_id', -1).limit(1).next()
+
+    def exists(self, classification_id):
+        print(self.collection)
+        logger.debug(
+            'Checking if classification %d already in \'%s\'',
+            classification_id, self._collection_name())
+        match = {'classification_id': classification_id}
+
+        exists = self.collection.find(match).count() > 0
+        logger.debug('exists: %s', str(exists))
+        return exists
+
+    def insert(self, classification):
+        id_ = classification['classification_id']
+        if not self.exists(id_):
+            logger.debug('Uploading classification to database')
+            super().insert(classification)

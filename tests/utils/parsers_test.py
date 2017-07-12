@@ -18,6 +18,7 @@ def parse_test_csv():
         reader = csv.DictReader(file)
         return list(reader)
 
+
 def parse_test_json():
     path = os.path.dirname(os.path.abspath(__file__))
     path = os.path.join(path, 'test_json.json')
@@ -26,36 +27,44 @@ def parse_test_json():
         return json.loads(line)
 
 
+def parse_test_metadata():
+    path = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(path, 'test_metadata_csv.csv')
+    with open(path, 'r') as file:
+        reader = csv.DictReader(file)
+        return next(reader)
+
+
 class Test_Parser:
 
     @staticmethod
     def override_annotation(task, value_key, true, false):
-        c = config.database.builder.annotation
+        c = config.parser.annotation
         c.task = task
         c.value_key = value_key
         c.true = true
         c.false = false
 
     def test_type_mod_int(self):
-        parser = parsers.ClassificationParser(config.database.builder)
+        parser = parsers.ClassificationParser(None)
 
         assert parser._type('1', int) == 1
         assert parser._type(1, int) == 1
 
     def test_type_mod_bool(self):
-        parser = parsers.ClassificationParser(config.database.builder)
+        parser = parsers.ClassificationParser(None)
 
         assert parser._type('true', bool) is True
         assert parser._type(True, bool) is True
         assert parser._type('True', bool) is True
 
     def test_type_mod_float(self):
-        parser = parsers.ClassificationParser(config.database.builder)
+        parser = parsers.ClassificationParser(None)
 
         assert parser._type('0.1', float) == 0.1
 
     def test_type_mod_timestamp(self):
-        parser = parsers.ClassificationParser(config.database.builder)
+        parser = parsers.ClassificationParser(None)
 
         t = parser._type('2017-01-24T16:11:24.680Z', 'timestamp')
         assert t == datetime.datetime(2017, 1, 24, 16, 11, 24, 680000)
@@ -64,20 +73,42 @@ class Test_Parser:
         assert t == datetime.datetime(2017, 1, 24, 16, 11, 24)
 
     def test_remap(self):
-        parser = parsers.ClassificationParser(config.database.builder)
-        parser.types = ({'a': (int, ('b', 'c', 'd'))})
+        field = {'type': int, 'remap': ['b', 'c', 'd', 'e']}
+        parser = parsers.ClassificationParser(None)
 
-        assert parser._remap({'a': 1}) == {'a': 1}
-        assert parser._remap({'b': 1}) == {'a': 1}
-        assert parser._remap({'c': 1}) == {'a': 1}
-        assert parser._remap({'d': 1}) == {'a': 1}
-        assert parser._remap({'e': 2}) == {'e': 2}
+        assert parser._remap({'a': 1}, 'a', field) == 1
+        assert parser._remap({'b': 2}, 'a', field) == 2
+        assert parser._remap({'c': 3}, 'a', field) == 3
+        assert parser._remap({'d': 4}, 'a', field) == 4
+        assert parser._remap({'e': 5}, 'a', field) == 5
 
-    def test_mod_with_remap_config(self):
-        parser = parsers.ClassificationParser(config.database.builder)
-        parser.types = ({'a': (int, ('b', 'c', 'd'))})
+    def test_remap_source(self):
+        parser = parsers.ClassificationParser(None)
+        field = {'type': int, 'remap': {None: 'b'}}
+        cl = {'a': 1, 'b': 2}
 
-        assert parser._mod_types({'a': '1'}) == {'a': 1}
+        assert parser._remap(cl, 'a', field) == 2
+
+    def test_remap_notsource(self):
+        parser = parsers.ClassificationParser(None)
+        field = {'type': int, 'remap': {'json': 'b'}}
+        cl = {'a': 1, 'b': 2}
+
+        assert parser._remap(cl, 'a', field) == 1
+
+    def test_navigate(self):
+        key = 'a.b.c'
+        obj = {'a': {'b': {'c': 5}}}
+        value = parsers.Parser._navigate(obj, key)
+
+        assert value == 5
+
+    def test_navigate_list(self):
+        key = '0.1.2'
+        obj = [[0,[0,0,5]]]
+        value = parsers.Parser._navigate(obj, key)
+
+        assert value == 5
 
 
 class Test_Project_Parser:
@@ -87,25 +118,15 @@ class Test_Project_Parser:
 
     @staticmethod
     def override_annotation(task, value_key, true, false):
-        c = config.database.builder.annotation
+        c = config.parser.annotation
         c.task = task
         c.value_key = value_key
         c.true = true
         c.false = false
 
-    def test_find_value(self):
-        self.override_annotation('T0', '0.value.1.2.3', None, None)
-        parser = parsers.ClassificationParser(config.database.builder)
-
-        v = parser._find_value([
-            {'value': [0,[0,0,[0,0,0,5]]]}
-        ])
-
-        assert v == 5
-
     def test_parse_value_1(self):
         self.override_annotation('T0', None, ['Abc'], ['Def'])
-        parser = parsers.ClassificationParser(config.database.builder)
+        parser = parsers.AnnotationParser(None)
 
         v = parser._parse_value('Abc')
 
@@ -113,7 +134,7 @@ class Test_Project_Parser:
 
     def test_parse_value_0(self):
         self.override_annotation('T0', None, ['Abc'], ['Def'])
-        parser = parsers.ClassificationParser(config.database.builder)
+        parser = parsers.AnnotationParser(None)
 
         v = parser._parse_value('Def')
 
@@ -121,7 +142,7 @@ class Test_Project_Parser:
 
     def test_parse_value_none(self):
         self.override_annotation('T0', None, ['Abc'], ['Def'])
-        parser = parsers.ClassificationParser(config.database.builder)
+        parser = parsers.AnnotationParser(None)
 
         v = parser._parse_value('ghi')
 
@@ -129,7 +150,7 @@ class Test_Project_Parser:
 
     def test_parse_value_and_find(self):
         self.override_annotation('T0', '0.value.1.2.3', [5], [0])
-        parser = parsers.ClassificationParser(config.database.builder)
+        parser = parsers.AnnotationParser(None)
 
         v = parser._parse_value([
             {'value': [0,[0,0,[0,0,0,5]]]}
@@ -143,7 +164,7 @@ class Test_Project_Parser:
             ['Real', 'yes', 1], ['Bogus', 'no', 0])
 
         from pprint import pprint
-        parser = parsers.ClassificationParser(config.database.builder)
+        parser = parsers.ClassificationParser('csv')
         pprint(self.test_csv[2])
         d = parser.process(self.test_csv[2].copy())
 
@@ -166,13 +187,43 @@ class Test_Project_Parser:
 
         assert len(d) == len(compare)
 
+    def test_csv_parser_seen_before(self):
+        self.override_annotation(
+            'T1', None,
+            ['Real', 'yes', 1], ['Bogus', 'no', 0])
+
+        from pprint import pprint
+        parser = parsers.ClassificationParser('csv')
+        cl = self.test_csv[3].copy()
+        pprint(cl)
+        d = parser.process(cl)
+
+        compare = {
+            'classification_id': 11423065,
+            'user_id': 1437100,
+            'workflow': 1737,
+            'time_stamp': datetime.datetime(2016, 4, 18, 18, 50, 48),
+            'session_id': 'b759eab8f4fe3436707edede3094cd5bd30c4812e2a701e48fa7cb13f0068f40',
+            'live_project': False,
+            'seen_before': True,
+            'annotation': 1,
+            'subject_id': 1935795,
+        }
+
+        print(d)
+        for key, value in compare.items():
+            print(key, value)
+            assert d[key] == value
+
+        assert len(d) == len(compare)
+
     def test_csv_parser_elephant(self):
         self.override_annotation(
             'T1', None,
             ['2'], ['-1'])
 
         from pprint import pprint
-        parser = parsers.ClassificationParser(config.database.builder)
+        parser = parsers.ClassificationParser('csv')
         pprint(self.test_csv[0])
         d = parser.process(self.test_csv[0].copy())
 
@@ -201,7 +252,7 @@ class Test_Project_Parser:
             ['Yes!'], ['No.'])
 
         from pprint import pprint
-        parser = parsers.ClassificationParser(config.database.builder)
+        parser = parsers.ClassificationParser('csv')
         pprint(self.test_csv[1])
         d = parser.process(self.test_csv[1].copy())
 
@@ -230,7 +281,7 @@ class Test_Project_Parser:
             [3], [-1])
 
         from pprint import pprint
-        parser = parsers.ClassificationParser(config.database.builder)
+        parser = parsers.ClassificationParser('csv')
         pprint(self.test_csv[1])
         d = parser.process(self.test_csv[1].copy())
 
@@ -259,7 +310,7 @@ class Test_Project_Parser:
             ['Real', 'yes', 1], ['Bogus', 'no', 0])
 
         from pprint import pprint
-        parser = parsers.ClassificationParser(config.database.builder)
+        parser = parsers.ClassificationParser('json')
         pprint(self.test_json)
         d = parser.process(self.test_json)
 
@@ -281,3 +332,23 @@ class Test_Project_Parser:
             assert d[key] == value
 
         assert len(d) == len(compare)
+
+
+class Test_Metadata_Parser:
+
+    test_metadata = parse_test_metadata()
+
+    def test_csv(self):
+        config.parser.subject_metadata = {
+            'subject': {'type': int, 'remap': ['subject_id']},
+            'project': {'type': int, 'remap': 'project_id'},
+        }
+
+        parser = parsers.MetadataParser('csv')
+        data = self.test_metadata
+        print(data)
+
+        data = parser.process(data)
+        assert data['subject'] == 3353054
+        assert data['project'] == 3098
+        assert len(data) == 2

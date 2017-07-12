@@ -18,7 +18,7 @@
 
 import swap.config as config
 import swap.caesar.app as caesar
-from swap.caesar.app import AuthCaesar
+from swap.caesar.auth import AuthCaesar
 from swap.ui.ui import Interface
 
 import logging
@@ -51,11 +51,10 @@ class CaesarInterface(Interface):
             help='Register swap as an external extractor/reducer'
         )
 
-        # TODO ability to unregister swap
-        # parser.add_argument(
-        #     '--unregister', action='store_true',
-        #     help='Clear swap registration from caesar'
-        # )
+        parser.add_argument(
+            '--unregister', action='store_true',
+            help='Clear swap registration from caesar'
+        )
 
         parser.add_argument(
             '--run', action='store_true',
@@ -85,7 +84,9 @@ class CaesarInterface(Interface):
             AuthCaesar().login()
 
         if args.register:
-            caesar.register_swap()
+            caesar.Requests.register_swap()
+        elif args.unregister:
+            caesar.Requests.unregister_swap()
 
         if args.run:
             self.run(swap)
@@ -94,4 +95,5 @@ class CaesarInterface(Interface):
     def run(swap=None):
         control = caesar.init_threader(swap)
         api = caesar.API(control)
+        logger.info('launching flask app')
         api.run()

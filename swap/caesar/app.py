@@ -3,13 +3,13 @@
 # with Caesar
 
 from swap.caesar.control import ThreadedControl
-from swap.caesar.auth import Auth, AuthCaesar
+from swap.caesar.auth import Auth
+from swap.caesar.utils.requests import Requests
 import swap.config as config
 
 import logging
 from flask import Flask, request, jsonify, Response
 from functools import wraps
-import requests
 
 
 logger = logging.getLogger(__name__)
@@ -89,6 +89,8 @@ class API:
         token = config.online_swap._auth_key
         self._auth = Auth(user, token)
 
+        self._recent_cl = []
+
     def run(self):
         self._route('/', 'status', self.status, ['GET'])
         self._route('/scores', 'scores', self.scores, ['GET'])
@@ -114,18 +116,20 @@ class API:
         """
         Receive a classification from caesar and process it
         """
-        logger.info('received classification')
-        logger.debug(str(request))
+        logger.info('received request')
 
         # Parse json from request
         data = request.get_json()
+        logger.debug('cl %s request %s', str(data['id']), str(request))
 
-        logger.debug('received data %s', str(data))
-        logger.debug('sending classification to swap thread')
-        self.control.queue('classify', data, Requests.respond)
+        if not self._is_recent_cl(data):
+            logger.info('Classification not recently received')
+            logger.debug('received data %s', str(data))
+            self.control.queue('classify', data, Requests.respond)
+        else:
+            logger.info('Filtering duplicate classification')
 
         # return empty response
-
         resp = jsonify({'status': 'ok'})
         resp.status_code = 200
         return resp
@@ -139,103 +143,23 @@ class API:
 
         return jsonify(scores.full_dict())
 
+    def _is_recent_cl(self, data):
+        id_ = data['id']
+        if id_ in self._recent_cl:
+            return True
 
-class Address:
-    config = config.online_swap
-
-    @classmethod
-    def root(cls):
-        host = cls.config.caesar.host
-        port = cls.config.caesar.port
-        workflow = cls.config.workflow
-        return cls.config.address._base % \
-            {'host': host, 'port': port, 'workflow': workflow}
-
-    @classmethod
-    def reducer(cls):
-        reducer = cls.config.caesar.reducer
-        addr = cls.config.address._reducer
-        return cls.root() + addr % {'reducer': reducer}
-
-    @classmethod
-    def swap_classify(cls):
-        addr = cls.config.address._swap
-        host = cls.config.host
-        port = cls.config.ext_port
-
-        username = cls.config._auth_username
-        password = cls.config._auth_key
-        password = Auth._mod_token(password)
-
-        return addr % \
-            {'user': username, 'pass': password,
-             'host': host, 'port': port}
-
-    @classmethod
-    def config_caesar(cls):
-        name = cls.config.caesar.reducer
-        addr = cls.swap_classify()
-        data = {'workflow': {
-            'extractors_config': {name: {'type': 'external', 'url': addr}},
-            'reducers_config': {name: {'type': 'external'}},
-            'rules_config': []
-        }}
-        logger.info('compiled caesar config: %s', data)
-        return data
-
-class Requests:
-
-    @staticmethod
-    def register_swap():
-        """
-        Register swap as an extractor/reducer on caesar
-        """
-        data = Address.config_caesar()
-        address = Address.root()
-
-        logger.info('PUT to %s with %s', address, str(data))
-        auth_header = AuthCaesar().auth()
-        requests.put(address, headers=auth_header, json=data)
-        logger.info('done')
-
-    @staticmethod
-    def respond(subject):
-        """
-        PUT subject score to Caesar
-        """
-        c = config.online_swap
-
-        address = Address.reducer()
-
-        # address = 'http://localhost:3000'
-        body = {
-            'reduction': {
-                'subject_id': subject.id,
-                'data': {
-                    c.caesar.field: subject.score
-                }
-            }
-        }
-
-        print('responding!')
-        logger.info('PUT subject %d score %.4f to caesar',
-                    subject.id, subject.score)
-
-        auth_header = AuthCaesar().auth()
-        requests.put(address, headers=auth_header, json=body)
-        logger.debug('done')
+        self._recent_cl.append(id_)
+        if len(self._recent_cl) > 10:
+            self._recent_cl.pop(0)
+        return False
 
 
 def init_threader(swap=None):
-    thread = ThreadedControl(swap=swap)
+    thread = ThreadedControl(swap_=swap)
     thread.start()
+    logger.info('Finished launching swap thread')
 
     return thread
-
-
-# def run():
-#     c = config.caesar.swap
-#     app.run(host=c.bind, port=c.port, debug=c.debug)
 
 
 if __name__ == '__main__':
