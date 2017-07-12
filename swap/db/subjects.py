@@ -15,20 +15,31 @@ class Subjects(Collection):
     def _collection_name():
         return 'subjects'
 
-    def schema(self):
-        pass
+    @staticmethod
+    def _schema():
+        return config.parser.subject_metadata
 
     def _init_collection(self):
         pass
 
     #######################################################################
 
+    def get_metadata(self, subject_id):
+        cursor = self.collection.find({'subject': subject_id}).sort('_id', -1)
+
+        try:
+            data = cursor.next()
+            data.pop('_id')
+            return data
+        except StopIteration:
+            pass
+
     def upload_metadata_dump(self, fname):
         self._rebuild()
 
         logger.info('parsing csv dump')
         data = []
-        parser = parsers.MetadataParser(config.database.builder)
+        parser = parsers.MetadataParser('csv')
 
         with open(fname, 'r') as file:
             reader = csv.DictReader(file)
