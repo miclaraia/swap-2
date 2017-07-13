@@ -40,6 +40,35 @@ Launching Caesar
 
 Some examples to launch caesar
 
+.. note::
+    Make sure to specify a config file to override default settings when running
+    online swap. This can by adding the `--config-file` option, e.g.:
+        ``run_swap --config-file /path/to/config caesar ...``
+
+Register SWAP as an extractor/reducer on caesar:
+    ``run_swap caesar --login --register``
+
+Unregister SWAP as an extractor/reducer on caesar:
+    ``run_swap caesar --login --unregister``
+
+Run SWAP with caesar:
+    ``run_swap caesar --login --run``
+
+
+Custom Config Files
+-------------------
+
+It is possible to specify a custom config file to override default
+config options. Make a copy of ``hco-experiments/swap/swap/config/config.default.py``
+and override the desired options.
+
+To override options to be loaded on every run, save your new config file to
+``hco-experiments/swap/swap/config/config.py`. To specify it at runtime, add the
+``--config-file`` option.
+
+Example:
+    ``run_swap --config-file /path/to/config``
+
 
 Interacting with SWAP
 =====================
