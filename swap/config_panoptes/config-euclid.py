@@ -64,8 +64,8 @@ def override(config):
     # config.online_swap.response.token = ''
 
     # Name of reducer registered in Caesar
-    config.online_swap.response.reducer = 'swap_euclid'
+    config.online_swap.caesar.reducer = 'swap_euclid'
     # Name of variable in Caesar
-    config.online_swap.response.field = 'swap_score'
+    # config.online_swap.response.field = 'swap_score'
 
     return None
