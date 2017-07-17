@@ -50,7 +50,7 @@ def override(config):
     # Online SWAP configuration
 
     # Interface and port for SWAP to listen on
-    # config.online_swap.port = 5000
+    config.online_swap.port = 5001
     # config.online_swap.bind = '0.0.0.0'
 
     # Workflow ID for incoming classifications
