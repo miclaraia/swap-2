@@ -29,7 +29,7 @@ def override(config):
     # config.mdr = 0.1
 
     # Parse data types in csv dump
-    config.database.builder.types = {}
+    # config.database.builder.types = {}
 
     # Metadata in csv dump
     # config.database.builder.metadata = [
@@ -39,7 +39,7 @@ def override(config):
     #     'diff',
     #     'object_id'] + [
     #     'random%d' % (i + 1) for i in range(15)]
-    config.database.builder.metadata = []
+    # config.database.builder.metadata = []
 
     # Database configuration
     config.database.name = 'swapDB_euclidTest'
