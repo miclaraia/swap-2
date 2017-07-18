@@ -109,7 +109,7 @@ class API:
 
     @staticmethod
     def status():
-        return Response('status: ok', 200)
+        return Response(config.flask_responder.status(), 200)
 
     @needs_auth
     def classify(self):

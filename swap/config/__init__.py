@@ -137,6 +137,39 @@ class online_swap:
     _auth_username = 'caesar'
     _auth_key = 'A7z9z2KwRVt4jXhXvRDy753SbBjCLNBB'
 
+    class flask_responder:
+        title = 'SWAP'
+
+        details = {
+            'Host' : host,
+            'Internal Port' : port,
+            'External Port' : ext_port,
+            'Caesar Reducer' : caesar.reducer,
+            'Caesar Field': caesar.field,
+        }
+
+        # provide a more informative display for a SWAP instance
+        def status(self) :
+            return """<http>
+            <head>
+            <title>{title}</title>
+            <head>
+            <body>
+            <h1>{title}</h1>
+            <h3>Running...</h3>
+            <h3>Details:<h3>
+            <table>
+            <tr>
+                <th>Description</th><th>Value</th>
+            </tr>
+                {details}
+            </table>
+            </body>
+            <html>""".format(title=title,
+                             details = '\n'.join(['<tr><td><i>{description}</i></td><td>{value}</td>'.format(description=desc, value=val) for desc, val in details.items()])
+                             )
+
+
 
 class logging:
     file_format = '%(asctime)s:%(levelname)s::%(name)s:%(funcName)s ' + \
