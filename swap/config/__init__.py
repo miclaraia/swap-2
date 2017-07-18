@@ -147,11 +147,12 @@ class online_swap:
 
         title = 'SWAP'
 
-        details = {
-            'Host' : self.online_swap.host,
-            'Internal Port' : self.online_swap.port,
-            'External Port' : self.online_swap.ext_port,
-            'Caesar Reducer' : self.online_swap.caesar.reducer,
+    def details(self):
+        return {
+            'Host': self.online_swap.host,
+            'Internal Port': self.online_swap.port,
+            'External Port': self.online_swap.ext_port,
+            'Caesar Reducer': self.online_swap.caesar.reducer,
             'Caesar Field': self.online_swap.caesar.field,
         }
 
@@ -173,7 +174,7 @@ class online_swap:
             </table>
             </body>
             <html>""".format(title=title,
-                             details = '\n'.join(['<tr><td><i>{description}</i></td><td>{value}</td>'.format(description=desc, value=val) for desc, val in details.items()])
+                             details = '\n'.join(['<tr><td><i>{description}</i></td><td>{value}</td>'.format(description=desc, value=val) for desc, val in self.details().items()])
                              )
 
 
