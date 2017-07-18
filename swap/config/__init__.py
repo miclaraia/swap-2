@@ -141,11 +141,11 @@ class online_swap:
         title = 'SWAP'
 
         details = {
-            'Host' : host,
-            'Internal Port' : port,
-            'External Port' : ext_port,
-            'Caesar Reducer' : caesar.reducer,
-            'Caesar Field': caesar.field,
+            'Host' : online_swap.host,
+            'Internal Port' : online_swap.port,
+            'External Port' : online_swap.ext_port,
+            'Caesar Reducer' : online_swap.caesar.reducer,
+            'Caesar Field': online_swap.caesar.field,
         }
 
         # provide a more informative display for a SWAP instance
