@@ -99,6 +99,7 @@ class parser:
 class online_swap:
     # Flask app config
     host = 'northdown.spa.umn.edu'
+    route = ''  # if not empty, must begin with '/'
     ext_port = '443'
     port = '5000'
     bind = '0.0.0.0'
@@ -121,7 +122,8 @@ class online_swap:
         # Caesar URL format
         _base = 'https://%(host)s:%(port)s/workflows/%(workflow)s'
         _reducer = '/reducers/%(reducer)s/reductions'
-        _swap = 'https://%(user)s:%(pass)s@%(host)s:%(port)s/classify'
+        # Local URL format for Caesar to send to
+        _swap = 'https://%(user)s:%(pass)s@%(host)s:%(port)s%(route)s/classify'
 
         #     {
         #               extractors_config: {"ext": {"type": "external", "url": "https://user:pass@myserver.com"}},

@@ -29,6 +29,7 @@ class Address:
         addr = cls.config.address._swap
         host = cls.config.host
         port = cls.config.ext_port
+        route = cls.config.route
 
         username = cls.config._auth_username
         password = cls.config._auth_key
@@ -36,4 +37,4 @@ class Address:
 
         return addr % \
             {'user': username, 'pass': password,
-             'host': host, 'port': port}
+             'host': host, 'port': port, 'route' : route}

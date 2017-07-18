@@ -11,7 +11,8 @@ def override(config):
     # config.parser.annotation.true = ['Yes', 1]
     # config.parser.annotation.false = ['No', 0]
     #
-    config.online_swap.host = 'northdown.spa.umn.edu/euclid'
+    config.online_swap.host = 'northdown.spa.umn.edu'
+    config.online_swap.route = '/euclid'
     # config.online_swap.ext_port = '443'
     # config.online_swap.caesar.host = 'caesar-staging.zooniverse.org'
     # config.online_swap.caesar.port = '443'
