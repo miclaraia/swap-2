@@ -95,7 +95,7 @@ class API:
         self._route('/', 'status', self.status, ['GET'])
         self._route('/scores', 'scores', self.scores, ['GET'])
         self._route('/classify', 'classify', self.classify, ['POST'])
-        self.app.run()
+        self.app.run(port=5001)
 
     def _route(self, route, name, func, methods=('GET')):
         self.app.add_url_rule(
