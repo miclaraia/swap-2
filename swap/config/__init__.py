@@ -107,6 +107,9 @@ class online_swap:
 
     workflow = 2614
 
+    def build_flask_responder(self) :
+        return flask_responder(self)
+
     class caesar:
         # Address configuration for accessing caesar
         host = 'caesar-staging.zooniverse.org'
@@ -138,14 +141,18 @@ class online_swap:
     _auth_key = 'A7z9z2KwRVt4jXhXvRDy753SbBjCLNBB'
 
     class flask_responder:
+
+        def __init__(self, online_swap):
+            self.online_swap = online_swap
+
         title = 'SWAP'
 
         details = {
-            'Host' : online_swap.host,
-            'Internal Port' : online_swap.port,
-            'External Port' : online_swap.ext_port,
-            'Caesar Reducer' : online_swap.caesar.reducer,
-            'Caesar Field': online_swap.caesar.field,
+            'Host' : self.online_swap.host,
+            'Internal Port' : self.online_swap.port,
+            'External Port' : self.online_swap.ext_port,
+            'Caesar Reducer' : self.online_swap.caesar.reducer,
+            'Caesar Field': self.online_swap.caesar.field,
         }
 
         # provide a more informative display for a SWAP instance
