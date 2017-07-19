@@ -47,8 +47,9 @@ class Test_DB:
 
 
 class Test_Cursor:
+    @patch('swap.config.database.name', 'swapDB')
     def test_length(self):
-        DB._instances = {}
+        DB._reset()
         db = DB()._db
         query = [{'$limit': 5}]
 

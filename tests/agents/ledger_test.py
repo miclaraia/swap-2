@@ -286,6 +286,7 @@ class TestSubjectLedger:
 
     @patch.object(STransaction, 'calculate', new=MagicMock(return_value=.5))
     @patch.object(STransaction, 'get_prior', new=MagicMock(return_value=.5))
+    @patch('swap.config.back_update', True)
     def test_recalculate_beginning(self):
         le = SLedger(0)
         t0 = STransaction(mockuser(0), 0)
@@ -301,6 +302,7 @@ class TestSubjectLedger:
 
     @patch.object(STransaction, 'calculate', new=MagicMock(return_value=.5))
     @patch.object(STransaction, 'get_prior', new=MagicMock(return_value=.5))
+    @patch('swap.config.back_update', True)
     def test_recalculate_middle(self):
         le = SLedger(0)
         t0 = STransaction(mockuser(0), 0)
@@ -433,6 +435,7 @@ class TestUserLedger:
         assert type(le.yes) is Counter
         assert le._score == (0.5, 0.5)
 
+    @patch('swap.config.back_update', True)
     def test_add(self):
         le = ULedger(0)
         t = UTransaction(mocksubject(0), 0)
@@ -474,6 +477,7 @@ class TestUserLedger:
         assert le.recalculate() == (2 / 3, 1 / 4)
 
     @patch('swap.config.gamma', 1)
+    @patch('swap.config.back_update', True)
     def test_recalculate_2(self):
         le = ULedger(0)
         t0 = UTransaction(mocksubject(0, 1), 0)
@@ -508,6 +512,7 @@ class TestUserLedger:
         assert le.recalculate() == (9 / 14, 6 / 14)
 
     @patch('swap.config.gamma', 1)
+    @patch('swap.config.back_update', True)
     def test_score(self):
         le = ULedger(0)
         t0 = UTransaction(mocksubject(0, 1), 0)
