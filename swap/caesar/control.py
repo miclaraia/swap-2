@@ -167,7 +167,7 @@ class ThreadedControl(threading.Thread):
                         logger.info('Already classified, not responding')
             else:
                 logger.error('Classification was None: %s', str(classification))
-        except Exception:
+        except Exception as e:
             logger.error(e)
             sys.exit(1)
 
