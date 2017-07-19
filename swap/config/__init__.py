@@ -150,7 +150,7 @@ class online_swap:
         }
 
         #  provide a more informative display for a SWAP instance
-        status_template = """<http>
+        default_status_template = """<http>
             <head>
             <title>{title}</title>
             <head>
@@ -167,9 +167,10 @@ class online_swap:
             </body>
             <html>"""
 
-        def __init__(self, title = None, details = None) :
+        def __init__(self, title = None, details = None, template = None) :
             self.status_title = default_status_title if title is None else title
             self.status_details = default_status_details if details is None else details
+            self.status_template = default_status_template if template is None else template
 
         @classmethod
         def build_responder(cls, config) :
@@ -184,11 +185,17 @@ class online_swap:
             return cls(title, details)
 
         @staticmethod
-        def status_string(status_template, status_title, status_details) :
+        def static_status_string(status_template, status_title, status_details) :
             details_string = ''.join(
                 ['<tr><td>{desc}</td><td>{val}</td></tr>'.format(desc=desc, val=val)
                  for desc, val in status_details.items()])
             return status_template.format(status_title, details_string)
+
+        def status_string(self) :
+            details_string = ''.join(
+                ['<tr><td>{desc}</td><td>{val}</td></tr>'.format(desc=desc, val=val)
+                 for desc, val in self.status_details.items()])
+            return self.status_template.format(self.status_title, details_string)
 
 
 class logging:

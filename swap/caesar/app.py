@@ -109,11 +109,7 @@ class API:
 
     @staticmethod
     def status():
-        return Response(config.online_swap.flask_responder.build_responder(config).status_string(
-            config.online_swap.flask_responder.status_template,
-            config.online_swap.flask_responder.status_title,
-            config.online_swap.flask_responder.status_details
-        ), 200)
+        return Response(config.online_swap.flask_responder.build_responder(config).status_string(), 200)
 
     @needs_auth
     def classify(self):
