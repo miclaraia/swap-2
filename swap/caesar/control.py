@@ -4,6 +4,7 @@ import swap.config as config
 from swap.utils.classification import Classification
 from swap.utils.parsers import ClassificationParser
 from swap.db import DB
+import swap.db.db
 
 import sys
 import threading
@@ -151,20 +152,24 @@ class ThreadedControl(threading.Thread):
         self._queue.put(Message(command, data, callback))
 
     def classify(self, message):
-        classification = message.data
-        if classification is not None:
-            with self.control_lock:
-                logger.info('classifying')
-                subject = self.control.classify(classification)
+        try:
+            classification = message.data
+            if classification is not None:
+                with self.control_lock:
+                    logger.info('classifying')
+                    subject = self.control.classify(classification)
 
-                if subject is not None:
-                    logger.info('responding with subject %s score %.4f',
-                                str(subject.id), subject.score)
-                    message.callback(subject)
-                else:
-                    logger.info('Already classified, not responding')
-        else:
-            logger.error('Classification was None: %s', str(classification))
+                    if subject is not None:
+                        logger.info('responding with subject %s score %.4f',
+                                    str(subject.id), subject.score)
+                        message.callback(subject)
+                    else:
+                        logger.info('Already classified, not responding')
+            else:
+                logger.error('Classification was None: %s', str(classification))
+        except Exception:
+            logger.error(e)
+            sys.exit(1)
 
     def scores(self):
         with self.control_lock:
