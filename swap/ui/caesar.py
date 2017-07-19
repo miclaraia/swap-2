@@ -25,6 +25,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class CaesarInterface(Interface):
     """
     Interface to launch the caesar app

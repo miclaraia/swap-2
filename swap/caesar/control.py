@@ -98,6 +98,7 @@ class OnlineControl(swap.control.Control):
 
             logger.debug('Adding classification from network: %s',
                          str(cl))
+
             self.swap.classify(cl)
 
             subject = self.swap.subjects.get(cl.subject)

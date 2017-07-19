@@ -23,6 +23,7 @@ import csv
 import logging
 logger = logging.getLogger(__name__)
 
+
 class Classifications(Collection):
 
     @staticmethod
