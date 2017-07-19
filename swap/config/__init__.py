@@ -168,9 +168,9 @@ class online_swap:
             <html>"""
 
         def __init__(self, title = None, details = None, template = None) :
-            self.status_title = flask_responder.default_status_title if title is None else title
-            self.status_details = flask_responder.default_status_details if details is None else details
-            self.status_template = flask_responder.default_status_template if template is None else template
+            self.status_title = online_swap.flask_responder.default_status_title if title is None else title
+            self.status_details = online_swap.flask_responder.default_status_details if details is None else details
+            self.status_template = online_swap.flask_responder.default_status_template if template is None else template
 
         @classmethod
         def build_responder(cls, config) :
