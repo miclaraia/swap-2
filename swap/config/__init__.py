@@ -139,14 +139,14 @@ class online_swap:
 
     class flask_responder:
 
-        status_title = 'SWAP'
+        title = 'SWAP'
 
-        status_details = {
-            'Host': config.online_swap.host,
-            'Internal Port': config.online_swap.port,
-            'External Port': config.online_swap.ext_port,
-            'Caesar Reducer': config.online_swap.caesar.reducer,
-            'Caesar Field': config.online_swap.caesar.field
+        default_status_details = {
+            'Host': 'config.online_swap.host',
+            'Internal Port': 'config.online_swap.port',
+            'External Port': 'config.online_swap.ext_port',
+            'Caesar Reducer': 'config.online_swap.caesar.reducer',
+            'Caesar Field': 'config.online_swap.caesar.field'
         }
 
         #  provide a more informative display for a SWAP instance
@@ -166,6 +166,22 @@ class online_swap:
             </table>
             </body>
             <html>"""
+
+        def __init__(self, title = None, details = None) :
+            self.status_title = default_status_title if title is None else title
+            self.status_details = default_status_details if details is None else details
+
+        @classmethod
+        def build_responder(cls, config) :
+            details = {
+                'Host': config.online_swap.host,
+                'Internal Port': config.online_swap.port,
+                'External Port': config.online_swap.ext_port,
+                'Caesar Reducer': config.online_swap.caesar.reducer,
+                'Caesar Field': config.online_swap.caesar.field
+            }
+            title = config.online_swap.flask_responder.title
+            return cls(title, details)
 
         @staticmethod
         def status_string(status_template, status_title, status_details) :
