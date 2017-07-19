@@ -182,9 +182,9 @@ def import_config(path):
     Import a custom fon
     """
     spec = importlib.util.spec_from_file_location('module', path)
-    foo = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(foo)
-    foo.override(module())
+    _module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(_module)
+    _module.override(module())
 
 
 local_config()
