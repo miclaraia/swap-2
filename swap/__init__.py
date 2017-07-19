@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
+import swap.config.logger as logger
 from swap.control import Control
 from swap.swap import SWAP
-import swap.config.logger as logger
 
 assert Control
 assert SWAP
