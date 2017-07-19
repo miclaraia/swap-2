@@ -13,7 +13,7 @@ def override(config):
     #
     config.online_swap.host = 'northdown.spa.umn.edu'
     config.online_swap.route = '/euclid'
-    config.online_swap.flask_responder.status_title = 'SWAP: Euclid - Challenge the machines.'
+    config.online_swap.flask_responder.default_status_title = 'SWAP: Euclid - Challenge the machines.'
     # config.online_swap.ext_port = '443'
     # config.online_swap.caesar.host = 'caesar-staging.zooniverse.org'
     # config.online_swap.caesar.port = '443'

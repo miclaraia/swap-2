@@ -139,7 +139,7 @@ class online_swap:
 
     class flask_responder:
 
-        title = 'SWAP'
+        default_status_title = 'SWAP'
 
         default_status_details = {
             'Host': 'config.online_swap.host',
@@ -168,9 +168,9 @@ class online_swap:
             <html>"""
 
         def __init__(self, title = None, details = None, template = None) :
-            self.status_title = default_status_title if title is None else title
-            self.status_details = default_status_details if details is None else details
-            self.status_template = default_status_template if template is None else template
+            self.status_title = flask_responder.default_status_title if title is None else title
+            self.status_details = flask_responder.default_status_details if details is None else details
+            self.status_template = flask_responder.default_status_template if template is None else template
 
         @classmethod
         def build_responder(cls, config) :
@@ -181,7 +181,7 @@ class online_swap:
                 'Caesar Reducer': config.online_swap.caesar.reducer,
                 'Caesar Field': config.online_swap.caesar.field
             }
-            title = config.online_swap.flask_responder.title
+            title = config.online_swap.flask_responder.default_status_title
             return cls(title, details)
 
         @staticmethod
