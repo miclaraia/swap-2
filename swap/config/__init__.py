@@ -45,6 +45,7 @@ back_update = False
 # Operator used in controversial and consensus score calculation
 controversial_version = 'pow'
 
+
 # Activate debug mode for control
 # limits how many classifications Control will iterate through
 class control:
@@ -58,6 +59,7 @@ class database:
     host = 'localhost'
     port = 27017
     max_batch_size = 1e5
+
 
 class parser:
 
@@ -81,6 +83,7 @@ class parser:
         'live_project': {'type': bool, 'remap': ['metadata.live_project']},
         'session_id': {'remap': ['metadata.session']},
         'time_stamp': {'type': 'timestamp', 'remap': 'created_at'},
+        'user_agent_string': {'type' : str, 'remap': ['metadata.user_agent']}
     }
 
     _timestamp_format = [
@@ -142,11 +145,7 @@ class online_swap:
         default_status_title = 'SWAP'
 
         default_status_details = {
-            'Host': 'config.online_swap.host',
-            'Internal Port': 'config.online_swap.port',
-            'External Port': 'config.online_swap.ext_port',
-            'Caesar Reducer': 'config.online_swap.caesar.reducer',
-            'Caesar Field': 'config.online_swap.caesar.field'
+            'Status': 'OK'
         }
 
         #  provide a more informative display for a SWAP instance
@@ -175,11 +174,13 @@ class online_swap:
         @classmethod
         def build_responder(cls, config) :
             details = {
+                'Status': 'OK',
                 'Host': config.online_swap.host,
                 'Internal Port': config.online_swap.port,
                 'External Port': config.online_swap.ext_port,
                 'Caesar Reducer': config.online_swap.caesar.reducer,
-                'Caesar Field': config.online_swap.caesar.field
+                'Caesar Field': config.online_swap.caesar.field,
+                'Target Workflow': config.online_swap.workflow
             }
             title = config.online_swap.flask_responder.default_status_title
             return cls(title, details)
