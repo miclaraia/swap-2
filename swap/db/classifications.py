@@ -11,7 +11,8 @@
             reference to the pymongo aggregation method of the collection
 """
 
-from swap.db.db import Collection, Schema
+from swap.db.db import Collection
+from swap.db.db import Schema as _Schema
 import swap.utils.parsers as parsers
 import swap.config as config
 
@@ -177,3 +178,16 @@ class Classifications(Collection):
         if not self.exists(id_):
             logger.debug('Uploading classification to database')
             super().insert(classification)
+
+
+class Schema(_Schema):
+
+    @staticmethod
+    def validate_field(key, value, type_):
+        try:
+            return super().validate_field(key, value, type_)
+        except _Schema.SchemaValidationError as e:
+            if key == 'user_id':
+                return super().validate_field(key, value, None)
+
+            raise e
