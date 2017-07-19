@@ -143,7 +143,7 @@ class Schema:
 
     @staticmethod
     def validate_field(key, value, type_):
-        return type(type_) is type and type(value) is not type_
+        return type(value) is type_ or type(type_) is not type
 
     class SchemaValidationError(Exception):
 

@@ -182,12 +182,9 @@ class Classifications(Collection):
 
 class Schema(_Schema):
 
-    @staticmethod
-    def validate_field(key, value, type_):
-        try:
-            return super().validate_field(key, value, type_)
-        except _Schema.SchemaValidationError as e:
-            if key == 'user_id':
-                return super().validate_field(key, value, None)
-
-            raise e
+    @classmethod
+    def validate_field(cls, key, value, type_):
+        validate = super().validate_field(key, value, type_)
+        if key == 'user_id':
+            return validate or value is None
+        return validate
