@@ -31,12 +31,16 @@ class Requests:
         Register swap as an extractor/reducer on caesar
         """
         data = cls.config_caesar('on')
+        logger.debug('100 %s', str(data))
         address = Address.root()
 
         logger.info('PUT to %s with %s', address, str(data))
-        auth_header = AuthCaesar().auth()
-        print(auth_header)
-        r = requests.put(address, headers=auth_header, json=data)
+
+        headers = cls.headers()
+        headers.update(AuthCaesar().auth())
+
+        print(headers)
+        r = requests.put(address, headers=headers, json=data)
         logger.info('done')
 
         return r
@@ -51,9 +55,12 @@ class Requests:
         address = Address.root()
 
         logger.info('PUT to %s with %s', address, str(data))
-        auth_header = AuthCaesar().auth()
-        print(auth_header)
-        r = requests.put(address, headers=auth_header, json=data)
+
+        headers = cls.headers()
+        headers.update(AuthCaesar().auth())
+
+        print(headers)
+        r = requests.put(address, headers=headers, json=data)
         logger.debug('done')
 
         return r
