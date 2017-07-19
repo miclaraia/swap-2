@@ -108,29 +108,23 @@ class online_swap:
 
     class caesar:
         # Address configuration for accessing caesar
-        host = 'caesar-staging.zooniverse.org'
+        caesar_endpoint = 'caesar-staging'
+        panoptes_endpoint = 'panoptes-staging'
+
         port = '443'
 
-        # Authorization token for panoptes
-        OAUTH = None
         # Response data for reductions
         reducer = 'swap'
         field = 'swap_score'
 
     class address:
         # Caesar URL format
-        _base = 'https://%(host)s:%(port)s/workflows/%(workflow)s'
+        _panoptes = 'https://%(endpoint)s.zooniverse.org'
+        _caesar = 'https://%(endpoint)s.zooniverse.org:%(port)s' \
+                  '/workflows/%(workflow)s'
+
         _reducer = '/reducers/%(reducer)s/reductions'
         _swap = 'https://%(user)s:%(pass)s@%(host)s:%(port)s/classify'
-
-        #     {
-        #               extractors_config: {"ext": {"type": "external", "url": "https://user:pass@myserver.com"}},
-        #               reducers_config: {"%(reducer)": {"type": "external"}},
-        #               rules_config: []
-        #             }
-        #
-        # {''}
-        # workflow:
 
     _auth_username = 'caesar'
     _auth_key = 'A7z9z2KwRVt4jXhXvRDy753SbBjCLNBB'
