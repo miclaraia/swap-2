@@ -21,6 +21,7 @@ import swap.caesar.app as caesar
 from swap.caesar.auth import AuthCaesar
 from swap.ui.ui import Interface
 
+import atexit
 import logging
 
 logger = logging.getLogger(__name__)
@@ -97,9 +98,10 @@ class CaesarInterface(Interface):
         api = caesar.API(control)
 
         logger.info('Registering swap in caesar')
+        # Try to deregister swap from caesar on exit
+        atexit.register(caesar.Requests.unregister_swap)
+        # Register swap in caesar
         caesar.Requests.register_swap()
 
         logger.info('launching flask app')
         api.run()
-
-        caesar.Requests.unregister_swap()
