@@ -94,5 +94,11 @@ class CaesarInterface(Interface):
     def run(swap=None):
         control = caesar.init_threader(swap)
         api = caesar.API(control)
+
+        logger.info('Registering swap in caesar')
+        caesar.Requests.register_swap()
+
         logger.info('launching flask app')
         api.run()
+
+        caesar.Requests.unregister_swap()
