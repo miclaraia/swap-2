@@ -31,15 +31,20 @@ class Auth:
         Sends a 401 response that enables basic auth
         """
         return Response(
-        'Could not verify your access level for that URL.\n'
-        'You have to login with proper credentials', 401,
-        {'WWW-Authenticate': 'Basic realm="Login Required"'})
+            'Could not verify your access level for that URL.\n'
+            'You have to login with proper credentials', 401,
+            {'WWW-Authenticate': 'Basic realm="Login Required"'})
 
 
 class _AuthCaesar:
 
     def __init__(self):
-        self.client = Panoptes(endpoint='https://panoptes-staging.zooniverse.org')
+        endpoint = config.online_swap.caesar.panoptes_endpoint
+        url = config.online_swap.address._panoptes
+
+        endpoint = url % {'endpoint': endpoint}
+
+        self.client = Panoptes(endpoint=endpoint)
         self.lock = threading.Lock()
 
     @property

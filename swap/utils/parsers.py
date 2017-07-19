@@ -156,6 +156,7 @@ class ClassificationParser(Parser):
     def __init__(self, source):
         super().__init__(source)
         self.annotation = AnnotationParser(source)
+        self.skipped = 0
 
     @property
     def config(self):
@@ -169,7 +170,14 @@ class ClassificationParser(Parser):
 
     def process(self, cl):
         cl['metadata'] = self.parse_json(cl['metadata'])
-        cl['annotation'] = self.annotation.process(cl)
+
+        try:
+            cl['annotation'] = self.annotation.process(cl)
+        except AnnotationParser.MissingAnnotation as e:
+            print(e)
+            logger.error('Couldn\'t find annotation')
+            self.skipped += 1
+            return None
         out = super().process(cl)
 
         return out
@@ -211,6 +219,8 @@ class AnnotationParser(Parser):
             for annotation in annotations:
                 if annotation['task'] == self.config.task:
                     return annotation
+
+        raise self.MissingAnnotation(annotations, 'T1', None)
 
     def _parse_value(self, value):
         """

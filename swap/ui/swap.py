@@ -201,9 +201,9 @@ class SWAPInterface(Interface):
                 fname = self.f(args.user[0])
                 plots.plot_user_cm(swap, fname)
 
-            if args.utraces:
-                fname = self.f(args.user[0])
-                plots.traces.plot_user(swap, fname)
+            # if args.utraces:
+            #     fname = self.f(args.user[0])
+            #     plots.traces.plot_user(swap, fname)
 
             if args.log:
                 fname = self.f(args.log[0])

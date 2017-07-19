@@ -114,6 +114,10 @@ def system_file_handler(date_format):
 
 
 def init():
+    # Remove all handlers associated with the root logger object.
+    for handler in logging.root.handlers[:]:
+        logging.root.removeHandler(handler)
+
     date_format = config.logging.date_format
     level = log_level(config.logging.level)
 

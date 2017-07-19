@@ -118,6 +118,7 @@ class Classifications(Collection):
                     self.collection.insert_many(data)
                     data = []
 
+        logger.critical('Parsers skipped %d rows', pp.skipped)
         self.collection.insert_many(data)
         self._gen_stats()
         logger.debug('done')
