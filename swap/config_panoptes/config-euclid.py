@@ -7,7 +7,7 @@ def override(config):
 
     # Configuration for Online Swap
     config.database.name = 'swapDB_euclidTest'
-    # config.parser.annotation.task = 'T0'
+    config.parser.annotation.task = 'T0'
     # config.parser.annotation.true = ['Yes', 1]
     # config.parser.annotation.false = ['No', 0]
     #
