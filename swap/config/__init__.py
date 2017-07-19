@@ -139,9 +139,9 @@ class online_swap:
 
     class flask_responder:
 
-        flask_responder.default_status_title = 'SWAP'
+        default_status_title = 'SWAP'
 
-        flask_responder.default_status_details = {
+        default_status_details = {
             'Host': 'config.online_swap.host',
             'Internal Port': 'config.online_swap.port',
             'External Port': 'config.online_swap.ext_port',
@@ -150,7 +150,7 @@ class online_swap:
         }
 
         #  provide a more informative display for a SWAP instance
-        flask_responder.default_status_template = """<http>
+        default_status_template = """<http>
             <head>
             <title>{title}</title>
             <head>
