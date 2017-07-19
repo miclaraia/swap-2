@@ -81,7 +81,7 @@ class ScoreExport:
 
         self.scores = scores
         self._sorted_ids = sorted(scores, key=lambda id_: scores[id_].p)
-        self.class_counts = self.counts(0)
+        self.class_counts = ScoreStats.counts(self.sorted_scores)
 
         if thresholds is None:
             thresholds = self.find_thresholds(config.fpr, config.mdr)
@@ -153,60 +153,6 @@ class ScoreExport:
         logger.debug('Getting real gold labels from db')
         return self.gold_getter.golds
 
-    def counts(self, threshold):
-        """
-        Count how many subjects of each class are in the export
-
-        Parameters
-        ----------
-        threshold : float
-            Threshold for p values of Scores to consider
-        """
-        n = {-1: 0, 0: 0, 1: 0}
-        for score in self.scores.values():
-            if score.p >= threshold:
-                n[score.gold] += 1
-        return n
-
-    def composition(self, threshold):
-        """
-        Measure percentage of each class in the export
-
-        Parameters
-        ----------
-        threshold : float
-            Threshold for p values of Scores to consider
-        """
-        n = self.counts(threshold)
-
-        total = n[0] + n[1]
-        if (total > 0):
-            for i in n:
-                n[i] = n[i] / total
-
-        return n
-
-    def purity(self, threshold):
-        """
-        Measure the purity of real objects in score export
-
-        Parameters
-        ----------
-        threshold : float
-            Threshold for p values of Scores to consider
-        """
-        return self._purity(self.counts(threshold))
-
-    @staticmethod
-    def _purity(counts):
-
-        def total(counts):
-            return counts[1] + counts[0]
-
-        t = total(counts)
-        if t > 0:
-            return counts[1] / t
-
     def find_purity(self, desired_purity):
         """
         Determine the threshold for p needed to arrive at the
@@ -217,61 +163,30 @@ class ScoreExport:
         desired_purity : float
         """
 
+        def _purity(counts):
+            return counts[1] / (counts[1] + counts[0])
+
         logger.debug('Trying to find purity %.3f', desired_purity)
 
         counts = self.class_counts.copy()
         for score in self.sorted_scores:
             counts[score.gold] -= 1
 
-            _purity = self._purity(counts)
+            purity = _purity(counts)
             # print(_purity, score, counts)
 
-            if _purity is not None and _purity > desired_purity:
+            if purity is not None and purity > desired_purity:
                 logger.info('found purity')
-                logger.info('%f %s %s', _purity, str(score), str(counts))
+                logger.info('%f %s %s', purity, str(score), str(counts))
                 return score.p
 
         logger.info('Couldn\'t find purity above %f!', desired_purity)
         return 1.0
 
-    def completeness(self, threshold):
-        """
-        Find the completeness at a desired purity
-
-        Parameters
-        ----------
-        threshold : float
-            Threshold for the desired purity
-        """
-        inside = 0
-        total = 0
-
-        for score in self.sorted_scores:
-            if score.gold == 1:
-                if score.p > threshold:
-                    inside += 1
-                total += 1
-
-        return inside / total
-
-    def completeness_at_purity(self, purity):
-        """
-        Find the completeness at a desired purity
-
-        Parameters
-        ----------
-        threshold : float
-            Threshold for the desired purity
-        """
-        p = self.find_purity(purity)
-        if p is None:
-            logger.error('Can\'t find purity > %f in score set!', purity)
-            return 0
-
     def find_thresholds(self, fpr, mdr):
         logger.debug('determining retirement thresholds fpr %.3f mdr %.3f',
                      fpr, mdr)
-        totals = self.counts(0)
+        totals = self.class_counts.copy()
 
         # Calculate real retirement threshold
         count = 0
@@ -302,23 +217,6 @@ class ScoreExport:
         logger.debug('bogus %.4f real %.4f', bogus, real)
 
         return bogus, real
-
-    def retire(self, history_export):
-        logger.debug('finding subject retired scores')
-        bogus, real = self.thresholds
-
-        for score in self.scores.values():
-            history = history_export.get(score.id)
-
-            # print(score.id)
-            for p in history.scores:
-                if p < bogus or p > real:
-                    # print(p, bogus, real)
-                    score.retired = p
-                    break
-        logger.debug('done')
-
-        self._stats = None
 
     def __len__(self):
         return len(self.scores)
