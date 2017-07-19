@@ -8,6 +8,7 @@ from swap.caesar.utils.requests import Requests
 import swap.config as config
 
 import logging
+import atexit
 from flask import Flask, request, jsonify, Response
 from functools import wraps
 
@@ -160,6 +161,11 @@ def init_threader(swap=None):
     logger.info('Finished launching swap thread')
 
     return thread
+
+
+@atexit.register
+def goodbye():
+    Requests.unregister_swap()
 
 
 if __name__ == '__main__':

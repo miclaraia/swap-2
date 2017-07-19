@@ -11,12 +11,20 @@ class Address:
     config = config.online_swap
 
     @classmethod
+    def panoptes(cls):
+        endpoint = cls.config.caesar.panoptes_endpoint
+        url = cls.config.address._panoptes
+
+        return url % {'endpoint': endpoint}
+
+    @classmethod
     def root(cls):
-        host = cls.config.caesar.host
+        url = cls.config.address._caesar
+
+        endpoint = cls.config.caesar.caesar_endpoint
         port = cls.config.caesar.port
         workflow = cls.config.workflow
-        return cls.config.address._base % \
-            {'host': host, 'port': port, 'workflow': workflow}
+        return url % {'endpoint': endpoint, 'port': port, 'workflow': workflow}
 
     @classmethod
     def reducer(cls):

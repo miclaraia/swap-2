@@ -80,18 +80,18 @@ class TestCaesarApp:
         assert ret is None
 
     @patch('swap.config.online_swap.workflow', '1234')
-    @patch('swap.config.online_swap.caesar.host', 'example.com')
+    @patch('swap.config.online_swap.caesar.caesar_endpoint', 'example')
     @patch('swap.config.online_swap.caesar.port', '2000')
     def test_reducer_address(self):
-        address = 'https://example.com:2000/' \
+        address = 'https://example.zooniverse.org:2000/' \
                   'workflows/1234/reducers/swap/reductions'
         assert Address.reducer() == address
 
     @patch('swap.config.online_swap.workflow', '1234')
-    @patch('swap.config.online_swap.caesar.host', 'example.com')
+    @patch('swap.config.online_swap.caesar.caesar_endpoint', 'example')
     @patch('swap.config.online_swap.caesar.port', '2000')
     def test_root_address(self):
-        address = 'https://example.com:2000/' \
+        address = 'https://example.zooniverse.org:2000/' \
                   'workflows/1234'
         assert Address.root() == address
 

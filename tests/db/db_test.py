@@ -2,6 +2,7 @@
 ################################################################
 # Script to test db functionality
 
+from swap.db.classifications import Classifications
 from swap.db.db import Collection
 from swap.db import DB
 from swap.db.db import Cursor
@@ -46,9 +47,9 @@ class Test_DB:
 
 
 class Test_Cursor:
+    @patch('swap.config.database.name', 'swapDB')
     def test_length(self):
         DB._reset()
-        config.database.name='swapDB'
         db = DB()._db
         query = [{'$limit': 5}]
 
