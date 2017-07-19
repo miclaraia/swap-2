@@ -195,7 +195,7 @@ class online_swap:
             details_string = ''.join(
                 ['<tr><td>{desc}</td><td>{val}</td></tr>'.format(desc=desc, val=val)
                  for desc, val in self.status_details.items()])
-            return self.status_template.format(self.status_title, details_string)
+            return self.status_template.format(title=self.status_title, details=details_string)
 
 
 class logging:
