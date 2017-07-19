@@ -107,9 +107,6 @@ class online_swap:
 
     workflow = 2614
 
-    def build_flask_responder(self) :
-        return flask_responder(self)
-
     class caesar:
         # Address configuration for accessing caesar
         host = 'caesar-staging.zooniverse.org'
@@ -142,23 +139,18 @@ class online_swap:
 
     class flask_responder:
 
-        def __init__(self, online_swap):
-            self.online_swap = online_swap
+        status_title = 'SWAP'
 
-        title = 'SWAP'
-
-    def details(self):
-        return {
-            'Host': self.online_swap.host,
-            'Internal Port': self.online_swap.port,
-            'External Port': self.online_swap.ext_port,
-            'Caesar Reducer': self.online_swap.caesar.reducer,
-            'Caesar Field': self.online_swap.caesar.field,
+        status_details = {
+            'Host': config.online_swap.host,
+            'Internal Port': config.online_swap.port,
+            'External Port': config.online_swap.ext_port,
+            'Caesar Reducer': config.online_swap.caesar.reducer,
+            'Caesar Field': config.online_swap.caesar.field
         }
 
-        # provide a more informative display for a SWAP instance
-        def status(self) :
-            return """<http>
+        #  provide a more informative display for a SWAP instance
+        status_template = """<http>
             <head>
             <title>{title}</title>
             <head>
@@ -173,10 +165,14 @@ class online_swap:
                 {details}
             </table>
             </body>
-            <html>""".format(title=title,
-                             details = '\n'.join(['<tr><td><i>{description}</i></td><td>{value}</td>'.format(description=desc, value=val) for desc, val in self.details().items()])
-                             )
+            <html>"""
 
+        @staticmethod
+        def status_string(status_template, status_title, status_details) :
+            details_string = ''.join(
+                ['<tr><td>{desc}</td><td>{val}</td></tr>'.format(desc=desc, val=val)
+                 for desc, val in status_details.items()])
+            return status_template.format(status_title, details_string)
 
 
 class logging:
