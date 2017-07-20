@@ -8,7 +8,6 @@ from swap.caesar.utils.requests import Requests
 import swap.config as config
 
 import logging
-import atexit
 from flask import Flask, request, jsonify, Response
 from functools import wraps
 
@@ -96,7 +95,7 @@ class API:
         self._route('/', 'status', self.status, ['GET'])
         self._route('/scores', 'scores', self.scores, ['GET'])
         self._route('/classify', 'classify', self.classify, ['POST'])
-        self.app.run()
+        self.app.run(port=config.online_swap.port)
 
     def _route(self, route, name, func, methods=('GET')):
         self.app.add_url_rule(
@@ -110,7 +109,7 @@ class API:
 
     @staticmethod
     def status():
-        return Response('status: ok', 200)
+        return Response(config.online_swap.flask_responder.build_responder(config).status_string(), 200)
 
     @needs_auth
     def classify(self):
@@ -161,11 +160,6 @@ def init_threader(swap=None):
     logger.info('Finished launching swap thread')
 
     return thread
-
-
-@atexit.register
-def goodbye():
-    Requests.unregister_swap()
 
 
 if __name__ == '__main__':

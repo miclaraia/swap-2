@@ -138,8 +138,12 @@ class Schema:
 
         for key, value in obj.items():
             type_ = schema[key].get('type', str)
-            if type(type_) is type and type(value) is not type_:
+            if not self.validate_field(key, value, type_):
                 raise self.SchemaValidationError.type(obj, key, type_)
+
+    @staticmethod
+    def validate_field(key, value, type_):
+        return type(value) is type_ or type(type_) is not type
 
     class SchemaValidationError(Exception):
 

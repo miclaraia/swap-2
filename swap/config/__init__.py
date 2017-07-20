@@ -45,6 +45,7 @@ back_update = False
 # Operator used in controversial and consensus score calculation
 controversial_version = 'pow'
 
+
 # Activate debug mode for control
 # limits how many classifications Control will iterate through
 class control:
@@ -58,6 +59,7 @@ class database:
     host = 'localhost'
     port = 27017
     max_batch_size = 1e5
+
 
 class parser:
 
@@ -99,6 +101,7 @@ class parser:
 class online_swap:
     # Flask app config
     host = 'northdown.spa.umn.edu'
+    route = ''  # if not empty, must begin with '/'
     ext_port = '443'
     port = '5000'
     bind = '0.0.0.0'
@@ -124,10 +127,69 @@ class online_swap:
                   '/workflows/%(workflow)s'
 
         _reducer = '/reducers/%(reducer)s/reductions'
-        _swap = 'https://%(user)s:%(pass)s@%(host)s:%(port)s/classify'
+        # Local URL format for Caesar to send to
+        _swap = 'https://%(user)s:%(pass)s@%(host)s:%(port)s%(route)s/classify'
 
     _auth_username = 'caesar'
     _auth_key = 'A7z9z2KwRVt4jXhXvRDy753SbBjCLNBB'
+
+    class flask_responder:
+
+        default_status_title = 'SWAP'
+
+        default_status_details = {
+            'Status': 'OK'
+        }
+
+        #  provide a more informative display for a SWAP instance
+        default_status_template = """<http>
+            <head>
+            <title>{title}</title>
+            <head>
+            <body>
+            <h1>{title}</h1>
+            <h3>Running...</h3>
+            <h3>Details:<h3>
+            <table>
+            <tr>
+                <th>Description</th><th>Value</th>
+            </tr>
+                {details}
+            </table>
+            </body>
+            <html>"""
+
+        def __init__(self, title = None, details = None, template = None) :
+            self.status_title = online_swap.flask_responder.default_status_title if title is None else title
+            self.status_details = online_swap.flask_responder.default_status_details if details is None else details
+            self.status_template = online_swap.flask_responder.default_status_template if template is None else template
+
+        @classmethod
+        def build_responder(cls, config) :
+            details = {
+                'Status': 'OK',
+                'Host': config.online_swap.host,
+                'Internal Port': config.online_swap.port,
+                'External Port': config.online_swap.ext_port,
+                'Caesar Reducer': config.online_swap.caesar.reducer,
+                'Caesar Field': config.online_swap.caesar.field,
+                'Target Workflow': config.online_swap.workflow
+            }
+            title = config.online_swap.flask_responder.default_status_title
+            return cls(title, details)
+
+        @staticmethod
+        def static_status_string(status_template, status_title, status_details) :
+            details_string = ''.join(
+                ['<tr><td>{desc}</td><td>{val}</td></tr>'.format(desc=desc, val=val)
+                 for desc, val in status_details.items()])
+            return status_template.format(status_title, details_string)
+
+        def status_string(self) :
+            details_string = ''.join(
+                ['<tr><td>{desc}</td><td>{val}</td></tr>'.format(desc=desc, val=val)
+                 for desc, val in self.status_details.items()])
+            return self.status_template.format(title=self.status_title, details=details_string)
 
 
 class logging:
