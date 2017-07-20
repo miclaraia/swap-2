@@ -134,6 +134,7 @@ class ThreadedControl(threading.Thread):
 
         self._queue = Queue()
         self.exit = threading.Event()
+        self.exception = None
         self.daemon = True
 
         self.control_lock = threading.Lock()
@@ -183,7 +184,6 @@ class ThreadedControl(threading.Thread):
         # Ensure thread doesn't exit
         # Wait for classifications in queue
         while not self.exit.is_set():
-
             message = self._queue.get()
             if message is not None:
                 logger.debug('received message')
@@ -191,7 +191,9 @@ class ThreadedControl(threading.Thread):
                     self.command(message)
                 except Exception as e:
                     logger.exception(e)
-                    os._exit(1)
+
+                    self.exception = e
+                    self.exit.set()
                     raise e
 
         logger.warning('thread exiting')

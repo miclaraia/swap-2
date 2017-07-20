@@ -111,12 +111,20 @@ class API:
     def status():
         return Response(config.online_swap.flask_responder.build_responder(config).status_string(), 200)
 
+    def _check_thread(self):
+        return self.control.exit.is_set()
+
     @needs_auth
     def classify(self):
         """
         Receive a classification from caesar and process it
         """
         logger.info('received request')
+
+        if self._check_thread():
+            message = 'Exception in SWAP thread\n%s' % self.control.exception
+            r = Response(message, status=500)
+            return r
 
         # Parse json from request
         data = request.get_json()
