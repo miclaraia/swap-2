@@ -1,6 +1,7 @@
 
 import swap.control
 import swap.config as config
+from swap.caesar.utils.requests import Requests
 from swap.utils.classification import Classification
 from swap.utils.parsers import ClassificationParser
 from swap.db import DB
@@ -190,13 +191,18 @@ class ThreadedControl(threading.Thread):
                 try:
                     self.command(message)
                 except Exception as e:
-                    logger.exception(e)
-
-                    self.exception = e
-                    self.exit.set()
+                    self._exception(e)
                     raise e
 
         logger.warning('thread exiting')
+
+    def _exception(self, e):
+        logger.exception(e)
+
+        self.exception = e
+        self.exit.set()
+
+        Requests.unregister_swap()
 
 
 class DualCursor:
