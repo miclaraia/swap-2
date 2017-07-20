@@ -267,7 +267,7 @@ class Transaction(ledger.Transaction):
             score = a / (a + b)
         # leave score unchanged
         except ZeroDivisionError as e:
-            logger.error(e)
+            logger.exception(e)
             score = prior
 
         self.score = score
