@@ -6,6 +6,7 @@ from swap.utils.parsers import ClassificationParser
 from swap.db import DB
 import swap.db.db
 
+import os
 import sys
 import threading
 import logging
@@ -193,9 +194,9 @@ class ThreadedControl(threading.Thread):
                 try:
                     self.command(message)
                 except Exception as e:
-                    logger.error(e)
+                    logger.exception(e)
+                    os._exit(1)
                     raise e
-                    sys.exit(1)
 
         logger.warning('thread exiting')
 
