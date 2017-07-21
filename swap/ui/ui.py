@@ -110,6 +110,7 @@ class UI:
         if args.config_file:
             config.import_config(args.config_file[0])
             swap.config.logger.init()
+        config._validate()
 
         if args.db:
             config.database.name = args.db[0]
