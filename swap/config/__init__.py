@@ -131,7 +131,6 @@ class online_swap:
         _swap = 'https://%(user)s:%(pass)s@%(host)s:%(port)s%(route)s/classify'
 
     _auth_username = 'caesar'
-    _auth_key = 'A7z9z2KwRVt4jXhXvRDy753SbBjCLNBB'
 
     class flask_responder:
 

@@ -7,7 +7,6 @@ from swap.utils.parsers import ClassificationParser
 from swap.db import DB
 import swap.db.db
 
-import sys
 import threading
 import logging
 from queue import Queue

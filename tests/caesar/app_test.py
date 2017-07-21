@@ -3,6 +3,7 @@ import swap.caesar.control as control
 import swap.caesar.app as app
 from swap.caesar.utils.address import Address
 from swap.caesar.utils.requests import Requests
+from swap.caesar.utils.caesar_config import CaesarConfig
 import swap.agents.subject
 from swap.db import DB
 from swap.db.db import Collection
@@ -95,22 +96,34 @@ class TestCaesarApp:
                   'workflows/1234'
         assert Address.root() == address
 
-    @patch('swap.config.online_swap._auth_key', 'TEST')
+    @patch('swap.caesar.auth._Auth.generate_key',
+           MagicMock(return_value='TEST'))
     def test_classify_address(self):
         address = 'https://caesar:TEST@northdown.spa.umn.edu:443/classify'
         assert Address.swap_classify() == address
 
     @patch('swap.config.online_swap.caesar.reducer', 'name')
-    @patch('swap.config.online_swap._auth_key', 'TEST')
-    def test_config_caesar(self):
+    @patch('swap.caesar.auth._Auth.generate_key',
+           MagicMock(return_value='TEST'))
+    @patch.object(Requests, 'put_caesar_config', return_value=MagicMock())
+    def test_config_caesar(self, put):
         addr = Address.swap_classify()
-        data = {'workflow': {
-            'extractors_config': {'ext': {'type': 'external', 'url': addr}},
+        data = {
+            'extractors_config': {'name': {'type': 'external', 'url': addr}},
             'reducers_config': {'name': {'type': 'external'}},
-            'rules_config': []
-        }}
+        }
 
-        assert Requests.config_caesar() == data
+        mock = MagicMock()
+        mock.text = json.dumps({
+            'extractors_config': {
+                'name': {'type': 'external', 'url': addr}},
+            'reducers_config': {'name': {'type': 'external'}},
+        })
+        with patch.object(Requests, 'fetch_caesar_config',
+                          MagicMock(return_value=mock)):
+            CaesarConfig.register()
+
+        put.assert_called_with(data)
 
     def test_recent_cl_full(self):
         api = app.API(None)

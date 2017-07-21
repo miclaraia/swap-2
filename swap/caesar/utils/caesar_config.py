@@ -1,15 +1,16 @@
 
-from swap.caesar.auth import Auth
 from swap.caesar.utils.requests import Requests
 from swap.caesar.utils.address import Address
 
 import json
 import logging
+from functools import wraps
 
 logger = logging.getLogger(__name__)
 
 
 def put_config(func):
+    @wraps(func)
     def wrapper(cls):
         config = func(cls)
         Requests.put_caesar_config(config)

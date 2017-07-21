@@ -8,22 +8,23 @@ from getpass import getpass
 import logging
 from flask import Response
 import threading
+import random
+import string
 
 logger = logging.getLogger(__name__)
 
 
-class Auth:
+class _Auth:
 
-    def __init__(self, username, token):
-        self._username = username
-        self._token = self._mod_token(token)
-
-    @staticmethod
-    def _mod_token(token):
-        return token.replace(' ', '').replace('\n', '')
+    def __init__(self):
+        self._username = config.online_swap._auth_username
+        self._key = self.generate_key()
 
     def check_auth(self, username, token):
-        return username == self._username and token == self._token
+        return username == self._username and token == self._key
+
+    def http_string(self):
+        return '%s:%s' % (self._username, self._key)
 
     @staticmethod
     def authenticate():
@@ -34,6 +35,17 @@ class Auth:
             'Could not verify your access level for that URL.\n'
             'You have to login with proper credentials', 401,
             {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
+    @staticmethod
+    def generate_key():
+        choice = string.ascii_letters + string.digits
+        key = ''.join([random.choice(choice) for n in range(64)])
+
+        return key
+
+
+class Auth(_Auth, metaclass=Singleton):
+    pass
 
 
 class _AuthCaesar:

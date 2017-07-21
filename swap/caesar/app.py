@@ -73,7 +73,7 @@ def needs_auth(func):
     @wraps(func)
     def wrapper(self, *args, **kwargs):
         auth = request.authorization
-        if not auth or not self._auth.check_auth(auth.username, auth.password):
+        if not auth or not Auth().check_auth(auth.username, auth.password):
             return self._auth.authenticate()
         return func(self, *args, **kwargs)
     return wrapper
@@ -84,10 +84,6 @@ class API:
     def __init__(self, control_thread):
         self.app = Flask(__name__)
         self.control = control_thread
-
-        user = config.online_swap._auth_username
-        token = config.online_swap._auth_key
-        self._auth = Auth(user, token)
 
         self._recent_cl = []
 
