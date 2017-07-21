@@ -86,7 +86,7 @@ class CaesarInterface(Interface):
             AuthCaesar().login()
 
         if args.run:
-            self.run(args, swap)
+            self.run(swap)
         else:
             if args.register:
                 CaesarConfig.register()
@@ -94,17 +94,19 @@ class CaesarInterface(Interface):
                 CaesarConfig.unregister()
 
     @staticmethod
-    def run(args, swap=None):
+    def run(swap=None):
+        if CaesarConfig.is_registered():
+            raise RuntimeError(
+                'Another instance of SWAP is already registered with caesar.')
+
         control = caesar.init_threader(swap)
         api = caesar.API(control)
 
         logger.info('Registering swap in caesar')
-
-        if args.register:
-            # Try to deregister swap from caesar on exit
-            atexit.register(CaesarConfig.unregister)
-            # Register swap in caesar
-            CaesarConfig.register()
+        # Try to deregister swap from caesar on exit
+        atexit.register(CaesarConfig.unregister)
+        # Register swap in caesar
+        CaesarConfig.register()
 
         logger.info('launching flask app')
         api.run()
