@@ -15,5 +15,6 @@ class Singleton(type):
                 .__call__(*args, **kwargs)
         return cls._instances[cls]
 
-    def _reset_instances(cls):
-        cls._instances = {}
+    def _reset(cls):
+        if cls in cls._instances:
+            cls._instances.pop(cls)
