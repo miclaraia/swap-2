@@ -200,16 +200,14 @@ class logging:
     level = 'DEBUG'
     console_level = 'INFO'
 
-    keep_logs = 5
-
     class files:
         version = 'dynamic'
 
         dynamic = 'swap-%(pid)d.log'
         static = 'swap.log'
 
-        keep_logs = 5
-        max_size_mb = 10
+        keep_logs = 10
+        max_size_mb = 40
 
     class system:
         active = False
