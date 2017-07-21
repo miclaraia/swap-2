@@ -376,7 +376,7 @@ class SWAP:
         retired = self.history.score_export(thresholds)
         retired.set_retired_flags()
 
-        return unretired, retired
+        return retired
 
     @property
     def history(self):

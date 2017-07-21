@@ -255,7 +255,7 @@ class ScoreExport:
         scores = {}
         for i in self.scores:
             score = self.scores[i]
-            d[score.id] = score.dict()
+            scores[score.id] = score.dict()
 
         d = {
             'thresholds': list(self.thresholds),

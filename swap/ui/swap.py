@@ -169,14 +169,13 @@ class SWAPInterface(Interface):
     def call(self, args):
         swap = None
         scores = None
-        unretired_scores = None
 
         if args.load:
             obj = self.load(args.load[0])
 
             if isinstance(obj, SWAP):
                 swap = obj
-                unretired_scores, scores = swap.score_export()
+                scores = swap.score_export()
             elif isinstance(obj, ScoreExport):
                 scores = obj
 
