@@ -131,7 +131,7 @@ class Ledger:
         self._change(id_)
         # self.transactions[id_].notify()
 
-    def print(self):
+    def print_(self):
         print(self)
 
     def __str__(self):
