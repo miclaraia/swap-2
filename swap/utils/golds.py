@@ -36,14 +36,13 @@ class GoldGetter:
     def __init__(self):
         self.getters = []
         self._golds = None
-        self.db = DB().golds
 
     @_getter
     def all(self):
         """
         Get all gold labels
         """
-        return self.db.get_golds()
+        return DB().golds.get_golds()
 
     @_getter
     def random(self, size):
@@ -55,7 +54,7 @@ class GoldGetter:
         size : int
             Sample size
         """
-        return self.db.get_random_golds(size)
+        return DB().golds.get_random_golds(size)
 
     @_getter
     def subjects(self, subject_ids):
@@ -67,7 +66,7 @@ class GoldGetter:
         subject_ids : list
             List of subject ids (int)
         """
-        return self.db.get_golds(subject_ids)
+        return DB().golds.get_golds(subject_ids)
 
     @_getter
     def controversial(self, size):
@@ -80,7 +79,7 @@ class GoldGetter:
             Number of subjects
         """
         subjects = db_cv().get_controversial(size)
-        return self.db.get_golds(subjects)
+        return DB().golds.get_golds(subjects)
 
     @_getter
     def consensus(self, size):
@@ -93,7 +92,7 @@ class GoldGetter:
             Number of subjects
         """
         subjects = db_cv().get_consensus(size)
-        return self.db.get_golds(subjects)
+        return DB().golds.get_golds(subjects)
 
     @_getter
     def these(self, golds):
