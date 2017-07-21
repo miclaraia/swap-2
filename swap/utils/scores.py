@@ -306,7 +306,9 @@ class ScoreStats:
 
             'purity': high[1] / cls.total(high),
             'retired': (cls.total(low) + cls.total(high)) / cls.total(total),
-            'retired_correct': (high[1] + low[0]) / cls.total(total)
+            'retired_correct':
+                (high[1] + low[0]) /
+                (cls.total(low) + cls.total(high)),
         }
 
         stats.update({
