@@ -19,11 +19,6 @@ db.classifications.aggregate([
         }
     },
     {
-        '$match':{
-            'total': {'$lt': 50}
-        }
-    },
-    {
         '$sort':{
             'controv':-1
         }
@@ -60,7 +55,7 @@ db.classifications.aggregate([
     },
     {
         '$sort':{
-            'controv':-1
+            'consensus':-1
         }
     },
     {

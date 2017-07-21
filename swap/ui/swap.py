@@ -168,24 +168,25 @@ class SWAPInterface(Interface):
 
     def call(self, args):
         swap = None
-        score_export = None
+        scores = None
+        unretired_scores = None
 
         if args.load:
             obj = self.load(args.load[0])
 
             if isinstance(obj, SWAP):
                 swap = obj
-                score_export = swap.score_export()
+                unretired_scores, scores = swap.score_export()
             elif isinstance(obj, ScoreExport):
-                score_export = obj
+                scores = obj
 
         if args.scores_from_csv:
             fname = args.scores_from_csv[0]
-            score_export = ScoreExport.from_csv(fname)
+            scores = ScoreExport.from_csv(fname)
 
         if args.run:
             swap = self.run_swap(args)
-            score_export = swap.score_export()
+            scores = swap.score_export()
 
         if swap is not None:
 
@@ -229,14 +230,14 @@ class SWAPInterface(Interface):
                 fname = self.f(args.export_user_scores[0])
                 self.export_user_scores(swap, fname)
 
-        if score_export is not None:
+        if scores is not None:
             if args.save_scores:
                 fname = self.f(args.save_scores[0])
-                self.save(score_export, fname)
+                self.save(scores, fname)
 
             if args.hist:
                 fname = self.f(args.hist[0])
-                plots.plot_class_histogram(fname, score_export)
+                plots.plot_class_histogram(fname, scores)
 
             if args.dist:
                 data = [s.getScore() for s in swap.subjects]
@@ -246,10 +247,10 @@ class SWAPInterface(Interface):
             if args.presrec:
                 fname = self.f(args.presrec[0])
                 plots.distributions.sklearn_purity_completeness(
-                    fname, score_export)
+                    fname, scores)
 
             if args.scores_to_csv:
-                self.scores_to_csv(score_export, args.scores_to_csv[0])
+                self.scores_to_csv(scores, args.scores_to_csv[0])
 
         if args.diff:
             self.difference(args)

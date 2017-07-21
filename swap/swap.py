@@ -10,9 +10,9 @@
 """
 
 from swap.agents.bureau import Bureau
-from swap.agents.agent import Stats
 from swap.agents.subject import Subject
 from swap.agents.user import User
+from swap.utils.stats import Stats
 from swap.utils.scores import ScoreExport, Score
 from swap.utils.history import History, HistoryExport
 from swap.utils.classification import Classification
@@ -60,6 +60,9 @@ class SWAP:
         self.users = Bureau(User)
         self.subjects = Bureau(Subject)
 
+        self._history = None
+        self._history_stale = True
+
         # Directive to update - if True, then a volunteer agent's posterior
         # probability of containing an interesting object will be updated
         # whenever an expertly classified "gold standard" subject is
@@ -90,6 +93,9 @@ class SWAP:
             user : boolean
                 Deprecated
         """
+        # Mark any existing exports as stale
+        self._history_stale = True
+
         # if subject is gold standard and gold_updates are specified,
         # update user success probability
 
@@ -353,7 +359,7 @@ class SWAP:
             'stats': self.stats.export()
         }
 
-    def score_export(self, history=None):
+    def score_export(self):
         """
         Generate object containing subject score data
 
@@ -364,20 +370,20 @@ class SWAP:
         swap.utils.scores.ScoreExport
             ScoreExport
         """
-        if history is None:
-            history = self.history_export()
+        unretired = self.history.score_export()
+        thresholds = unretired.thresholds
 
-        logger.info('Generating score export')
-        scores = {}
-        for subject in self.subjects:
-            if len(subject.ledger) == 0:
-                continue
-            id_ = subject.id
-            score = subject.score
-            scores[id_] = Score(id_, None, score)
+        retired = self.history.score_export(thresholds)
 
-        logger.debug('done')
-        return ScoreExport(scores, history=history)
+        return unretired, retired
+
+    @property
+    def history(self):
+        if self._history is None or self._history_stale is True:
+            self._history = self.history_export()
+            self._history_stale = False
+
+        return self._history
 
     def history_export(self):
         """
@@ -388,6 +394,7 @@ class SWAP:
         swap.utils.history.HistoryExport
             HistoryExport
         """
+
         logger.info('Generating history export')
         history = {}
         for subject in self.subjects:

@@ -6,7 +6,7 @@ from swap.db.classifications import Classifications
 from swap.db.db import Collection
 from swap.db import DB
 from swap.db.db import Cursor
-from swap.db.query import Query
+import swap.config as config
 
 from unittest.mock import MagicMock, patch
 from collections import OrderedDict

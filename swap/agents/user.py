@@ -3,7 +3,8 @@
 # score
 
 
-from swap.agents.agent import Agent, MultiStat
+from swap.agents.agent import Agent
+from swap.utils.stats import MultiStat
 import swap.agents.ledger as ledger
 import swap.config as config
 

@@ -1,5 +1,6 @@
 
-from swap.utils.scores import ScoreIterator
+from swap.utils.scores import ScoreIterator, Score, ScoreExport
+from swap.utils.golds import GoldGetter
 
 
 class History:
@@ -19,17 +20,31 @@ class History:
         self.gold = gold
         self.scores = score_history
 
+    def retire(self, thresholds):
+        if thresholds is not None:
+            bogus, real = thresholds
+            for score in self.scores:
+                if score < bogus or score > real:
+                    return score
+        return self.scores[-1]
+
 
 class HistoryExport:
 
-    def __init__(self, history):
+    def __init__(self, history, gold_getter=None):
         """
         Parameters
         ----------
-        history : dict
+        history : {History}
             Mapping of Subject History to subject id
         """
         self.history = history
+
+        if gold_getter is None:
+            gold_getter = GoldGetter()
+            gold_getter.all()
+
+        self.gold_getter = gold_getter
 
     def get(self, id_):
         return self.history[id_]
@@ -40,6 +55,20 @@ class HistoryExport:
             return (history.gold, history.scores)
 
         return ScoreIterator(self.history, func)
+
+    def score_export(self, thresholds=None):
+        scores = {}
+        for history in self.history.values():
+            id_ = history.id
+            p = history.retire(thresholds)
+
+            score = Score(id_, None, p)
+            scores[id_] = score
+
+        return ScoreExport(
+            scores, gold_getter=self.gold_getter,
+            thresholds=thresholds)
+
 
     def __iter__(self):
 
