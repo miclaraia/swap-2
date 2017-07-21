@@ -20,12 +20,14 @@ def put_config(func):
 
 class CaesarConfig:
 
+    keys = ['extractors_config', 'reducers_config']
+
     @classmethod
     def get_config(cls):
         data = Requests.fetch_caesar_config()
         data = json.loads(data.text)
 
-        keys = ['extractors_config', 'reducers_config']
+        keys = cls.keys
         data = {k: data[k] for k in keys}
 
         logger.debug('fetched caesar config: %s', data)
@@ -52,8 +54,8 @@ class CaesarConfig:
 
         name = Address.config.caesar.reducer
 
-        config['extractors_config'].pop(name)
-        config['reducers_config'].pop(name)
-
+        for k in cls.keys:
+            if name in config[k]:
+                config[k].pop(name)
 
         return config
