@@ -374,6 +374,7 @@ class SWAP:
         thresholds = unretired.thresholds
 
         retired = self.history.score_export(thresholds)
+        retired.set_retired_flags()
 
         return unretired, retired
 
