@@ -252,10 +252,15 @@ class ScoreExport:
         return ScoreIterator(list(self.sorted_scores), func)
 
     def full_dict(self):
-        d = {}
+        scores = {}
         for i in self.scores:
             score = self.scores[i]
             d[score.id] = score.dict()
+
+        d = {
+            'thresholds': list(self.thresholds),
+            'scores': scores
+        }
 
         return d
 
