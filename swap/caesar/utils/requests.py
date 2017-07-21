@@ -6,6 +6,7 @@ from swap.caesar.auth import AuthCaesar
 from functools import wraps
 import json
 import requests
+import requests.auth
 import logging
 
 logger = logging.getLogger(__name__)
@@ -92,13 +93,27 @@ class Requests:
 
         return r
 
+    @classmethod
+    @request_wrapper
+    def generate_scores(cls, user, key):
+        address = Address.swap_scores(auth=False)
+        auth = requests.auth.HTTPBasicAuth(user, key)
+
+        r = requests.get(address, auth=auth)
+        logger.debug('done')
+
+        return  r
+
+
     class BadResponse(Exception):
         def __init__(self, response, msg=None):
             try:
                 data = json.loads(response.text)
             except json.decoder.JSONDecodeError:
                 data = response.text
-            logger.error('%s\n%s', str(response), data)
+
+            status = response.status_code
+            logger.error('%d %s\n%s', status, str(response), data)
 
             super().__init__(msg)
 
