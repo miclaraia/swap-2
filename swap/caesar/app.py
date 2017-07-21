@@ -74,7 +74,7 @@ def needs_auth(func):
     def wrapper(self, *args, **kwargs):
         auth = request.authorization
         if not auth or not Auth().check_auth(auth.username, auth.password):
-            return self._auth.authenticate()
+            return Auth().authenticate()
         return func(self, *args, **kwargs)
     return wrapper
 
