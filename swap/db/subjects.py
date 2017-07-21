@@ -59,3 +59,64 @@ class Subjects(Collection):
 
         self.collection.insert_many(data)
         logger.debug('done')
+
+
+class SubjectStats:
+
+    def __init__(self, subject_id, db):
+        self.id = subject_id
+        self.annotations = self._annotations(db, subject_id)
+
+    def dict(self):
+        return {
+            'subject_id': self.id,
+            'annotations': self.annotations,
+            'controversial': self.controversial,
+            'consensus': self.consensus
+        }
+
+    @staticmethod
+    def _annotations(db, subject_id):
+        query = [
+            {'$match': {'seen_before': False, 'subject_id': subject_id}},
+            {'$project': {'annotation': 1}}
+        ]
+        cursor = db.classifications.aggregate(query)
+
+        counts = {0: 0, 1: 0}
+        for cl in cursor:
+            counts[cl['annotation']] += 1
+
+        return counts
+
+    @property
+    def controversial(self):
+        yes = self.annotations[1]
+        no = self.annotations[0]
+        a = min(yes, no)
+        b = max(yes, no)
+
+        return (a + b) ** (a / b)
+
+    @property
+    def consensus(self):
+        yes = self.annotations[1]
+        no = self.annotations[0]
+        a = min(yes, no)
+        b = max(yes, no)
+
+        return (b - a) ** (1 - a / b)
+
+    def print_(self):
+        print(self)
+
+    def __str__(self):
+        return \
+            'subject %(subject_id)9d ' \
+            'controversial %(controversial)8.4f ' \
+            'consensus %(consensus)8.4f ' \
+            'annotations %(annotations)s' \
+            % self.dict()
+
+    def __repr__(self):
+        return str(self.dict())
