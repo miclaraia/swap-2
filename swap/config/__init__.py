@@ -100,8 +100,9 @@ class parser:
 
 class online_swap:
     # Flask app config
+    project = None
+
     host = 'northdown.spa.umn.edu'
-    route = ''  # if not empty, must begin with '/'
     ext_port = '443'
     port = '5000'
     bind = '0.0.0.0'
@@ -128,7 +129,8 @@ class online_swap:
 
         _reducer = '/reducers/%(reducer)s/reductions'
         # Local URL format for Caesar to send to
-        _swap = 'https://%(user)s:%(pass)s@%(host)s:%(port)s%(route)s/classify'
+        _swap_protocol = 'https://'
+        _swap = '%(host)s:%(port)s/%(project)s'
 
     _auth_username = 'caesar'
 
@@ -217,9 +219,9 @@ class logging:
 
 
 class ConfigError(Exception):
-    def __init__(self, item, value):
-        super().__init__('Error parsing config entry %s: %s' %
-                         (str(item), str(value)))
+    def __init__(self, path, msg):
+        super().__init__('Not valid config value for %s\n%s' %
+                         (path, msg))
 
 
 def local_config():
@@ -244,6 +246,13 @@ def import_config(path):
     _module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(_module)
     _module.override(module())
+
+
+def _validate():
+    if online_swap.project is None:
+        raise ConfigError(
+            'online_swap.name',
+            'Project name cannot be None')
 
 
 local_config()
