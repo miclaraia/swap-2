@@ -102,7 +102,7 @@ class CaesarInterface(Interface):
 
         if args.register:
             # Try to deregister swap from caesar on exit
-            atexit.register(CaesarConfig.unregister())
+            atexit.register(CaesarConfig.unregister)
             # Register swap in caesar
             CaesarConfig.register()
 
