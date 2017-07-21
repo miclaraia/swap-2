@@ -26,18 +26,14 @@ class Requests:
 
     @classmethod
     @request_wrapper
-    def register_swap(cls):
+    def put_caesar_config(cls, data):
         """
-        Register swap as an extractor/reducer on caesar
+        Update caesar config data
         """
-        data = cls.config_caesar('on')
-        logger.debug('100 %s', str(data))
         address = Address.root()
-
-        logger.info('PUT to %s with %s', address, str(data))
-
         headers = cls.headers()
-        headers.update(AuthCaesar().auth())
+
+        logger.info('PUT to %s config %s', address, data)
 
         print(headers)
         r = requests.put(address, headers=headers, json=data)
@@ -47,23 +43,23 @@ class Requests:
 
     @classmethod
     @request_wrapper
-    def unregister_swap(cls):
+    def fetch_caesar_config(cls):
         """
-        Remove swap from caesar's extractor/reducer config
+        Fetch the current config stored in caesar
         """
-        data = cls.config_caesar('off')
         address = Address.root()
 
-        logger.info('PUT to %s with %s', address, str(data))
+        logger.info('Fetching current config in caesar')
+        logger.info('GET to %s', address)
 
         headers = cls.headers()
-        headers.update(AuthCaesar().auth())
-
         print(headers)
-        r = requests.put(address, headers=headers, json=data)
+
+        r = requests.get(address, headers=headers)
         logger.debug('done')
 
         return r
+
 
     @classmethod
     @request_wrapper
@@ -84,48 +80,17 @@ class Requests:
             }
         }
 
-        print('responding!')
         # address='http://httpbin.org/put'
         logger.info('PUT to %s subject %d score %.4f to caesar',
                     address, subject.id, subject.score)
 
         headers = cls.headers()
-        headers.update(AuthCaesar().auth())
+        logger.debug('headers %s', str(headers))
+
         r = requests.put(address, headers=headers, json=body)
         logger.debug('done')
 
         return r
-
-    @classmethod
-    def config_caesar(cls, method='on'):
-
-        def _config(ext, red, rul):
-            return {'workflow': {
-                'extractors_config': ext,
-                'reducers_config': red,
-                'rules_config': rul
-            }}
-
-        name = Address.config.caesar.reducer
-        addr = Address.swap_classify()
-
-        if method == 'on':
-            return _config(
-                {'ext': {'type': 'external', 'url': addr}},
-                {name: {'type': 'external'}},
-                []
-            )
-        elif method == 'off':
-            return _config({}, {}, [])
-
-
-        data = {'workflow': {
-            'extractors_config': {'ext': {'type': 'external', 'url': addr}},
-            'reducers_config': {name: {'type': 'external'}},
-            'rules_config': []
-        }}
-        logger.info('compiled caesar config: %s', data)
-        return data
 
     class BadResponse(Exception):
         def __init__(self, response, msg=None):
@@ -139,6 +104,9 @@ class Requests:
 
     @staticmethod
     def headers():
-        return {
+        headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json'}
+
+        headers.update(AuthCaesar().auth())
+        return headers

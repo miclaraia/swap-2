@@ -19,6 +19,10 @@ class Address:
 
     @classmethod
     def root(cls):
+        """
+        Returns the root workflow address for caesar
+        eg: https://caesar.zooniverse.org:443/workflows/1234
+        """
         url = cls.config.address._caesar
 
         endpoint = cls.config.caesar.caesar_endpoint

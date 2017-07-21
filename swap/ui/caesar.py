@@ -18,6 +18,7 @@
 
 import swap.config as config
 import swap.caesar.app as caesar
+from swap.caesar.utils.caesar_config import CaesarConfig
 from swap.caesar.auth import AuthCaesar
 from swap.ui.ui import Interface
 
@@ -88,9 +89,9 @@ class CaesarInterface(Interface):
             self.run(args, swap)
         else:
             if args.register:
-                caesar.Requests.register_swap()
+                CaesarConfig.register()
             elif args.unregister:
-                caesar.Requests.unregister_swap()
+                CaesarConfig.unregister()
 
     @staticmethod
     def run(args, swap=None):
@@ -101,9 +102,9 @@ class CaesarInterface(Interface):
 
         if args.register:
             # Try to deregister swap from caesar on exit
-            atexit.register(caesar.Requests.unregister_swap)
+            atexit.register(CaesarConfig.unregister())
             # Register swap in caesar
-            caesar.Requests.register_swap()
+            CaesarConfig.register()
 
         logger.info('launching flask app')
         api.run()

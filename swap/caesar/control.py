@@ -1,13 +1,12 @@
 
 import swap.control
 import swap.config as config
-from swap.caesar.utils.requests import Requests
+from swap.caesar.utils.caesar_config import CaesarConfig
 from swap.utils.classification import Classification
 from swap.utils.parsers import ClassificationParser
 from swap.db import DB
 import swap.db.db
 
-import os
 import sys
 import threading
 import logging
@@ -54,7 +53,7 @@ class OnlineControl(swap.control.Control):
 
         if config.database.name == 'swapDB':
             raise Exception('Refusing to use swapDB database in online mode')
-            sys.exit(1)
+
         logger.debug('Initialized online controller')
 
     def subjects_changed(self):
@@ -202,7 +201,7 @@ class ThreadedControl(threading.Thread):
         self.exception = e
         self.exit.set()
 
-        Requests.unregister_swap()
+        CaesarConfig.unregister()
 
 
 class DualCursor:
