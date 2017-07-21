@@ -1,10 +1,9 @@
 ################################################################
 # Test functions for stats classes
 
-from swap.agents.agent import Stat
-from swap.agents.agent import MultiStat
+from swap.utils.stats import Stat
+from swap.utils.stats import MultiStat
 # from swap.agents.agent import Stats
-from swap.agents.agent import Accuracy
 import statistics
 
 import unittest
@@ -35,7 +34,7 @@ class Test_Stat:
     def test_export(self):
         s = Stat(self.data)
         print(s)
-        export = s.export()
+        export = s.dict()
         assert 'mean' in export
         assert 'median' in export
         assert 'stdev' in export
@@ -48,45 +47,45 @@ class Test_Multistat:
     def test_export(self):
         m = MultiStat((1, self.data1), (2, self.data2))
 
-        export = m.export()
+        export = m.dict()
         print(export)
         assert 1 in export
         assert 2 in export
 
-        assert export[1] == Stat(self.data1).export()
-        assert export[2] == Stat(self.data2).export()
+        assert export[1] == Stat(self.data1).dict()
+        assert export[2] == Stat(self.data2).dict()
 
     def test_add_new(self):
         m = MultiStat()
         m.addNew(1, self.data1)
 
-        assert m.export()[1] == Stat(self.data1).export()
+        assert m.dict()[1] == Stat(self.data1).dict()
 
     def test_add(self):
         m = MultiStat()
         m.addNew(1, self.data1)
 
-        assert 1 in m.export()
+        assert 1 in m.dict()
 
 
-class Test_Accuracy(unittest.TestCase):
-
-    def test_add(self):
-        a = Accuracy()
-        a.add(0, 1, 10)
-
-        assert 0 in a.stats
-        assert a.stats[0] == (1, 10)
-
-    def test_add_invalid(self):
-        a = Accuracy()
-        with self.assertRaises(ValueError):
-            a.add(0, 10, 1)
-
-    def test_score(self):
-        a = Accuracy()
-        assert a.score(1, 10) == .1
-
-    def test_score_0(self):
-        a = Accuracy()
-        assert a.score(10, 0) == 0
+# class Test_Accuracy(unittest.TestCase):
+#
+#     def test_add(self):
+#         a = Accuracy()
+#         a.add(0, 1, 10)
+#
+#         assert 0 in a.stats
+#         assert a.stats[0] == (1, 10)
+#
+#     def test_add_invalid(self):
+#         a = Accuracy()
+#         with self.assertRaises(ValueError):
+#             a.add(0, 10, 1)
+#
+#     def test_score(self):
+#         a = Accuracy()
+#         assert a.score(1, 10) == .1
+#
+#     def test_score_0(self):
+#         a = Accuracy()
+#         assert a.score(10, 0) == 0

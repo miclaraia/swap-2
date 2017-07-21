@@ -1,5 +1,7 @@
 
 from swap.db import DB
+from swap.db.subjects import SubjectStats
+from swap.utils.stats import Stat
 
 from functools import wraps
 

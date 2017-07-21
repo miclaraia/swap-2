@@ -10,9 +10,9 @@
 """
 
 from swap.agents.bureau import Bureau
-from swap.agents.agent import Stats
 from swap.agents.subject import Subject
 from swap.agents.user import User
+from swap.utils.stats import Stats
 from swap.utils.scores import ScoreExport, Score
 from swap.utils.history import History, HistoryExport
 from swap.utils.classification import Classification

@@ -3,7 +3,7 @@ from swap.utils.classification import Classification
 from swap.agents.bureau import Bureau
 from swap.agents.user import User
 from swap.agents.subject import Subject
-from swap.agents.agent import Stats
+from swap.utils.stats import Stats
 
 from unittest.mock import MagicMock
 
