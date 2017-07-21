@@ -163,7 +163,6 @@ class Classifications(Collection):
         return stats.find().sort('_id', -1).limit(1).next()
 
     def exists(self, classification_id):
-        print(self.collection)
         logger.debug(
             'Checking if classification %d already in \'%s\'',
             classification_id, self._collection_name())
