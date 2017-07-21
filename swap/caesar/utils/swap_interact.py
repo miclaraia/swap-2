@@ -4,6 +4,9 @@ from swap.caesar.utils.requests import Requests
 from swap.caesar.utils.caesar_config import CaesarConfig
 
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class SwapInteract:
@@ -16,4 +19,4 @@ class SwapInteract:
         r = Requests.generate_scores(user, key)
         data = json.loads(r.text)
 
-        print(len(data))
+        logger.debug('Parsed scores for %d subjects', len(data))
