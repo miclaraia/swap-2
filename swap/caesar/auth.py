@@ -16,15 +16,18 @@ logger = logging.getLogger(__name__)
 
 class _Auth:
 
-    def __init__(self):
+    def __init__(self, key=None):
         self._username = config.online_swap._auth_username
-        self._key = self.generate_key()
+
+        if key is None:
+            key = self.generate_key()
+        self._key = key
 
     def check_auth(self, username, token):
         return username == self._username and token == self._key
 
     def http_string(self):
-        return '%s:%s' % (self._username, self._key)
+        return '%s:%s@' % (self._username, self._key)
 
     @staticmethod
     def authenticate():
@@ -40,6 +43,7 @@ class _Auth:
     def generate_key():
         choice = string.ascii_letters + string.digits
         key = ''.join([random.choice(choice) for n in range(64)])
+        logger.warning('Generated key: %s', key)
 
         return key
 
