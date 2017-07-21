@@ -13,7 +13,7 @@ class Score:
     Stores information on each subject for export
     """
 
-    def __init__(self, id_, gold, p, retired=None):
+    def __init__(self, id_, gold, p, retired=False):
         """
         Parameters
         ----------
@@ -37,15 +37,16 @@ class Score:
 
     @property
     def is_retired(self):
-        return self.retired is not None
+        return self.retired
+
+    def retire(self, p=None):
+        if p is not None:
+            self.p = p
+        self.retired = True
 
     def __str__(self):
-        retired = self.retired
-        if retired is None:
-            retired = -1
-
-        return 'id: %d gold: %d p: %.4f retired: %.4f' % \
-            (self.id, self.gold, self.p, retired)
+        return 'id: %d gold: %d p: %.4f retired: %s' % \
+            (self.id, self.gold, self.p, str(self.retired))
 
     def __repr__(self):
         return '{%s}' % self.__str__()
@@ -85,7 +86,6 @@ class ScoreExport:
 
         if thresholds is None:
             thresholds = self.find_thresholds(config.fpr, config.mdr)
-
         self.thresholds = thresholds
 
         self._stats = None
@@ -145,6 +145,12 @@ class ScoreExport:
             else:
                 score.gold = -1
         return scores
+
+    def set_retired_flags(self):
+        for score in self.sorted_scores:
+            bogus, real = self.thresholds
+            if score.p < bogus or score.p > real:
+                score.retire()
 
     def get_real_golds(self):
         """
@@ -313,10 +319,7 @@ class ScoreStats:
     def counts(sorted_scores, left=0, right=1):
         counts = {-1: 0, 0: 0, 1: 0}
         for score in sorted_scores:
-            if score.is_retired:
-                p = score.retired
-            else:
-                p = score.p
+            p = score.p
             if score.gold == -1 or p is None or p < left or p > right:
                 continue
 
