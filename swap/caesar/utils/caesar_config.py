@@ -94,3 +94,18 @@ class CaesarConfig:
         config['rules_config'].append(rule)
 
         return config
+
+    @classmethod
+    def registered_key(cls):
+        config = cls.get_config()
+        user = swap.config.online_swap._auth_username
+
+        name = swap.config.online_swap.caesar.reducer
+        host = swap.config.online_swap.host
+
+        url = config['extractors_config'][name]['url']
+
+        s = '(?<=%s:).*(?=@%s)' % (user, host)
+        key = re.search(s, url).group(0)
+
+        return key
