@@ -19,9 +19,11 @@
 import swap.config as config
 import swap.caesar.app as caesar
 from swap.caesar.utils.caesar_config import CaesarConfig
+from swap.caesar.utils.swap_interact import SwapInteract
 from swap.caesar.auth import AuthCaesar
 from swap.ui.ui import Interface
 
+import code
 import atexit
 import logging
 
@@ -70,6 +72,14 @@ class CaesarInterface(Interface):
             '--login', action='store_true'
         )
 
+        parser.add_argument(
+            '--interact', action='store_true'
+        )
+
+        parser.add_argument(
+            '--score-export', action='store_true'
+        )
+
     def call(self, args):
         """
         Define what to do if this interface's command was passed
@@ -92,6 +102,13 @@ class CaesarInterface(Interface):
                 CaesarConfig.register()
             elif args.unregister:
                 CaesarConfig.unregister()
+
+        if args.interact:
+
+            if args.score_export:
+                scores = SwapInteract.generate_scores()
+
+            code.interact(local=locals())
 
     @staticmethod
     def run(swap=None):
