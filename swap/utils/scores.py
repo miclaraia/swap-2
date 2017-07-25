@@ -385,6 +385,9 @@ class ScoreStats:
             s += '%s: %.3f ' % (key, value)
         return '{%s}' % s[:-1]
 
+    def __repr__(self):
+        return str(self)
+
 
 class ScoreIterator:
     """

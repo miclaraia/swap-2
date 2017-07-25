@@ -8,6 +8,7 @@ from swap.caesar.utils.requests import Requests
 import swap.config as config
 
 import logging
+import json
 from flask import Flask, request, jsonify, Response
 from functools import wraps
 
@@ -134,7 +135,9 @@ class API:
             logger.info('Filtering duplicate classification')
 
         # return empty response
-        return Response(status=204)
+        r = jsonify({})
+        r.status_code = 204
+        return r
 
     @needs_auth
     def scores(self):
