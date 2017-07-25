@@ -135,9 +135,7 @@ class API:
             logger.info('Filtering duplicate classification')
 
         # return empty response
-        r = jsonify({})
-        r.status_code = 204
-        return r
+        return Response(status=204)
 
     @needs_auth
     def scores(self):
