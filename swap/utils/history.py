@@ -62,7 +62,7 @@ class HistoryExport:
             id_ = history.id
             n, p = history.retire(thresholds)
 
-            score = Score(id_, None, p, n_classifications=n)
+            score = Score(id_, None, p, ncl=n)
             scores[id_] = score
 
         return ScoreExport(

@@ -14,7 +14,7 @@ class Score:
     Stores information on each subject for export
     """
 
-    def __init__(self, id_, gold, p, n_classifications=None, retired=False):
+    def __init__(self, id_, gold, p, ncl=None, retired=False):
         """
         Parameters
         ----------
@@ -29,7 +29,7 @@ class Score:
         self.gold = gold
         self.p = p
         self.retired = retired
-        self.ncl = n_classifications
+        self.ncl = ncl
         self.label = None
 
     def dict(self):
@@ -225,7 +225,8 @@ class ScoreExport:
                     bogus = score.p
                     break
 
-        logger.debug('bogus %.4f real %.4f', bogus, real)
+        logger.debug('bogus %.4f real %.4f, fpr %.4f mdr %.4f',
+                     bogus, real, _fpr, _mdr)
 
         return bogus, real
 
