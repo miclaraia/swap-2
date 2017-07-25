@@ -47,7 +47,7 @@ class TestScoreExport:
         se = ScoreExport(scores, False)
         print(se.scores)
 
-        assert se.counts(0) == {-1: 1, 0: 2, 1: 3}
+        assert ScoreStats.counts(se.sorted_scores) == {-1: 1, 0: 2, 1: 3}
 
     def test_composition(self):
         golds = {1: 0, 2: 0, 3: 1, 4: 1, 5: -1, 6: 1}

@@ -98,8 +98,10 @@ class TestCaesarApp:
 
     @patch('swap.caesar.auth._Auth.generate_key',
            MagicMock(return_value='TEST'))
+    @patch('swap.config.online_swap.project', 'project')
     def test_classify_address(self):
-        address = 'https://caesar:TEST@northdown.spa.umn.edu:443/classify'
+        address = \
+            'https://caesar:TEST@northdown.spa.umn.edu:443/project/classify'
         assert Address.swap_classify() == address
 
     @patch('swap.config.online_swap.caesar.reducer', 'name')
