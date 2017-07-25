@@ -23,10 +23,10 @@ class History:
     def retire(self, thresholds):
         if thresholds is not None:
             bogus, real = thresholds
-            for score in self.scores:
+            for i, score in enumerate(self.scores):
                 if score < bogus or score > real:
-                    return score
-        return self.scores[-1]
+                    return i, score
+        return ((len(self.scores) - 1), self.scores[-1])
 
 
 class HistoryExport:
@@ -60,9 +60,9 @@ class HistoryExport:
         scores = {}
         for history in self.history.values():
             id_ = history.id
-            p = history.retire(thresholds)
+            n, p = history.retire(thresholds)
 
-            score = Score(id_, None, p)
+            score = Score(id_, None, p, n_classifications=n)
             scores[id_] = score
 
         return ScoreExport(

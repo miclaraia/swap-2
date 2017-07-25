@@ -1,4 +1,5 @@
 
+from swap.utils.stats import Stat
 import swap.config as config
 from swap.utils.golds import GoldGetter
 
@@ -13,7 +14,7 @@ class Score:
     Stores information on each subject for export
     """
 
-    def __init__(self, id_, gold, p, retired=False):
+    def __init__(self, id_, gold, p, n_classifications=None, retired=False):
         """
         Parameters
         ----------
@@ -28,12 +29,13 @@ class Score:
         self.gold = gold
         self.p = p
         self.retired = retired
+        self.ncl = n_classifications
         self.label = None
 
     def dict(self):
         return {
             'id': self.id, 'gold': self.gold, 'p': self.p,
-            'retired': self.retired}
+            'retired': self.retired, 'ncl': self.ncl}
 
     @property
     def is_retired(self):
@@ -45,8 +47,12 @@ class Score:
         self.retired = True
 
     def __str__(self):
-        return 'id: %d gold: %d p: %.4f retired: %s' % \
-            (self.id, self.gold, self.p, str(self.retired))
+        ncl = self.ncl
+        if type(ncl) is float:
+            ncl = '%.3f' % ncl
+
+        return 'id: %d gold: %d p: %.4f retired: %s ncl: %s' % \
+            (self.id, self.gold, self.p, str(self.retired), ncl)
 
     def __repr__(self):
         return '{%s}' % self.__str__()
@@ -125,9 +131,8 @@ class ScoreExport:
         return self._stats
 
     def _gen_stats(self):
-        scores = self.sorted_scores
         thresholds = self.thresholds
-        return ScoreStats(scores, thresholds)
+        return ScoreStats(self, thresholds)
 
     def _init_golds(self, scores):
         """
@@ -270,20 +275,23 @@ class ScoreExport:
 
 class ScoreStats:
 
-    def __init__(self, sorted_scores, thresholds):
-        if type(sorted_scores) is not list:
-            sorted_scores = list(sorted_scores)
+    def __init__(self, scores, thresholds):
+        stats = self.calculate(scores, thresholds)
 
-        stats = self.calculate(sorted_scores, thresholds)
+        self.tpr = None
+        self.tnr = None
+        self.fpr = None
+        self.fnr = None
 
-        self.tpr = stats['tpr']
-        self.tnr = stats['tnr']
-        self.fpr = stats['fpr']
-        self.fnr = stats['fnr']
+        self.purity = None
+        self.retired = None
+        self.retired_correct = None
 
-        self.purity = stats['purity']
-        self.retired = stats['retired']
-        self.retired_correct = stats['retired_correct']
+        self.ncl_mean = None
+        self.ncl_median = None
+        self.ncl_stdev = None
+
+        self.__dict__.update(stats)
 
     @property
     def completeness(self):
@@ -291,10 +299,11 @@ class ScoreStats:
 
     @classmethod
     def calculate(cls, scores, thresholds):
+        scores_list = list(scores.sorted_scores)
         bogus, real = thresholds
-        low = cls.counts(scores, 0, bogus)
-        high = cls.counts(scores, real, 1)
-        total = cls.counts(scores)
+        low = cls.counts(scores_list, 0, bogus)
+        high = cls.counts(scores_list, real, 1)
+        total = cls.counts(scores_list)
 
         logger.debug('low %s high %s total %s', low, high, total)
 
@@ -316,7 +325,26 @@ class ScoreStats:
             'mdr': 1 - stats['tpr']
         })
 
+        stats.update(cls.ncl_stats(scores))
+
         return stats
+
+    @classmethod
+    def ncl_stats(cls, scores):
+        ncl = []
+        for score in scores.retired_scores:
+            if score.ncl is not None:
+                ncl.append(score.ncl)
+
+        if len(ncl) == 0:
+            return {}
+
+        stat = Stat(ncl)
+        return {
+            'ncl_mean': stat.mean,
+            'ncl_median': stat.median,
+            'ncl_stdev': stat.stdev
+        }
 
     @staticmethod
     def total(counts):
@@ -335,17 +363,19 @@ class ScoreStats:
         return counts
 
     def dict(self):
-        stats = {
-            'tpr': self.tpr,
-            'tnr': self.tnr,
-            'fpr': self.fpr,
-            'fnr': self.fnr,
-            'purity': self.purity,
-            'retired': self.retired,
-            'retired_correct': self.retired_correct
-        }
+        keys = [
+            'tpr', 'tnr', 'fpr', 'fnr',
+            'purity', 'retired', 'retired_correct',
+            'completeness', 'mdr',
+            'ncl_mean', 'ncl_median', 'ncl_stdev']
 
-        return stats
+        data = {}
+        for k in keys:
+            v = self.__dict__[k]
+            if v is not None:
+                data[k] = v
+
+        return data
 
     def __str__(self):
         s = ''
