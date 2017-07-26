@@ -81,7 +81,7 @@ class SubjectStats:
             {'$match': {'seen_before': False, 'subject_id': subject_id}},
             {'$project': {'annotation': 1}}
         ]
-        cursor = db.classifications.aggregate(query)
+        cursor = db.classifications.aggregate(query, debug_query=False)
 
         counts = {0: 0, 1: 0}
         for cl in cursor:

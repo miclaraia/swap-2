@@ -35,13 +35,17 @@ class Collection:
     def _collection_fromdb(cls, db):
         return db[cls._collection_name()]
 
-    def aggregate(self, query, cursor_args={}):
+    def aggregate(self, query, cursor_args={}, debug_query=True):
         if type(cursor_args) is not dict:
             raise ValueError('cursor_args must be dict: %s' % str(cursor_args))
         try:
-            logger.debug('Preparing to run aggregation')
-            logger.debug('query %s args %s', str(query), str(cursor_args))
-            return Cursor(query, self.collection, **cursor_args)
+            if debug_query:
+                logger.debug('Preparing to run aggregation')
+                logger.debug(
+                    'collection %s query %s args %s',
+                    self._collection_name(), str(query), str(cursor_args))
+            return Cursor(query, self.collection,
+                          **cursor_args, debug_query=debug_query)
         except Exception as e:
             logger.error(e)
             raise e
@@ -78,7 +82,7 @@ class Cursor:
     so it comes with a slight penalty due to additional network access.
     """
 
-    def __init__(self, query, collection, **kwargs):
+    def __init__(self, query, collection, debug_query=True, **kwargs):
         """
         Parameters
         ----------
@@ -95,7 +99,8 @@ class Cursor:
         self.cursor = None
         self.count = None
 
-        logger.debug('Cursor query: %s', str(query))
+        if debug_query:
+            logger.debug('Cursor query: %s', str(query))
 
         if query:
             self.cursor = collection.aggregate(query, **kwargs)
