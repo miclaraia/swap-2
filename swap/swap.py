@@ -338,8 +338,7 @@ class SWAP:
         """
         return str(self.stats)
 
-
-    def score_export(self):
+    def score_export(self, thresholds=None):
         """
         Generate object containing subject score data
 
@@ -350,8 +349,9 @@ class SWAP:
         swap.utils.scores.ScoreExport
             ScoreExport
         """
-        unretired = self.history.score_export()
-        thresholds = unretired.thresholds
+        if thresholds is None:
+            unretired = self.history.score_export()
+            thresholds = unretired.thresholds
 
         retired = self.history.score_export(thresholds)
         retired.set_retired_flags()
