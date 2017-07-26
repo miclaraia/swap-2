@@ -18,8 +18,7 @@ def _getter(func):
     @wraps(func)
     def wrapper(self, *args, **kwargs):
         getter = lambda: func(self, *args, **kwargs)
-        logger.debug('Using getter %s with args %s %s',
-                     func, args, kwargs)
+        logger.debug('Using getter %s', func)
 
         self.getters.append(getter)
         self._golds = None
@@ -54,6 +53,7 @@ class GoldGetter:
         size : int
             Sample size
         """
+        logger.debug('Size %d', size)
         return DB().golds.get_random_golds(size)
 
     @_getter
@@ -66,6 +66,7 @@ class GoldGetter:
         subject_ids : list
             List of subject ids (int)
         """
+        logger.debug('getting %d subjects', len(subject_ids))
         return DB().golds.get_golds(subject_ids)
 
     @_getter
@@ -78,6 +79,7 @@ class GoldGetter:
         size : int
             Number of subjects
         """
+        logger.debug('Size %d', size)
         subjects = db_cv().get_controversial(size)
         return DB().golds.get_golds(subjects)
 
@@ -91,11 +93,13 @@ class GoldGetter:
         size : int
             Number of subjects
         """
+        logger.debug('Size %d', size)
         subjects = db_cv().get_consensus(size)
         return DB().golds.get_golds(subjects)
 
     @_getter
     def these(self, golds):
+        logger.debug('Size %d', size)
         return golds
 
     # @_getter
