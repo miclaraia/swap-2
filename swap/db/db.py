@@ -10,7 +10,11 @@ class Collection:
         # pylint: disable=E1111
         self.collection = self._collection_fromdb(db._db)
         self._db = db
-        self.schema = self._schema()
+
+        schema = self._schema()
+        if type(schema) is dict:
+            schema = Schema(schema)
+        self.schema = schema
 
     #######################################################################
 
