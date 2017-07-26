@@ -4,6 +4,7 @@ import swap.config as config
 from swap.utils.golds import GoldGetter
 
 import csv
+from collections import OrderedDict
 
 import logging
 logger = logging.getLogger(__name__)
@@ -370,13 +371,13 @@ class ScoreStats:
             'completeness', 'mdr',
             'ncl_mean', 'ncl_median', 'ncl_stdev']
 
-        data = {}
+        data = []
         for k in keys:
             v = self.__dict__[k]
             if v is not None:
-                data[k] = v
+                data.append((k, v))
 
-        return data
+        return OrderedDict(data)
 
     def __str__(self):
         s = ''

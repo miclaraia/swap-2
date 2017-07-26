@@ -4,6 +4,7 @@ from swap.db.subjects import SubjectStats
 from swap.utils.stats import Stat
 
 from functools import wraps
+from collections import OrderedDict
 
 import logging
 logger = logging.getLogger(__name__)
@@ -190,13 +191,13 @@ class GoldStats:
 
     def dict(self):
         counts = self.counts
-        return {
-            'true': counts[1],
-            'false': counts[0],
-            'total': len(self),
-            'controversial': self.controversial.dict(),
-            'consensus': self.consensus.dict(),
-        }
+        return OrderedDict([
+            ('true', counts[1]),
+            ('false', counts[0]),
+            ('total', len(self)),
+            ('controversial', self.controversial.dict()),
+            ('consensus', self.consensus.dict()),
+        ])
 
     def print_(self):
         print(self)
