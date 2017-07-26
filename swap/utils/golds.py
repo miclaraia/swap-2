@@ -174,7 +174,9 @@ class GoldStats:
 
     @property
     def controversial(self):
+        # print(self._subjects)
         cv = [s.stats.controversial for s in self.subjects]
+        print(cv)
         return Stat(cv)
 
     @property
@@ -211,4 +213,3 @@ class GoldStats:
             self.id = subject
             self.gold = gold
             self.stats = stats
-
