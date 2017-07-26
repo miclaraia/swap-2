@@ -338,26 +338,6 @@ class SWAP:
         """
         return str(self.stats)
 
-    # def exportUserData(self):
-    #     """ Exports consolidated user information """
-    #     return self.users.export()
-
-    # def exportSubjectData(self):
-    #     """ Exports consolidated subject information """
-    #     return self.subjects.export()
-
-    def export(self):
-        """
-            Export both user and subject data
-
-            Deprecated
-        """
-        raise DeprecationWarning
-        return {
-            'users': self.users.export(),
-            'subjects': self.subjects.export(),
-            'stats': self.stats.export()
-        }
 
     def score_export(self):
         """
