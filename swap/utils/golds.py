@@ -99,7 +99,7 @@ class GoldGetter:
 
     @_getter
     def these(self, golds):
-        logger.debug('Size %d', size)
+        logger.debug('Size %d', len(golds))
         return golds
 
     # @_getter
