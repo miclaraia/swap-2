@@ -6,6 +6,8 @@ import swap.config as config
 import csv
 import sys
 from functools import wraps
+from pymongo import IndexModel, ASCENDING
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -35,10 +37,10 @@ def parse_golds(func):
     @wraps(func)
     def wrapper(self, *args, type_=dict, **kwargs):
         # build cursor from query
-        query = func(self, *args, **kwargs)
-        # add pipelines to use most recent gold entry
-        # of each subject, and propery projections
-        query += self._selection()
+        query = self._pre()
+        query += func(self, *args, **kwargs)
+        query += self._post()
+
         cursor = self.aggregate(query)
 
         if type_ is dict:
@@ -70,15 +72,28 @@ class Golds(Collection):
         return parsers.GoldsParser(None).config
 
     def _init_collection(self):
-        pass
+        indexes = [
+            IndexModel([('gold', ASCENDING)]),
+            IndexModel([('subject', ASCENDING)])
+        ]
+
+        logger.debug('inserting %d indexes', len(indexes))
+        self.collection.create_indexes(indexes)
+        logger.debug('done')
 
     #######################################################################
 
     @staticmethod
-    def _selection():
+    def _pre():
         return [
-            {'$group': {'_id': '$subject', 'gold': {'$last': '$gold'}}},
-            {'$project': {'subject': '$_id', 'gold': 1}}]
+            {'$match': {'gold': {'$exists': 1}}}
+        ]
+
+    @staticmethod
+    def _post():
+        return [
+            {'$project': {'subject': 1, 'gold': 1}}
+        ]
 
     @parse_golds
     def get_golds(self, subjects=None):
@@ -107,10 +122,17 @@ class Golds(Collection):
         logger.critical('building gold label list from classifications')
         self._db.classifications.aggregate(query)
 
-    def upload_golds_csv(self, fname):
+    def update(self, subject, gold, upsert=False):
+        self.collection.update_many(
+            {'subject': subject}, {'$set': {'gold': gold}}, upsert=upsert)
 
+    def upload_golds_csv(self, fname):
         logger.info('parsing csv dump')
-        data = []
+        self._init_collection()
+
+        insert = []
+        subjects = self._db.subjects.get_subjects()
+        print(subjects)
         pp = parsers.GoldsParser('csv')
 
         with open(fname, 'r') as file:
@@ -120,14 +142,19 @@ class Golds(Collection):
                 item = pp.process(row)
                 if item is None:
                     continue
-                data.append(item)
 
-                sys.stdout.flush()
-                sys.stdout.write("%d records processed\r" % i)
+                if item['subject'] in subjects:
+                    self.update(item['subject'], item['gold'])
+                else:
+                    insert.append(item)
 
-                if len(data) > 100000:
-                    self.collection.insert_many(data)
-                    data = []
+                if i % 100 == 0:
+                    sys.stdout.flush()
+                    sys.stdout.write("%d records processed\r" % i)
 
-        self.collection.insert_many(data)
+                if len(insert) > 100000:
+                    self.collection.insert_many(insert)
+                    insert = []
+
+        self.collection.insert_many(insert)
         logger.debug('done')

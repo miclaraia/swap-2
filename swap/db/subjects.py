@@ -5,7 +5,9 @@ import swap.config as config
 
 import sys
 import csv
+from pymongo import IndexModel, ASCENDING
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -20,7 +22,13 @@ class Subjects(Collection):
         return config.parser.subject_metadata
 
     def _init_collection(self):
-        pass
+        indexes = [
+            IndexModel([('subject', ASCENDING)])
+        ]
+
+        logger.debug('inserting %d indexes', len(indexes))
+        self.collection.create_indexes(indexes)
+        logger.debug('done')
 
     #######################################################################
 
@@ -33,6 +41,44 @@ class Subjects(Collection):
             return data
         except StopIteration:
             pass
+
+    def get_subjects(self):
+        cursor = self.collection.find(projection={'subject': 1})
+        subjects = []
+
+        for item in cursor:
+            subjects.append(item['subject'])
+
+        return subjects
+
+    def get_stats(self, subject_id):
+        cursor = self.collection.find({'subject': subject_id})
+
+        if cursor.count() > 0:
+            item = cursor.next()['stats']
+            cursor.close()
+            return item
+        cursor.close()
+
+    def calculate_subject_stats(self):
+        subjects = self._db.classifications.get_subjects()
+
+        logger.info('Updating subject stats')
+        count = 0
+        for subject in subjects:
+            id_ = subject['_id']
+            stats = SubjectStats.new(id_, self._db)
+            data = stats.dict()
+            data.pop('subject_id')
+
+            self.collection.update_one(
+                {'subject': id_}, {'$set': {'stats': data}}, upsert=True)
+
+            count += 1
+            if count % 100 == 0:
+                sys.stdout.flush()
+                sys.stdout.write("Updated %d subjects\r" % count)
+        print()
 
     def upload_metadata_dump(self, fname):
         self._rebuild()
@@ -63,14 +109,36 @@ class Subjects(Collection):
 
 class SubjectStats:
 
-    def __init__(self, subject_id, db):
+    def __init__(self, subject_id, annotations, controversial, consensus):
         self.id = subject_id
-        self.annotations = self._annotations(db, subject_id)
+        self.annotations = annotations
+
+        self.controversial = controversial
+        self.consensus = consensus
+
+    @classmethod
+    def new(cls, subject_id, db):
+        annotations = cls._annotations(db, subject_id)
+
+        controversial = cls._controversial(annotations)
+        consensus = cls._consensus(annotations)
+
+        return cls(subject_id, annotations, controversial, consensus)
+
+    @classmethod
+    def from_static(cls, subject_id, db):
+        stats = db.subjects.get_stats(subject_id)
+
+        annotations = stats.pop('annotations')
+        annotations = {0: annotations['N'], 1: annotations['Y']}
+
+        return cls(subject_id, annotations, **stats)
 
     def dict(self):
+        annotations = {'N': self.annotations[0], 'Y': self.annotations[1]}
         return {
             'subject_id': self.id,
-            'annotations': self.annotations,
+            'annotations': annotations,
             'controversial': self.controversial,
             'consensus': self.consensus
         }
@@ -89,19 +157,19 @@ class SubjectStats:
 
         return counts
 
-    @property
-    def controversial(self):
-        yes = self.annotations[1]
-        no = self.annotations[0]
+    @staticmethod
+    def _controversial(annotations):
+        yes = annotations[1]
+        no = annotations[0]
         a = min(yes, no)
         b = max(yes, no)
 
         return (a + b) ** (a / b)
 
-    @property
-    def consensus(self):
-        yes = self.annotations[1]
-        no = self.annotations[0]
+    @staticmethod
+    def _consensus(annotations):
+        yes = annotations[1]
+        no = annotations[0]
         a = min(yes, no)
         b = max(yes, no)
 

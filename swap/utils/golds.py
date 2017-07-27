@@ -159,7 +159,7 @@ class GoldStats:
     def _init_subjects(self, golds):
         subjects = {}
         for id_, gold in golds.items():
-            stats = SubjectStats(id_, DB())
+            stats = SubjectStats.from_static(id_, DB())
             subjects[id_] = self.Subject(id_, gold, stats)
 
         return subjects
