@@ -26,8 +26,6 @@ class Parser:
         steps = dotkey.split(split)
         item = obj
 
-        logger.debug('navigating to %s', str(steps))
-
         for key in steps:
             if type(item) is list:
                 key = int(key)
