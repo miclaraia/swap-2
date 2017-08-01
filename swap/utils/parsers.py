@@ -190,7 +190,7 @@ class AnnotationParser(Parser):
 
     def process(self, cl):
         annotations = self.parse_json(cl['annotations'])
-        logger.debug('parsing annotation %s', annotations)
+        # logger.debug('parsing annotation %s', annotations)
 
         annotation = self._find_task(annotations)
 
