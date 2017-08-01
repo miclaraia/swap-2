@@ -63,7 +63,7 @@ class Subjects(Collection):
     def calculate_subject_stats(self):
         subjects = self._db.classifications.get_subjects()
 
-        logger.info('Updating subject stats')
+        logger.info('Updating %d subject stats', len(subjects))
         count = 0
         for subject in subjects:
             id_ = subject['_id']
@@ -164,7 +164,7 @@ class SubjectStats:
         a = min(yes, no)
         b = max(yes, no)
 
-        return (a + b) ** (a / b)
+        return (a + b) ** (a / b - 1)
 
     @staticmethod
     def _consensus(annotations):
@@ -173,7 +173,7 @@ class SubjectStats:
         a = min(yes, no)
         b = max(yes, no)
 
-        return (b - a) ** (1 - a / b)
+        return (a + b) ** (- a / b)
 
     def print_(self):
         print(self)
