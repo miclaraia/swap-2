@@ -55,7 +55,7 @@ class Parser:
             elif type(remap) is str:
                 remap = [remap]
             elif type(remap) is not list:
-                raise self.MissingInformation(field, 'remap')
+                raise self.ParsingError('remap', field)
 
             for old_key in remap:
                 try:
@@ -68,7 +68,7 @@ class Parser:
         if 'ifgone' in field:
             return field['ifgone']
 
-        raise self.MissingInformation(cl, key)
+        raise self.ParsingError(key, cl)
 
     def _type(self, value, type_):
         """
@@ -142,10 +142,10 @@ class Parser:
     def process(self, cl):
         return self._mod_fields(cl)
 
-    class MissingInformation(Exception):
-        def __init__(self, cl, key):
-            msg = 'Couldn\'t parse \'%s\' out of classification %s' % \
-                (key, str(cl))
+    class ParsingError(Exception):
+        def __init__(self, key, cl):
+            logger.error('Error with classification: %s', str(cl))
+            msg = 'Couldn\'t parse \'%s\' out of classification' % key
             super().__init__(msg)
 
 
@@ -164,16 +164,17 @@ class ClassificationParser(Parser):
         for key in ['subject_id', 'subject_ids']:
             if key in cl:
                 return cl[key]
-        raise self.MissingInformation(cl, 'subject')
+        raise self.ParsingError('subject', cl)
 
     def process(self, cl):
         cl['metadata'] = self.parse_json(cl['metadata'])
 
         try:
             cl['annotation'] = self.annotation.process(cl)
-        except AnnotationParser.MissingAnnotation as e:
+        except AnnotationParser.AnnotationError as e:
+            logger.error('Problem with classification: %s', str(cl))
             print(e)
-            logger.error('Couldn\'t find annotation')
+            logger.exception(e)
             self.skipped += 1
             return None
         out = super().process(cl)
@@ -195,10 +196,9 @@ class AnnotationParser(Parser):
 
         value = self._parse_value(annotation['value'])
         if value is None:
-            logger.error('Coult not find valid annotation for classification')
             task = self.config.task
             value_key = self.config.value_key
-            raise self.MissingAnnotation(cl, task, value_key)
+            raise self.AnnotationError(task, value_key, annotations, cl=cl)
 
         return value
 
@@ -218,7 +218,7 @@ class AnnotationParser(Parser):
                 if annotation['task'] == self.config.task:
                     return annotation
 
-        raise self.MissingAnnotation(annotations, 'T1', None)
+        raise self.AnnotationError(task, '', annotations)
 
     def _parse_value(self, value):
         """
@@ -226,7 +226,6 @@ class AnnotationParser(Parser):
         """
         key = self.config.value_key
         sep = self.config.value_separator
-        logger.debug('value %s key %s', str(value), key)
 
         if key is not None:
             value = self._navigate(value, key, sep)
@@ -236,9 +235,14 @@ class AnnotationParser(Parser):
         if value in self.config.false:
             return 0
 
-    class MissingAnnotation(Parser.MissingInformation):
-        def __init__(self, field, task, value_key):
-            super().__init__(field, '%s %s' % (task, value_key))
+    class AnnotationError(Exception):
+        def __init__(self, task, value_key, annotations, cl=None):
+            if cl is not None:
+                logger.error('Problem with classification: %s', str(cl))
+
+            msg = 'Couldn\'t parse task %s value_key %s ' \
+                'from annotations %s' % (task, value_key, annotations)
+            super().__init__(msg)
 
 
 class MetadataParser(Parser):
