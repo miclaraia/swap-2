@@ -41,7 +41,7 @@ def parse_golds(func):
         query += func(self, *args, **kwargs)
         query += self._post()
 
-        cursor = self.aggregate(query)
+        cursor = self.aggregate(query, debug_query=False)
 
         if type_ is dict:
             data = {}
