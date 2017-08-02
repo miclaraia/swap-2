@@ -11,7 +11,7 @@ CONFIG=$ROOT/experiment_config.py
 echo "Running from $ROOT"
 echo $SWAPLOG
 
-echo "Starting SWAP"
+# echo "Starting SWAP"
 # swap_tools --config-file $ROOT/experiment_config.py randomex --num-golds 1000 10000 1000 --num-trials 20 test1 "Attempting to reproduce previous random plots" --run
 # swap_tools --config-file $ROOT/experiment_config.py burnin --num-golds 10000 --gamma 1 50 1 burnin-1 "Testing effects of varying 'gamma' variable" --run
 # swap_tools --config-file $CONFIG cvcn --num-golds 5000 --controversial 0 5000 100 --consensus 0 5000 100 cvcn-1 "Testing effects of adding controversial and consensus subjects" --run
@@ -48,9 +48,13 @@ run_command=$1
 case $run_command in
     "randomex")
         randomex
+    ;;
     "burnin")
         burnin
+    ;;
     "cvcn")
         cvcn
+    ;;
+esac
 
 echo done
