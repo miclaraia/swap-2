@@ -104,10 +104,12 @@ class Golds(Collection):
         return query
 
     @parse_golds
-    def get_random_golds(self, size):
-        query = [
-            {'$match': {'gold': {'$ne': -1}}},
-            {'$sample': {'size': size}}]
+    def get_random_golds(self, size, gold_filter=None):
+        if gold_filter is not None:
+            query = [{'$match': {'gold': gold_filter}}]
+        else:
+            query = [{'$match': {'gold': {'$ne': -1}}}]
+        query += [{'$sample': {'size': size}}]
 
         return query
 

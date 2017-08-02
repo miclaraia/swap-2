@@ -45,7 +45,7 @@ class GoldGetter:
         return DB().golds.get_golds()
 
     @_getter
-    def random(self, size):
+    def random(self, size, gold=None):
         """
         Get a random sample of gold labels
 
@@ -54,8 +54,8 @@ class GoldGetter:
         size : int
             Sample size
         """
-        logger.debug('Size %d', size)
-        return DB().golds.get_random_golds(size)
+        logger.debug('Size %d gold filter %s', size, gold)
+        return DB().golds.get_random_golds(size, gold)
 
     @_getter
     def subjects(self, subject_ids):
