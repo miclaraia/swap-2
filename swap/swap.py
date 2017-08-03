@@ -350,10 +350,10 @@ class SWAP:
             ScoreExport
         """
         if thresholds is None:
-            unretired = self.history.score_export()
+            unretired = self.history.score_export(all_golds=False)
             thresholds = unretired.thresholds
 
-        retired = self.history.score_export(thresholds)
+        retired = self.history.score_export(thresholds, all_golds=True)
         retired.set_retired_flags()
 
         return retired

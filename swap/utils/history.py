@@ -56,18 +56,18 @@ class HistoryExport:
 
         return ScoreIterator(self.history, func)
 
-    def score_export(self, thresholds=None):
+    def score_export(self, thresholds=None, all_golds=False):
         scores = {}
         for history in self.history.values():
             id_ = history.id
             n, p = history.retire(thresholds)
 
-            score = Score(id_, None, p, ncl=n)
+            score = Score(id_, history.gold, p, ncl=n)
             scores[id_] = score
 
         return ScoreExport(
             scores, gold_getter=self.gold_getter,
-            thresholds=thresholds)
+            thresholds=thresholds, new_golds=all_golds)
 
 
     def __iter__(self):
