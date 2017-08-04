@@ -44,10 +44,10 @@ cvcn () {
 
 goldprop () {
     swap_tools --config-file $CONFIG goldprop \
-    --num-real 1000 10000 1000 \
-    --num-bogus 1000 10000 1000 \
-    --num-trials 10 \
-    --name cvcn-1 --description "Testing effects of adding controversial and consensus subjects" \
+    --num-real 1000 5000 1000 \
+    --num-bogus 1000 5000 1000 \
+    --num-trials 5 \
+    --name golds-1 --description "Testing effects of adding real vs bogus gold labels" \
     --run
 }
 
@@ -63,6 +63,9 @@ case $run_command in
     ;;
     "cvcn")
         cvcn
+    ;;
+    "goldprop")
+        goldprop
     ;;
 esac
 
