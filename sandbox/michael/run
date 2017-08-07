@@ -38,7 +38,7 @@ cvcn () {
     --num-golds 2500 \
     --controversial 0 10000 500 \
     --consensus 0 10000 500 \
-    --name cvcn-1 --description "Testing effects of adding controversial and consensus subjects" \
+    --name cvcn-2 --description "Repeating controversial-consensus experiment with proper retirement from limited gold knowledge" \
     --run
 }
 
@@ -51,22 +51,34 @@ goldprop () {
     --run
 }
 
+prior () {
+    swap_tools --config-file $CONFIG prior \
+    --num-golds 10000 \
+    --prior .05 .95 .05 \
+    --num-trials 3 \
+    --name prior-1 --description "Testing effects of prior" \
+    --run
+}
+
 echo "Starting SWAP"
 run_command=$1
 
 case $run_command in
     "randomex")
         randomex
-    ;;
+        ;;
     "burnin")
         burnin
-    ;;
+        ;;
     "cvcn")
         cvcn
-    ;;
+        ;;
     "goldprop")
         goldprop
-    ;;
+        ;;
+    "prior")
+        prior
+        ;;
 esac
 
 echo done
