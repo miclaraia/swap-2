@@ -203,28 +203,36 @@ class ScoreExport:
         # Calculate real retirement threshold
         count = 0
         real = 0
-        for score in self.sorted_scores:
-            if score.gold == 0:
-                count += 1
+        if totals[0] == 0:
+            logger.error('No bogus gold labels!')
+            real = 1
+        else:
+            for score in self.sorted_scores:
+                if score.gold == 0:
+                    count += 1
 
-                _fpr = 1 - count / totals[0]
-                # print(_fpr, count, totals[0], score)
-                if _fpr < fpr:
-                    real = score.p
-                    break
+                    _fpr = 1 - count / totals[0]
+                    # print(_fpr, count, totals[0], score)
+                    if _fpr < fpr:
+                        real = score.p
+                        break
 
         # Calculate bogus retirement threshold
         count = 0
         bogus = 0
-        for score in reversed(list(self.sorted_scores)):
-            if score.gold == 1:
-                count += 1
+        if totals[1] == 0:
+            logger.error('No real gold labels!')
+            bogus = 0
+        else:
+            for score in reversed(list(self.sorted_scores)):
+                if score.gold == 1:
+                    count += 1
 
-                _mdr = 1 - count / totals[1]
-                # print(_mdr, count, totals[1], score)
-                if _mdr < mdr:
-                    bogus = score.p
-                    break
+                    _mdr = 1 - count / totals[1]
+                    # print(_mdr, count, totals[1], score)
+                    if _mdr < mdr:
+                        bogus = score.p
+                        break
 
         logger.debug('bogus %.4f real %.4f, fpr %.4f mdr %.4f',
                      bogus, real, _fpr, _mdr)
@@ -309,18 +317,22 @@ class ScoreStats:
 
         logger.debug('low %s high %s total %s', low, high, total)
 
-        stats = {
-            'tpr': high[1] / total[1],
-            'tnr': low[0] / total[0],
-            'fpr': high[0] / total[0],
-            'fnr': low[1] / total[1],
+        stats = {}
+        def add(k, n, d):
+            if d == 0:
+                stats[k] = None
+            else:
+                stats[k] = n / d
 
-            'purity': high[1] / cls.total(high),
-            'retired': (cls.total(low) + cls.total(high)) / cls.total(total),
-            'retired_correct':
-                (high[1] + low[0]) /
-                (cls.total(low) + cls.total(high)),
-        }
+        add('tpr', high[1], total[1])
+        add('tnr', low[0], total[0])
+        add('fpr', high[0], total[0])
+        add('fnr', low[1], total[1])
+
+        add('purity', high[1], cls.total(high))
+        add('retired', (cls.total(low) + cls.total(high)), cls.total(total))
+        add('retired_correct',
+            (high[1] + low[0]), (cls.total(low) + cls.total(high)))
 
         stats.update({
             'completeness': stats['tpr'],
