@@ -14,7 +14,7 @@ from os import path
 here = path.abspath(path.dirname(__file__))
 
 # Get the version string from the VERSION file
-with open(path.join(here, 'VERSION', 'r')) as f:
+with open(path.join(here, 'VERSION'), 'r') as f:
     version = f.readline()
 
 # Get the long description from the README file
