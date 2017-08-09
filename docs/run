@@ -4,34 +4,57 @@ set -eu
 set -o pipefail
 
 set +eu
-ROOT=$(dirname "${VAR}")
+ROOT=$(dirname "${BASH_SOURCE[0]}")
 set -eu
 
 ROOT=$(readlink -f "${ROOT}")
 echo "Building from $ROOT"
 
-BUILDDIR="/tmp/swap-pages-$$"
-echo "Building to $BUILDDIR"
+SOURCEDIR="$ROOT/source"
+echo "Using source from $SOURCEDIR"
 
-GIT=$(git remote -v | grep push | grep origin | awk '{print $2}')
-echo "Using git origin address $GIT"
+publish () {
 
-mkdir $BUILDDIR
-cd $BUILDDIR
-git init .
-git remote add -t gh-pages origin $GIT
-git pull
+    BUILDDIR="/tmp/swap-pages-$$"
+    echo "Building to $BUILDDIR"
 
-ln -s . html
-touch .nojekyll
+    GIT=$(git remote -v | grep push | grep origin | awk '{print $2}')
+    echo "Using git origin address $GIT"
 
-cd $ROOT
-sphinx-build -a -E -b html source $BUILDDIR
+    mkdir $BUILDDIR
+    cd $BUILDDIR
+    git init .
+    git remote add -t gh-pages origin $GIT
+    git pull
 
-cd $BUILDDIR
-rm html
-git add -A
-git commit -m "Auto publish updated docs...."
+    ln -s . html
+    touch .nojekyll
 
-read -p "Build finished, should push?" -n 1 -r
-git push origin master:gh-pages
+    cd $ROOT
+    sphinx-build -a -E -b html $SOURCEDIR $BUILDDIR
+
+    cd $BUILDDIR
+    rm html
+    git add -A
+    git commit -m "Auto publish updated docs...."
+
+    read -p "Build finished, should push?" -n 1 -r
+    git push origin master:gh-pages
+}
+
+build () {
+    BUILDDIR="$ROOT/build"
+    sphinx-build -b html $SOURCEDIR $BUILDDIR
+}
+
+run_command=$1
+shift
+
+case $run_command in
+    "publish")
+        publish
+        ;;
+    "build")
+        build
+        ;;
+esac
