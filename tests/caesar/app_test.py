@@ -29,7 +29,7 @@ class TestCaesarApp:
     @patch.object(control.OnlineControl, 'run')
     @patch.object(GoldGetter, 'golds', {})
     @patch('swap.config.back_update', False)
-    @patch('swap.config.database.name', 'swapDBtest')
+    @patch('swap.config.database.name', 'localDB')
     @patch('swap.config.parser.annotation.task', 'T1')
     @patch('swap.config.parser.annotation.true', [1])
     @patch('swap.config.parser.annotation.false', [0])
@@ -50,7 +50,7 @@ class TestCaesarApp:
     @patch.object(Classifications, 'insert', MagicMock())
     @patch.object(Classifications, 'exists', MagicMock(return_value=False))
     @patch('swap.config.back_update', False)
-    @patch('swap.config.database.name', 'swapDBtest')
+    @patch('swap.config.database.name', 'localDB')
     @patch('swap.config.parser.annotation.task', 'T1')
     @patch('swap.config.parser.annotation.true', [1])
     @patch('swap.config.parser.annotation.false', [0])
@@ -68,7 +68,7 @@ class TestCaesarApp:
     @patch.object(Classifications, 'insert', MagicMock())
     @patch.object(Classifications, 'exists', MagicMock(return_value=True))
     @patch('swap.config.back_update', False)
-    @patch('swap.config.database.name', 'swapDBtest')
+    @patch('swap.config.database.name', 'localDB')
     @patch('swap.config.parser.annotation.task', 'T1')
     @patch('swap.config.parser.annotation.true', [1])
     @patch('swap.config.parser.annotation.false', [0])
@@ -98,8 +98,10 @@ class TestCaesarApp:
 
     @patch('swap.caesar.auth._Auth.generate_key',
            MagicMock(return_value='TEST'))
+    @patch('swap.config.online_swap.project', 'project')
     def test_classify_address(self):
-        address = 'https://caesar:TEST@northdown.spa.umn.edu:443/classify'
+        address = \
+            'https://caesar:TEST@northdown.spa.umn.edu:443/project/classify'
         assert Address.swap_classify() == address
 
     @patch('swap.config.online_swap.caesar.reducer', 'name')

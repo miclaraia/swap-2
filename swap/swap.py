@@ -338,28 +338,7 @@ class SWAP:
         """
         return str(self.stats)
 
-    # def exportUserData(self):
-    #     """ Exports consolidated user information """
-    #     return self.users.export()
-
-    # def exportSubjectData(self):
-    #     """ Exports consolidated subject information """
-    #     return self.subjects.export()
-
-    def export(self):
-        """
-            Export both user and subject data
-
-            Deprecated
-        """
-        raise DeprecationWarning
-        return {
-            'users': self.users.export(),
-            'subjects': self.subjects.export(),
-            'stats': self.stats.export()
-        }
-
-    def score_export(self):
+    def score_export(self, thresholds=None):
         """
         Generate object containing subject score data
 
@@ -370,10 +349,11 @@ class SWAP:
         swap.utils.scores.ScoreExport
             ScoreExport
         """
-        unretired = self.history.score_export()
-        thresholds = unretired.thresholds
+        if thresholds is None:
+            unretired = self.history.score_export(all_golds=False)
+            thresholds = unretired.thresholds
 
-        retired = self.history.score_export(thresholds)
+        retired = self.history.score_export(thresholds, all_golds=True)
         retired.set_retired_flags()
 
         return retired

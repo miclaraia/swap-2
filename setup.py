@@ -98,7 +98,7 @@ setup(
     extras_require={
         'dev': ['check-manifest', 'setuptools', 'wheel', 'sphinx',
                 'sphinxcontrib-napoleon', 'sphinx-rtd-theme',
-                'sphinx-argparse'],
+                'sphinx-argparse', 'pylint'],
         'test': ['coverage', 'pytest'],
     },
 

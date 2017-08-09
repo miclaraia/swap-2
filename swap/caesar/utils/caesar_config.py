@@ -25,11 +25,15 @@ class CaesarConfig:
     keys = ['extractors_config', 'reducers_config']
 
     @classmethod
-    def get_config(cls):
+    def get_config(cls, keys=None):
         data = Requests.fetch_caesar_config()
         data = json.loads(data.text)
 
-        keys = cls.keys
+        if type(keys) is str:
+            keys = [keys]
+        elif keys is None:
+            keys = cls.keys
+
         data = {k: data[k] for k in keys}
 
         logger.debug('fetched caesar config: %s', data)
@@ -65,15 +69,15 @@ class CaesarConfig:
     @classmethod
     @put_config
     def clear_all(cls):
-        return {}
+        keys = cls.keys
+        config = {k: {} for k in keys}
+        config['rules_config'] = []
+        return config
 
     @classmethod
     @put_config
     def clear_rules(cls):
-        config = cls.get_config()
-        config['rules_config'] = []
-
-        return config
+        return {'rules_config': []}
 
     @classmethod
     def is_registered(cls):
@@ -90,9 +94,12 @@ class CaesarConfig:
     @classmethod
     @put_config
     def add_rule(cls, rule):
-        config = cls.get_config()
-        config['rules_config'].append(rule)
+        config = cls.get_config('rules_config')
 
+        key = 'rules_config'
+        config = {key: config.get(key, [])}
+
+        config[key].append(rule)
         return config
 
     @classmethod

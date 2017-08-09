@@ -112,8 +112,9 @@ class Classifications(Collection):
                     continue
                 data.append(cl)
 
-                sys.stdout.flush()
-                sys.stdout.write("%d records processed\r" % i)
+                if i % 100 == 0:
+                    sys.stdout.flush()
+                    sys.stdout.write("%d records processed\r" % i)
 
                 if len(data) > 100000:
                     self.collection.insert_many(data)
@@ -157,6 +158,14 @@ class Classifications(Collection):
             logger.critical('Uploading stats')
             self._db.stats.insert_one(stats)
         return stats
+
+    def get_subjects(self):
+        query = [
+            {'$match': {'live_project': True}},
+            {'$group': {'_id': '$subject_id'}},
+        ]
+
+        return self.aggregate(query)
 
     def get_stats(self):
         stats = self._db.stats

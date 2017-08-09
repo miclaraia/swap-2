@@ -8,6 +8,7 @@ from swap.caesar.utils.requests import Requests
 import swap.config as config
 
 import logging
+import json
 from flask import Flask, request, jsonify, Response
 from functools import wraps
 
@@ -156,7 +157,16 @@ class API:
         return False
 
 
+def validate_config():
+    if config.online_swap.project is None:
+        raise config.ConfigError(
+            'online_swap.name',
+            'Project name cannot be None')
+
+
 def init_threader(swap=None):
+    validate_config()
+
     thread = ThreadedControl(swap_=swap)
     thread.start()
     logger.info('Finished launching swap thread')

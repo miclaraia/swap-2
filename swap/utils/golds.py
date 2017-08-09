@@ -4,6 +4,7 @@ from swap.db.subjects import SubjectStats
 from swap.utils.stats import Stat
 
 from functools import wraps
+from collections import OrderedDict
 
 import logging
 logger = logging.getLogger(__name__)
@@ -18,8 +19,7 @@ def _getter(func):
     @wraps(func)
     def wrapper(self, *args, **kwargs):
         getter = lambda: func(self, *args, **kwargs)
-        logger.debug('Using getter %s with args %s %s',
-                     func, args, kwargs)
+        logger.debug('Using getter %s', func)
 
         self.getters.append(getter)
         self._golds = None
@@ -45,7 +45,7 @@ class GoldGetter:
         return DB().golds.get_golds()
 
     @_getter
-    def random(self, size):
+    def random(self, size, gold=None):
         """
         Get a random sample of gold labels
 
@@ -54,7 +54,8 @@ class GoldGetter:
         size : int
             Sample size
         """
-        return DB().golds.get_random_golds(size)
+        logger.debug('Size %d gold filter %s', size, gold)
+        return DB().golds.get_random_golds(size, gold)
 
     @_getter
     def subjects(self, subject_ids):
@@ -66,6 +67,7 @@ class GoldGetter:
         subject_ids : list
             List of subject ids (int)
         """
+        logger.debug('getting %d subjects', len(subject_ids))
         return DB().golds.get_golds(subject_ids)
 
     @_getter
@@ -78,6 +80,7 @@ class GoldGetter:
         size : int
             Number of subjects
         """
+        logger.debug('Size %d', size)
         subjects = db_cv().get_controversial(size)
         return DB().golds.get_golds(subjects)
 
@@ -91,11 +94,13 @@ class GoldGetter:
         size : int
             Number of subjects
         """
+        logger.debug('Size %d', size)
         subjects = db_cv().get_consensus(size)
         return DB().golds.get_golds(subjects)
 
     @_getter
     def these(self, golds):
+        logger.debug('Size %d', len(golds))
         return golds
 
     # @_getter
@@ -154,7 +159,7 @@ class GoldStats:
     def _init_subjects(self, golds):
         subjects = {}
         for id_, gold in golds.items():
-            stats = SubjectStats(id_, DB())
+            stats = SubjectStats.from_static(id_, DB())
             subjects[id_] = self.Subject(id_, gold, stats)
 
         return subjects
@@ -174,23 +179,28 @@ class GoldStats:
 
     @property
     def controversial(self):
+        # print(self._subjects)
         cv = [s.stats.controversial for s in self.subjects]
-        return Stat(cv)
+        stats = Stat(cv)
+        logger.debug('Controversial scores: %s', str(stats))
+        return stats
 
     @property
     def consensus(self):
         cn = [s.stats.consensus for s in self.subjects]
-        return Stat(cn)
+        stats = Stat(cn)
+        logger.debug('Consensus scores: %s', str(stats))
+        return stats
 
     def dict(self):
         counts = self.counts
-        return {
-            'true': counts[1],
-            'false': counts[0],
-            'total': len(self),
-            'controversial': self.controversial.dict(),
-            'consensus': self.consensus.dict(),
-        }
+        return OrderedDict([
+            ('true', counts[1]),
+            ('false', counts[0]),
+            ('total', len(self)),
+            ('controversial', self.controversial.dict()),
+            ('consensus', self.consensus.dict()),
+        ])
 
     def print_(self):
         print(self)
@@ -211,4 +221,3 @@ class GoldStats:
             self.id = subject
             self.gold = gold
             self.stats = stats
-

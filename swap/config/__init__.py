@@ -249,10 +249,7 @@ def import_config(path):
 
 
 def _validate():
-    if online_swap.project is None:
-        raise ConfigError(
-            'online_swap.name',
-            'Project name cannot be None')
+    pass
 
 
 local_config()

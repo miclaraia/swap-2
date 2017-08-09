@@ -47,7 +47,7 @@ class Test_DB:
 
 
 class Test_Cursor:
-    @patch('swap.config.database.name', 'swapDB')
+    @patch('swap.config.database.name', 'localDB')
     def test_length(self):
         DB._reset()
         db = DB()._db
