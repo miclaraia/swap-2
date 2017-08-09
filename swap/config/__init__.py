@@ -12,6 +12,7 @@
 import os
 import sys
 import importlib.util
+import importlib.machinery
 
 
 class Object:
@@ -225,26 +226,38 @@ class ConfigError(Exception):
 
 
 def local_config():
+    here = os.path.dirname(os.path.abspath(__file__))
+    local_conf = os.path.abspath(os.path.join(here, '../../conf'))
+    print(local_conf)
+    locations = [
+        os.path.join(os.path.expanduser('~'), '.swaprc'),
+        os.environ.get('SWAP_CONFIG'),
+        '/etc/swap/swap.conf',
+        os.path.join(local_conf, 'swap.conf')
+    ]
     # Import local_config.py to seamlessly override
     # config defaults without having to check in to git repo
-    path = os.path.dirname(os.path.abspath(__file__))
-    path = os.path.join(path, 'config.py')
-    if os.path.isfile(path):
-        # pylint: disable=E0401,W0401
-        import_config(path)
+
+    for fname in locations:
+        if fname is not None and os.path.isfile(fname):
+            print(fname)
+            import_config(fname)
+            return
 
 
 def module():
     return sys.modules[__name__]
 
 
-def import_config(path):
+def import_config(fname):
     """
     Import a custom fon
     """
-    spec = importlib.util.spec_from_file_location('module', path)
+    loader = importlib.machinery.SourceFileLoader('module', fname)
+    spec = importlib.util.spec_from_loader(loader.name, loader)
     _module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(_module)
+
     _module.override(module())
 
 
