@@ -192,6 +192,13 @@ class GoldStats:
         logger.debug('Consensus scores: %s', str(stats))
         return stats
 
+    @property
+    def classifications(self):
+        ncl = [sum(s.stats.annotations.values()) for s in self.subjects]
+        stats = Stat(ncl)
+        logger.debug('Number of classifications to retire: %s', str(stats))
+        return stats
+
     def dict(self):
         counts = self.counts
         return OrderedDict([
@@ -200,6 +207,7 @@ class GoldStats:
             ('total', len(self)),
             ('controversial', self.controversial.dict()),
             ('consensus', self.consensus.dict()),
+            ('classifications', self.classifications.dict()),
         ])
 
     def print_(self):
