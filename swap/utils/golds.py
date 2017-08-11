@@ -215,8 +215,9 @@ class GoldStats:
 
     def __str__(self):
         s = ''
-        s += 'controversial %s\n' % str(self.controversial)
-        s += 'consensus     %s\n' % str(self.consensus)
+        s += 'controversial    %s\n' % str(self.controversial)
+        s += 'consensus        %s\n' % str(self.consensus)
+        s += 'classifications  %s\n' % str(self.classifications)
         s += 'true %(true)d false %(false)d total %(total)d' % self.dict()
 
         return s
