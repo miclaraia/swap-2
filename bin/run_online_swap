@@ -1,4 +1,8 @@
 #!/bin/bash
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SWAP="$( readlink -f $DIR/.. )"
+source $SWAP/venv/bin/activate
+
 run_swap caesar --login --run --register
 
