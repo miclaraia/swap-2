@@ -24,8 +24,10 @@ setup () {
         mkdir -p $VENVDIR
     fi
 
-    $PYTHON -m venv $VENVDIR
+    $PYTHON -m virtualenv $VENVDIR
+    set +eu
     source $VENVDIR/bin/activate
+    set -eu
     pip install -e $SWAP
 
     echo "Creating config filein $SWAP/conf/swap.conf"
