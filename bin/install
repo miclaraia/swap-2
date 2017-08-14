@@ -1,0 +1,41 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SWAP="$( readlink -f $DIR/.. )"
+
+if [ -z "${VENVDIR}" ]; then
+    VENVDIR="$( readlink -f "$DIR/../venv" )"
+fi
+
+if [ -z "${PYTHON}" ]; then
+    PYTHON="$( which python3 )"
+fi
+
+set -eu
+set -o pipefail
+
+echo DIR $DIR
+echo SWAP $SWAP
+echo VENVDIR $VENVDIR
+echo PYTHON $PYTHON
+
+setup () {
+    if [ ! -d $VENVDIR ]; then
+        mkdir -p $VENVDIR
+    fi
+
+    $PYTHON -m venv $VENVDIR
+    source $VENVDIR/bin/activate
+    pip install -e $SWAP
+
+    echo "Creating config filein $SWAP/conf/swap.conf"
+    echo "Edit this file to configure swap"
+    if [ ! -f $SWAP/conf/swap.conf ]; then
+        cd $SWAP/conf
+        cp swap.default.conf swap.conf
+    fi
+}
+
+read -p "Confirm install directories are correct" -n 1 -r
+setup
+
