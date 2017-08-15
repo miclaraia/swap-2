@@ -102,14 +102,13 @@ class parser:
 class online_swap:
     # Flask app config
     project = None
+    workflow = 2614
 
     host = 'northdown.spa.umn.edu'
     ext_port = '443'
     port = '5000'
     bind = '0.0.0.0'
     debug = False
-
-    workflow = 2614
 
     class caesar:
         # Address configuration for accessing caesar
@@ -230,8 +229,8 @@ def local_config():
     local_conf = os.path.abspath(os.path.join(here, '../../conf'))
     print(local_conf)
     locations = [
-        os.path.join(os.path.expanduser('~'), '.swaprc'),
         os.environ.get('SWAP_CONFIG'),
+        os.path.join(os.path.expanduser('~'), '.swaprc'),
         '/etc/swap/swap.conf',
         os.path.join(local_conf, 'swap.conf')
     ]
