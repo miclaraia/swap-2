@@ -15,7 +15,7 @@ here = path.abspath(path.dirname(__file__))
 
 # Get the version string from the VERSION file
 with open(path.join(here, 'VERSION'), 'r') as f:
-    version = f.readline()
+    version = f.readline().strip()
 
 # Get the long description from the README file
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
