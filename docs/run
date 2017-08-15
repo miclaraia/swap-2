@@ -42,6 +42,30 @@ publish () {
     git push origin master:gh-pages
 }
 
+setup_gh_pages () {
+
+    BUILDDIR="/tmp/swap-pages-$$"
+    echo "Building to $BUILDDIR"
+
+    GIT=$(git remote -v | grep push | grep origin | awk '{print $2}')
+    echo "Using git origin address $GIT"
+
+    mkdir $BUILDDIR
+    cd $BUILDDIR
+    git init .
+    git remote add origin $GIT
+    git fetch
+    git checkout --orphan gh-pages
+
+    touch .nojekyll
+    git add .nojekyll
+    git commit -m "Initial commit"
+
+    read -p "Push empty gh-pages branch to origin?" -n 1 -r
+    git push origin gh-pages:gh-pages
+
+}
+
 build () {
     BUILDDIR="$ROOT/build"
     sphinx-build -b html $SOURCEDIR $BUILDDIR
@@ -53,6 +77,9 @@ shift
 case $run_command in
     "publish")
         publish
+        ;;
+    "init")
+        setup_gh_pages
         ;;
     "build")
         build
