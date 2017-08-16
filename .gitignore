@@ -123,4 +123,4 @@ _vimrc_local.vim
 
 # SWAP specific stuff
 logs/
-config/
+conf/

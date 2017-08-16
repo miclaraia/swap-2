@@ -120,6 +120,12 @@ html_theme_options = {'navigation_depth': 4}
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+html_context = {
+    'css_files': [
+        '_static/theme_overrides.css',
+    ],
+}
+
 # html_sidebars = { '**': ['globaltoc.html', 'relations.html',
 #                          'sourcelink.html', 'searchbox.html'], }
 
