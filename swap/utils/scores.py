@@ -206,6 +206,7 @@ class ScoreExport:
         if totals[0] == 0:
             logger.error('No bogus gold labels!')
             real = 1
+            _fpr = None
         else:
             for score in self.sorted_scores:
                 if score.gold == 0:
@@ -223,6 +224,7 @@ class ScoreExport:
         if totals[1] == 0:
             logger.error('No real gold labels!')
             bogus = 0
+            _mdr = None
         else:
             for score in reversed(list(self.sorted_scores)):
                 if score.gold == 1:
