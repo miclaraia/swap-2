@@ -359,6 +359,7 @@ class ScoreStats:
                 n += 1
 
         error = error / n
+        return error
 
     @classmethod
     def ncl_stats(cls, scores):
