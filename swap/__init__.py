@@ -11,8 +11,8 @@ def version():
     root = path.abspath(path.join(root, '..'))
 
     with open(path.join(root, 'VERSION'), 'r') as f:
-        version = f.readline()
-        return version.strip()
+        v = f.readline()
+        return v.strip()
 
 __version__ = version()
 
