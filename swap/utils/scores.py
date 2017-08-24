@@ -295,6 +295,7 @@ class ScoreStats:
         self.fpr = None
         self.fnr = None
         self.mse = None
+        self.mse_t = None
 
         self.purity = None
         self.retired = None
@@ -339,6 +340,7 @@ class ScoreStats:
 
         # Calculate mean squared error
         stats['mse'] = cls.mean_squared_error(scores)
+        stats['mse_t'] = cls.mean_squared_error(scores, True)
 
         stats.update({
             'completeness': stats['tpr'],
@@ -350,12 +352,24 @@ class ScoreStats:
         return stats
 
     @classmethod
-    def mean_squared_error(cls, scores):
+    def mean_squared_error(cls, scores, retirement=False):
+        real, bogus = scores.thresholds
         error = 0
         n = 0
+
         for s in scores.sorted_scores:
             if s.gold in [0, 1]:
-                error += (s.gold - s.p) ** 2
+                if retirement:
+                    if s.p < bogus:
+                        e = 0
+                    elif s.p > real:
+                        e = 1
+                    else:
+                        e = s.gold - s.p
+                else:
+                    e = s.gold - s.p
+
+                error += e ** 2
                 n += 1
 
         error = error / n
@@ -396,7 +410,7 @@ class ScoreStats:
 
     def dict(self):
         keys = [
-            'tpr', 'tnr', 'fpr', 'fnr', 'mse',
+            'tpr', 'tnr', 'fpr', 'fnr', 'mse', 'mse_t',
             'purity', 'retired', 'retired_correct',
             'completeness', 'mdr',
             'ncl_mean', 'ncl_median', 'ncl_stdev']
