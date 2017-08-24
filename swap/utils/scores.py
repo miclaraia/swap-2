@@ -294,6 +294,8 @@ class ScoreStats:
         self.tnr = None
         self.fpr = None
         self.fnr = None
+        self.mse = None
+        self.mse_t = None
 
         self.purity = None
         self.retired = None
@@ -336,6 +338,10 @@ class ScoreStats:
         add('retired_correct',
             (high[1] + low[0]), (cls.total(low) + cls.total(high)))
 
+        # Calculate mean squared error
+        stats['mse'] = cls.mean_squared_error(scores)
+        stats['mse_t'] = cls.mean_squared_error(scores, True)
+
         stats.update({
             'completeness': stats['tpr'],
             'mdr': 1 - stats['tpr']
@@ -344,6 +350,30 @@ class ScoreStats:
         stats.update(cls.ncl_stats(scores))
 
         return stats
+
+    @classmethod
+    def mean_squared_error(cls, scores, retirement=False):
+        real, bogus = scores.thresholds
+        error = 0
+        n = 0
+
+        for s in scores.sorted_scores:
+            if s.gold in [0, 1]:
+                if retirement:
+                    if s.p < bogus:
+                        e = 0
+                    elif s.p > real:
+                        e = 1
+                    else:
+                        e = s.gold - s.p
+                else:
+                    e = s.gold - s.p
+
+                error += e ** 2
+                n += 1
+
+        error = error / n
+        return error
 
     @classmethod
     def ncl_stats(cls, scores):
@@ -380,7 +410,7 @@ class ScoreStats:
 
     def dict(self):
         keys = [
-            'tpr', 'tnr', 'fpr', 'fnr',
+            'tpr', 'tnr', 'fpr', 'fnr', 'mse', 'mse_t',
             'purity', 'retired', 'retired_correct',
             'completeness', 'mdr',
             'ncl_mean', 'ncl_median', 'ncl_stdev']
