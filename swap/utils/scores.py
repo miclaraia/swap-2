@@ -359,17 +359,14 @@ class ScoreStats:
 
         for s in scores.sorted_scores:
             if s.gold in [0, 1]:
+                p = s.p
                 if retirement:
                     if s.p < bogus:
-                        e = 0
+                        p = 0
                     elif s.p > real:
-                        e = 1
-                    else:
-                        e = s.gold - s.p
-                else:
-                    e = s.gold - s.p
+                        p = 1
 
-                error += e ** 2
+                error += (s.gold - p) ** 2
                 n += 1
 
         error = error / n
