@@ -82,14 +82,8 @@ setup(
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        'matplotlib',
-        'numpy',
         'progressbar2',
         'pymongo',
-        'scikit-learn',
-        'scipy',
-        'seaborn',
-        'pandas',
         'flask',
         'requests',
         'panoptes-client'
@@ -100,10 +94,26 @@ setup(
     # for example:
     # $ pip install -e .[dev,test]
     extras_require={
-        'dev': ['check-manifest', 'setuptools', 'wheel', 'sphinx',
-                'sphinxcontrib-napoleon', 'sphinx-rtd-theme',
-                'sphinx-argparse', 'pylint'],
-        'test': ['coverage', 'pytest'],
+        'dev': [
+            'check-manifest',
+            'setuptools',
+            'wheel',
+            'sphinx',
+            'sphinxcontrib-napoleon',
+            'sphinx-rtd-theme',
+            'sphinx-argparse',
+            'pylint',
+            'coverage',
+            'pytest',
+        ],
+        'plots': [
+            'matplotlib',
+            'seaborn',
+            'numpy',
+            'scikit-learn',
+            'scipy',
+            'pandas',
+        ],
     },
 
     # If there are data files included in your packages that need to be
