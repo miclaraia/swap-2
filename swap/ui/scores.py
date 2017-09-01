@@ -34,6 +34,10 @@ class ScoresInterface(Interface):
         Customized interface for swap scores analysis
     """
 
+    def __init__(self, ui):
+        if plots._active is True:
+            super().__init__(ui)
+
     @property
     def command(self):
         """
