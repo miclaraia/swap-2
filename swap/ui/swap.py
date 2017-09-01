@@ -47,6 +47,85 @@ class SWAPInterface(Interface):
 
     def options(self, parser):
 
+        ############################################################
+        #### Running SWAP ##########################################
+        ############################################################
+
+        parser.add_argument(
+            '--run', action='store_true',
+            help='Run the SWAP algorithm')
+
+        parser.add_argument(
+            '--train', nargs=1,
+            metavar='n',
+            help='Run swap with a test/train split. Restricts sample size '
+                 'of gold labels to \'n\'')
+
+        parser.add_argument(
+            '--controversial', nargs=1,
+            metavar='n',
+            help='Run swap with a test/train split, using the most/least '
+                 'controversial subjects')
+
+        parser.add_argument(
+            '--consensus', nargs=1,
+            metavar='n',
+            help='Run swap with a test/train split, using the most/least '
+                 'consensus subjects')
+
+        parser.add_argument(
+            '--stats', action='store_true',
+            help='Display run statistics')
+
+        parser.add_argument(
+            '--shell', action='store_true',
+            help='Drop to shell after other commands have completed.')
+
+
+        ############################################################
+        #### Plotting SWAP Data ####################################
+        ############################################################
+
+        if plots._active is True:
+
+            parser.add_argument(
+                '--subject', nargs=1,
+                metavar='file',
+                help='Generate subject track plot and output to file')
+
+            parser.add_argument(
+                '--user', nargs=1,
+                metavar='file',
+                help='Generate plot of user confusion matrices and save '
+                     'to file.Specifying - as filename renders plot in '
+                     'matplotlib viewer.')
+
+            parser.add_argument(
+                '--hist', nargs=1,
+                metavar='file',
+                help='Generate multiclass histogram plot. '
+                     'Specifying - as filename renders plot in matplotlib '
+                     'viewer.')
+
+            parser.add_argument(
+                '--presrec', nargs=1,
+                metavar='file',
+                help='Generate Precision-Recall curve (SciKit learn) '
+                     'Specifying - as filename renders plot in '
+                     'matplotlib viewer.')
+
+            parser.add_argument(
+                '--dist', nargs=2,
+                help='Show distribution plot')
+
+            parser.add_argument(
+                '--diff', nargs='*',
+                help='Visualize performance difference between swap outputs')
+
+        ############################################################
+        #### Exporting SWAP Data ###################################
+        ############################################################
+
         parser.add_argument(
             '--save', nargs=1,
             metavar='file',
@@ -63,93 +142,9 @@ class SWAPInterface(Interface):
             help='Load a pickled SWAP object')
 
         parser.add_argument(
-            '--run', action='store_true',
-            help='Run the SWAP algorithm')
-
-        parser.add_argument(
-            '--train', nargs=1,
-            metavar='n',
-            help='Run swap with a test/train split. Restricts sample size' +
-                 ' of gold labels to \'n\'')
-
-        parser.add_argument(
-            '--controversial', nargs=1,
-            metavar='n',
-            help='Run swap with a test/train split, using the most/least' +
-                 'controversial subjects')
-
-        parser.add_argument(
-            '--consensus', nargs=1,
-            metavar='n',
-            help='Run swap with a test/train split, using the most/least' +
-                 'consensus subjects')
-
-        parser.add_argument(
-            '--subject', nargs=1,
-            metavar='file',
-            help='Generate subject track plot and output to file')
-
-        # parser.add_argument(
-        #     '--utraces', nargs=1,
-        #     metavar='file',
-        #     help='Generate user track plots and output to file')
-
-        parser.add_argument(
-            '--user', nargs=1,
-            metavar='file',
-            help='Generate plot of user confusion matrices and save to file.'
-                 ' Specifying - as filename renders plot in matplotlib viewer.')
-
-        parser.add_argument(
-            '--hist', nargs=1,
-            metavar='file',
-            help='Generate multiclass histogram plot.'
-                 ' Specifying - as filename renders plot in matplotlib viewer.')
-
-        parser.add_argument(
             '--log', nargs=1,
             metavar='file',
             help='Write the entire SWAP export to file')
-
-        parser.add_argument(
-            '--presrec', nargs=1,
-            metavar='file',
-            help='Generate Precision-Recall curve (SciKit learn)'
-                 ' Specifying - as filename renders plot in matplotlib viewer.')
-
-        # parser.add_argument(
-        #     '--extremes', nargs=2,
-        #     metavar='controversial consensus',
-        #     help='Run swap with a test/train split, using the most' +
-        #          'controversial subjects and subjects with most consensus')
-
-        # parser.add_argument(
-        #     '--extreme-min', nargs=2,
-        #     metavar='controversial consensus',
-        #     help='Run swap with a test/train split, using the most' +
-        #          'controversial subjects and subjects with most consensus')
-
-        parser.add_argument(
-            '--stats', action='store_true',
-            help='Display run statistics')
-
-        parser.add_argument(
-            '--dist', nargs=2,
-            help='Show distribution plot')
-
-        parser.add_argument(
-            '--diff', nargs='*',
-            help='Visualize performance difference between swap outputs')
-
-        parser.add_argument(
-            '--shell', action='store_true',
-            help='Drop to shell after other commands have completed.')
-
-        parser.add_argument(
-            '--test', action='store_true')
-
-        parser.add_argument(
-            '--test-reorder', action='store_true')
 
         parser.add_argument(
             '--scores-from-csv', nargs=1,
@@ -165,6 +160,19 @@ class SWAPInterface(Interface):
             '--export-user-scores', nargs=1,
             metavar='file',
             help='Export user scores to csv')
+
+        ############################################################
+        #### Miscellaneous #########################################
+        ############################################################
+
+        parser.add_argument(
+            '--test', action='store_true')
+
+        parser.add_argument(
+            '--test-reorder', action='store_true')
+
+        ############################################################
+        ############################################################
 
     def call(self, args):
         swap = None
@@ -193,18 +201,6 @@ class SWAPInterface(Interface):
                 manifest = self.manifest(swap, args)
                 self.save(swap, self.f(args.save[0]), manifest)
 
-            if args.subject:
-                fname = self.f(args.subject[0])
-                plots.traces.plot_subjects(swap.history_export(), fname)
-
-            if args.user:
-                fname = self.f(args.user[0])
-                plots.plot_user_cm(swap, fname)
-
-            # if args.utraces:
-            #     fname = self.f(args.user[0])
-            #     plots.traces.plot_user(swap, fname)
-
             if args.log:
                 fname = self.f(args.log[0])
                 write_log(swap, fname)
@@ -230,26 +226,10 @@ class SWAPInterface(Interface):
                 self.export_user_scores(swap, fname)
 
         if scores is not None:
-            if args.save_scores:
-                fname = self.f(args.save_scores[0])
-                self.save(scores, fname)
-
-            if args.hist:
-                fname = self.f(args.hist[0])
-                plots.plot_class_histogram(fname, scores)
-
-            if args.dist:
-                data = [s.getScore() for s in swap.subjects]
-                plots.plot_pdf(data, self.f(args.dist[0]), swap,
-                               cutoff=float(args.dist[1]))
-
-            if args.presrec:
-                fname = self.f(args.presrec[0])
-                plots.distributions.sklearn_purity_completeness(
-                    fname, scores)
-
             if args.scores_to_csv:
                 self.scores_to_csv(scores, args.scores_to_csv[0])
+
+        self.plot(args, swap, scores)
 
         if args.diff:
             self.difference(args)
@@ -259,6 +239,36 @@ class SWAPInterface(Interface):
             code.interact(local=locals())
 
         return swap
+
+    def plot(self, args, swap, scores):
+        if plots._active is True:
+            if swap is not None:
+                if args.subject:
+                    fname = self.f(args.subject[0])
+                    plots.traces.plot_subjects(swap.history_export(), fname)
+
+                if args.user:
+                    fname = self.f(args.user[0])
+                    plots.plot_user_cm(swap, fname)
+            if scores is not None:
+                if args.save_scores:
+                    fname = self.f(args.save_scores[0])
+                    self.save(scores, fname)
+
+                if args.hist:
+                    fname = self.f(args.hist[0])
+                    plots.plot_class_histogram(fname, scores)
+
+                if args.dist:
+                    data = [s.getScore() for s in swap.subjects]
+                    plots.plot_pdf(data, self.f(args.dist[0]), swap,
+                                   cutoff=float(args.dist[1]))
+
+                if args.presrec:
+                    fname = self.f(args.presrec[0])
+                    plots.distributions.sklearn_purity_completeness(
+                        fname, scores)
+
 
     def run_swap(self, args):
         """
@@ -279,16 +289,6 @@ class SWAPInterface(Interface):
             size = int(args.consensus[0])
             control.gold_getter.consensus(size)
 
-        # if args.extremes:
-        #     controversial = int(args.extremes[0])
-        #     consensus = int(args.extremes[1])
-        #     control.gold_getter.extremes(controversial, consensus)
-
-        # if args.extreme_min:
-        #     controversial = int(args.extreme_min[0])
-        #     consensus = int(args.extreme_min[1])
-        #     control.gold_getter.extreme_min(controversial, consensus)
-
         control.run()
         swap = control.getSWAP()
 
@@ -299,7 +299,8 @@ class SWAPInterface(Interface):
         import random
         import progressbar
         with progressbar.ProgressBar(
-                max_value=len(swap.subjects)) as bar:
+            max_value=len(swap.subjects)) as bar:
+
             n = 0
             for subject in swap.subjects:
                 bar.update(n)
