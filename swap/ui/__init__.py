@@ -16,25 +16,11 @@
         An interface to generate roc curves from multiple SWAP exports
 """
 
-from swap.control import Control
-import swap.config as config
-import swap.plots as plots
-import swap.caesar.app as caesar
-
-from swap.utils.scores import ScoreExport
-from swap.swap import SWAP
-
 from swap.ui.ui import UI
 from swap.ui.scores import RocInterface, ScoresInterface
 from swap.ui.swap import SWAPInterface
 from swap.ui.caesar import CaesarInterface
 from swap.ui.admin import AdminInterface
-
-import pickle
-import argparse
-import os
-import sys
-import csv
 
 import logging
 logger = logging.getLogger(__name__)
