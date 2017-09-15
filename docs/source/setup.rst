@@ -50,7 +50,25 @@ Install SWAP::
 
     pip install -e swap
 
-*Development Mode:* Pip can also install SWAP in development mode. This means pip will install
+*Extras:* 
+SWAP has some additional functionalities that can be installed via pip. To
+install these extras, run::
+
+    pip install -e swap[{EXTRA1},{EXTRA2},...]
+
++---------------+--------------------------------------------------+
+| dev           | Install additional dependencies required for     |
+|               | development                                      |
++---------------+--------------------------------------------------+
+| plot          | Install plotting libraries and activate SWAP's   |
+|               | builtin plotting functionality.                  |
++---------------+--------------------------------------------------+
+
+
+There are a number of additional dependencies that can be installed to enhance
+SWAP. 
+Run `pip install -e swap[dev]` to install dependencies require
+Pip can also install SWAP in development mode. This means pip will install
 the project in editable mode, so changes to the source affect the runtime version.
 It will also install additional dependencies for testing and development.
 To do this, clone the git repository, navigate to the projectd directory, and run::
