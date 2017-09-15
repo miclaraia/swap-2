@@ -4,24 +4,19 @@ README
 Documentation
 -------------
 
-Find full documentation and more at [ReadTheDocs](http://hco-experiments.readthedocs.io/en/latest/)
+Full documentation is available [here](https://zooniverse.github.io/swap/)
 
-Getting Started
----------------
+Quick Start
+-----------
 
-Recommended to set up a virtual environment and install SWAP
-and its dependencies inside. You can find more information about virtual environments
-[here](http://python-guide-pt-br.readthedocs.io/en/latest/dev/virtualenvs/).
+Install SWAP
 
-### Installing SWAP
+`./bin/install`
 
-To install SWAP regularly, run
+Run Online SWAP
 
-    pip install {PATH_TO_SWAP}
+`./bin/run_online_swap`
 
-To install SWAP in development mode, run::
-
-    pip install -e {PATH_TO_SWAP}[dev,test]
 
 Using SWAP
 ----------
