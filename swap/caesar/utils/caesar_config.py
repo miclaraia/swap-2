@@ -49,7 +49,7 @@ class CaesarConfig:
         addr = Address.swap_classify()
 
         config['extractors_config'][name] = {'type': 'external', 'url': addr}
-        config['reducers_config'][name] = {'type': 'external'}
+        config['reducers_config'][name] = {'type': 'placeholder'}
 
         return config
 
