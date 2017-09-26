@@ -136,8 +136,8 @@ class CaesarInterface(Interface):
         api = caesar.API(control)
 
         logger.info('Registering swap in caesar')
-        # Try to deregister swap from caesar on exit
-        atexit.register(CaesarConfig.unregister)
+        # Try to disable swap in caesar on exit
+        atexit.register(CaesarConfig.disable)
         # Register swap in caesar
         CaesarConfig.register()
 

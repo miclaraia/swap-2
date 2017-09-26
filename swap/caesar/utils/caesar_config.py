@@ -67,6 +67,39 @@ class CaesarConfig:
         return config
 
     @classmethod
+    def enable(cls):
+        """
+            Enable swap in caesar's config. Swap should already be registered
+            in the config, with the active flag set to False.
+            Useful to re-enable swap as an external extractor/reducer
+            after it's been disabled
+        """
+        pass
+        # config = cls.get_config()
+        # name = swap.config.online_swap.caesar.reducer
+
+        # for k in cls.keys:
+        #     if name in config[k]:
+        #         config[k]['active'] = True
+
+    @classmethod
+    def disable(cls):
+        """
+            Disable swap in caesar's config, but don't remove it entirely.
+            Not currently supported by caesar, so currently just a placeholder
+            for `unregister`.
+        """
+        cls.unregister()
+
+        # General outline once this feature is supported in caesar
+        # config = cls.get_config()
+        # name = swap.config.online_swap.caesar.reducer
+
+        # for k in cls.keys:
+        #     if name in config[k]:
+        #         config[k]['active'] = False
+
+    @classmethod
     @put_config
     def clear_all(cls):
         logger.debug('clearing caesar\'s config')
