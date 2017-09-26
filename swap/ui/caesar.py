@@ -80,6 +80,14 @@ class CaesarInterface(Interface):
             '--score-export', action='store_true'
         )
 
+        parser.add_argument(
+            '--clear-config', action='store_true'
+        )
+
+        parser.add_argument(
+            '--print-config', action='store_true'
+        )
+
     def call(self, args):
         """
         Define what to do if this interface's command was passed
@@ -100,8 +108,16 @@ class CaesarInterface(Interface):
         else:
             if args.register:
                 CaesarConfig.register()
+
             elif args.unregister:
                 CaesarConfig.unregister()
+
+            elif args.clear_config:
+                CaesarConfig.clear_all()
+                self.print_config()
+
+            elif args.print_config:
+                self.print_config()
 
         if args.interact:
 
@@ -127,3 +143,9 @@ class CaesarInterface(Interface):
 
         logger.info('launching flask app')
         api.run()
+
+    @staticmethod
+    def print_config():
+        config = CaesarConfig.get_config()
+        from pprint import pprint
+        pprint(config)

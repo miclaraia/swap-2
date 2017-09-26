@@ -69,6 +69,7 @@ class CaesarConfig:
     @classmethod
     @put_config
     def clear_all(cls):
+        logger.debug('clearing caesar\'s config')
         keys = cls.keys
         config = {k: {} for k in keys}
         config['rules_config'] = []
