@@ -1,0 +1,64 @@
+#!/bin/bash
+
+source $HOME/.virtualenv/swap/bin/activate
+set -euo pipefail
+
+ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+CONFIG=$ROOT/muon_config.conf
+
+echo "Running from $ROOT"
+
+
+upload () {
+    if [ $@ < 2 ]; then
+        echo $./run {CLASSIFICATIONS} {GOLD LABELS}
+        exit 100
+    fi
+    DATA=$1
+    GOLDS=$2
+
+    run_swap --config $CONFIG admin --upload-golds $GOLDS
+    run_swap --config $CONFIG admin --upload-dump $DATA
+    run_swap --config $CONFIG admin --subject-stats
+}
+
+experiments () {
+    SWAPLOG=1
+    swap_tools --config $CONFIG randomex \
+        --num-golds 1000 20000 1000 \
+        --num-trials 20 \
+        --name muon-random-1 \
+        --description "Muon hunters comparison randomex experiment" \
+        --run &
+
+    SWAPLOG=2
+    swap_tools --config $CONFIG cvcn \
+        --num-golds 2500 \
+        --controversial 0 10000 500 \
+        --consensus 0 10000 500 \
+        --name muon-cvcn-1 \
+        --description "Muon hunters comparison cvcn experiment" \
+        --run &
+
+    SWAPLOG=3
+    swap_tools --config $CONFIG flipgolds \
+        --golds 5000 10000 20000 40000 \
+        --flipped 0 .6 .025 \
+        --series 5 \
+        --name muon-flipgolds-1 \
+        --description "Muon hunters comparison flipgolds experiment" \
+        --run &
+}
+
+command=$1
+shift
+
+case $command in
+    "upload")
+        upload $1 $2
+        shift 2
+        ;;
+    "experiments")
+        experiments
+        ;;
+esac
