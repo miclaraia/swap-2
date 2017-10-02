@@ -25,9 +25,9 @@ upload () {
 experiments () {
     screen -S 1-random -d -m $ROOT/run run 1
     sleep 10
-    screen -S 1-random -d -m $ROOT/run run 2
+    screen -S 2-cvcn -d -m $ROOT/run run 2
     sleep 10
-    screen -S 1-random -d -m $ROOT/run run 3
+    screen -S 3-flipgolds -d -m $ROOT/run run 3
 
 }
 
