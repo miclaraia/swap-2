@@ -10,7 +10,7 @@ echo "Running from $ROOT"
 
 
 upload () {
-    if [ $@ < 2 ]; then
+    if [[ $@ < 2 ]]; then
         echo $./run {CLASSIFICATIONS} {GOLD LABELS}
         exit 100
     fi
