@@ -24,30 +24,35 @@ upload () {
 
 experiments () {
     SWAPLOG=1
-    swap_tools --config $CONFIG randomex \
+    screen -S 1-random -d -m \
+        swap_tools --config $CONFIG randomex \
         --num-golds 1000 20000 1000 \
         --num-trials 20 \
-        --name muon-random-1 \
+        --name muon-1-random \
         --description "Muon hunters comparison randomex experiment" \
-        --run &
+        --run
+    sleep 10
 
     SWAPLOG=2
-    swap_tools --config $CONFIG cvcn \
+    screen -S 2-cvcn -d -m \
+        swap_tools --config $CONFIG cvcn \
         --num-golds 2500 \
         --controversial 0 10000 500 \
         --consensus 0 10000 500 \
-        --name muon-cvcn-1 \
+        --name muon-2-cvcn \
         --description "Muon hunters comparison cvcn experiment" \
-        --run &
+        --run
+    sleep 10
 
     SWAPLOG=3
-    swap_tools --config $CONFIG flipgolds \
+    screen -S 3-flip -d -m \
+        swap_tools --config $CONFIG flipgolds \
         --golds 5000 10000 20000 40000 \
         --flipped 0 .6 .025 \
         --series 5 \
-        --name muon-flipgolds-1 \
+        --name muon-3-flipgolds \
         --description "Muon hunters comparison flipgolds experiment" \
-        --run &
+        --run
 }
 
 command=$1
