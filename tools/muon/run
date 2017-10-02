@@ -23,36 +23,48 @@ upload () {
 }
 
 experiments () {
-    SWAPLOG=1
-    screen -S 1-random -d -m \
-        swap_tools --config $CONFIG randomex \
-        --num-golds 1000 20000 1000 \
-        --num-trials 20 \
-        --name muon-1-random \
-        --description "Muon hunters comparison randomex experiment" \
-        --run
+    screen -S 1-random -d -m $ROOT/run run 1
     sleep 10
-
-    SWAPLOG=2
-    screen -S 2-cvcn -d -m \
-        swap_tools --config $CONFIG cvcn \
-        --num-golds 2500 \
-        --controversial 0 10000 500 \
-        --consensus 0 10000 500 \
-        --name muon-2-cvcn \
-        --description "Muon hunters comparison cvcn experiment" \
-        --run
+    screen -S 1-random -d -m $ROOT/run run 2
     sleep 10
+    screen -S 1-random -d -m $ROOT/run run 3
 
-    SWAPLOG=3
-    screen -S 3-flip -d -m \
-        swap_tools --config $CONFIG flipgolds \
-        --golds 5000 10000 20000 40000 \
-        --flipped 0 .6 .025 \
-        --series 5 \
-        --name muon-3-flipgolds \
-        --description "Muon hunters comparison flipgolds experiment" \
-        --run
+}
+
+run () {
+    case $1 in
+        "1")
+            export SWAPLOG=1
+            swap_tools --config $CONFIG randomex \
+                --num-golds 1000 20000 1000 \
+                --num-trials 20 \
+                --name muon-1-random \
+                --description "Muon hunters comparison randomex experiment" \
+                --run
+            ;;
+        "2")
+            export SWAPLOG=2
+            screen -S 2-cvcn -d -m \
+                swap_tools --config $CONFIG cvcn \
+                --num-golds 2500 \
+                --controversial 0 10000 500 \
+                --consensus 0 10000 500 \
+                --name muon-2-cvcn \
+                --description "Muon hunters comparison cvcn experiment" \
+                --run
+            ;;
+        "3")
+            export SWAPLOG=3
+            screen -S 3-flip -d -m \
+                swap_tools --config $CONFIG flipgolds \
+                --golds 5000 10000 20000 40000 \
+                --flipped 0 .6 .025 \
+                --series 5 \
+                --name muon-3-flipgolds \
+                --description "Muon hunters comparison flipgolds experiment" \
+                --run
+            ;;
+    esac
 }
 
 command=$1
@@ -65,5 +77,8 @@ case $command in
         ;;
     "experiments")
         experiments
+        ;;
+    "run")
+        run $1
         ;;
 esac
