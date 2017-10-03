@@ -44,8 +44,7 @@ run () {
             ;;
         "2")
             export SWAPLOG=2
-            screen -S 2-cvcn -d -m \
-                swap_tools --config $CONFIG cvcn \
+            swap_tools --config $CONFIG cvcn \
                 --num-golds 2500 \
                 --controversial 0 10000 500 \
                 --consensus 0 10000 500 \
@@ -55,8 +54,7 @@ run () {
             ;;
         "3")
             export SWAPLOG=3
-            screen -S 3-flip -d -m \
-                swap_tools --config $CONFIG flipgolds \
+            swap_tools --config $CONFIG flipgolds \
                 --golds 5000 10000 20000 40000 \
                 --flipped 0 .6 .025 \
                 --series 5 \
