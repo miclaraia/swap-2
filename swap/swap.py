@@ -15,6 +15,7 @@ from swap.agents.user import User
 from swap.utils.stats import Stats
 from swap.utils.scores import ScoreExport, Score
 from swap.utils.history import History, HistoryExport
+from swap.utils.user_scores import UserHistoryExport
 from swap.utils.classification import Classification
 
 from swap.db import DB
@@ -360,6 +361,9 @@ class SWAP:
 
     @property
     def history(self):
+        """
+            Only regenerate history when necessary
+        """
         if self._history is None or self._history_stale is True:
             self._history = self.history_export()
             self._history_stale = False
@@ -393,6 +397,9 @@ class SWAP:
 
         logger.debug('done')
         return HistoryExport(history)
+
+    def user_history_export(self):
+        return UserHistoryExport.parse_users(self.users)
 
     def debug_str(self):
         s = ''

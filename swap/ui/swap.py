@@ -101,6 +101,11 @@ class SWAPInterface(Interface):
                      'matplotlib viewer.')
 
             parser.add_argument(
+                '--user-convergence', nargs=1,
+                metavar='file'
+            )
+
+            parser.add_argument(
                 '--hist', nargs=1,
                 metavar='file',
                 help='Generate multiclass histogram plot. '
@@ -250,6 +255,11 @@ class SWAPInterface(Interface):
                 if args.user:
                     fname = self.f(args.user[0])
                     plots.plot_user_cm(swap, fname)
+
+                if args.user_convergence:
+                    fname = self.f(args.user_convergence[0])
+                    history = swap.user_history_export()
+                    plots.performance.plot_max_contributors(history, fname)
             if scores is not None:
                 if args.save_scores:
                     fname = self.f(args.save_scores[0])
