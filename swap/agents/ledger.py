@@ -131,6 +131,10 @@ class Ledger:
         self._change(id_)
         # self.transactions[id_].notify()
 
+    def sorted_ledger(self):
+        s = sorted(self.transactions.values(), key=lambda t: t.order)
+        return list(s)
+
     def print_(self):
         print(self)
 

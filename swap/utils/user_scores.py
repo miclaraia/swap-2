@@ -28,7 +28,7 @@ class UserHistoryExport:
 
     @staticmethod
     def parse_user(user):
-        history = [t.score for t in user.ledger]
+        history = [t.score for t in user.ledger.sorted_ledger()]
         id_ = user.id
 
         return History(id_, history)
