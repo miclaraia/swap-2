@@ -15,9 +15,9 @@ class History:
 
         for i, score in enumerate(self.scores):
             if compare(score[gold]):
-                return i + 1
+                return i
 
-        return len(self.scores)
+        return len(self.scores) - 1
 
 
 
