@@ -8,10 +8,7 @@ class History:
         self.id = id_
         self.scores = score_history
 
-    def convergence(self):
-        return (self._part_converge(0), self._part_converge(1))
-
-    def _part_converge(self, gold):
+    def convergence(self, gold):
         end = self.scores[-1][gold]
         def compare(v):
             return abs(v - end) < 1e-9
