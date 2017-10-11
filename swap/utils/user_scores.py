@@ -19,6 +19,9 @@ class History:
 
         return len(self.scores) - 1
 
+    def get_scores(self, gold):
+        return [s[gold] for s in self.scores]
+
 
 
 class UserHistoryExport:
