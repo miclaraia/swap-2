@@ -24,15 +24,23 @@ def plot_user_cm(swap, fname):
 
 def plot_max_contributors(history, fname):
     data = history.max_contributors(15)
-    convergence = history.convergence()
 
     plt.figure(1)
-    for u in data:
-        h = data[u]
-        c = convergence[u] - 1
+    for i, g in enumerate([0, 1]):
+        ax = plt.subplot(210 + i + 1)
+        for u in data:
+            # if u == 2947:
+                # continue
+            h = data[u]
+            scores = h.get_scores(g)
+            c = h.convergence(g)
 
-        plt.plot(range(len(h)), h)
-        plt.scatter(c, h[c])
+            if len(h.scores) > 0:
+                x, y = zip(*enumerate(scores))
+                plt.plot(x, y, label=u, alpha=.8)
+                plt.plot(c, scores[c], 'ro')
+
+    ax.legend()
 
     if fname is None:
         plt.show()
