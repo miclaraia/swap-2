@@ -49,7 +49,7 @@ class UserHistoryExport:
         history = self.history
         def key(item):
             user, _ = item
-            return len(history[user])
+            return len(history[user].scores)
         users = sorted(self.history.items(), key=key)
         users = reversed(users[-n:])
 
