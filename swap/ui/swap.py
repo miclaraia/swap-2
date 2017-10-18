@@ -23,6 +23,7 @@ from swap.swap import SWAP
 from swap.control import Control
 from swap.ui.ui import Interface
 from swap.ui.utils import load_pickle, write_log
+from swap.db import DB
 
 import os
 import csv
@@ -137,9 +138,8 @@ class SWAPInterface(Interface):
             help='save swap to file')
 
         parser.add_argument(
-            '--save-scores', nargs=1,
-            metavar='file',
-            help='save swap scores to file')
+            '--save-scores', action='store_true',
+            help='save swap scores to mongo database')
 
         parser.add_argument(
             '--load', nargs=1,
@@ -262,8 +262,7 @@ class SWAPInterface(Interface):
                     plots.performance.plot_max_contributors(history, fname)
             if scores is not None:
                 if args.save_scores:
-                    fname = self.f(args.save_scores[0])
-                    self.save(scores, fname)
+                    DB().subjects.save_scores(scores)
 
                 if args.hist:
                     fname = self.f(args.hist[0])

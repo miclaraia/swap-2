@@ -5,7 +5,7 @@ import swap.config as config
 
 import sys
 import csv
-from pymongo import IndexModel, ASCENDING
+from pymongo import IndexModel, ASCENDING, UpdateOne
 import logging
 
 logger = logging.getLogger(__name__)
@@ -106,6 +106,16 @@ class Subjects(Collection):
         self.collection.insert_many(data)
         logger.debug('done')
 
+    def save_scores(self, scores):
+        requests = []
+        for score in scores:
+            requests.append(UpdateOne(
+                {'subject': score.id},
+                {'$set': {'score': score.p, 'retired_as': score.label}}
+            ))
+
+        self.collection.bulk_write(requests)
+
 
 class SubjectStats:
 
@@ -135,7 +145,12 @@ class SubjectStats:
         return cls(subject_id, annotations, **stats)
 
     def dict(self):
-        annotations = {'N': self.annotations[0], 'Y': self.annotations[1]}
+        annotations = {
+            'N': self.annotations[0],
+            'Y': self.annotations[1],
+            'total': sum([self.annotations[i] for i in [0, 1]])
+        }
+
         return {
             'subject_id': self.id,
             'annotations': annotations,
