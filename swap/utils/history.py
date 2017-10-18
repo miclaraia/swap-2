@@ -21,11 +21,30 @@ class History:
         self.scores = score_history
 
     def retire(self, thresholds):
-        if thresholds is not None:
-            bogus, real = thresholds
-            for i, score in enumerate(self.scores):
-                if score < bogus or score > real:
-                    return i, score
+
+        bogus, real = thresholds
+        def check(score):
+            return score < bogus and score > real
+
+        for i, score in enumerate(self.scores):
+            if check(score):
+                return (i, score)
+
+    def _retire_back(self, thresholds):
+
+        bogus, real = thresholds
+        def check(score):
+            return score > bogus and score < real
+
+        for i in reversed(range(len(self.scores))):
+            score = self.scores[i]
+            if check(score):
+                i += 1
+                if i >= len(self.scores):
+                    return self.last
+                return (i, self.scores[i])
+
+    def last(self):
         return ((len(self.scores) - 1), self.scores[-1])
 
 
@@ -58,9 +77,14 @@ class HistoryExport:
 
     def score_export(self, thresholds=None, all_golds=False):
         scores = {}
+        if thresholds is None:
+            retire = lambda h: h.last()
+        else:
+            retire = lambda h: h.retire()
+
         for history in self.history.values():
             id_ = history.id
-            n, p = history.retire(thresholds)
+            n, p = retire(history)
 
             score = Score(id_, history.gold, p, ncl=n)
             scores[id_] = score

@@ -15,7 +15,7 @@ class Score:
     Stores information on each subject for export
     """
 
-    def __init__(self, id_, gold, p, ncl=None, retired=False):
+    def __init__(self, id_, gold, p, ncl=None):
         """
         Parameters
         ----------
@@ -29,31 +29,28 @@ class Score:
         self.id = id_
         self.gold = gold
         self.p = p
-        self.retired = retired
+        self.label = -1
         self.ncl = ncl
-        self.label = None
 
     def dict(self):
         return {
             'id': self.id, 'gold': self.gold, 'p': self.p,
-            'retired': self.retired, 'ncl': self.ncl}
+            'label': self.label, 'ncl': self.ncl}
 
     @property
     def is_retired(self):
-        return self.retired
+        return self.label in [0, 1]
 
-    def retire(self, p=None):
-        if p is not None:
-            self.p = p
-        self.retired = True
+    def retire(self, label):
+        self.label = label
 
     def __str__(self):
         ncl = self.ncl
         if type(ncl) is float:
             ncl = '%.3f' % ncl
 
-        return 'id: %d gold: %d p: %.4f retired: %s ncl: %s' % \
-            (self.id, self.gold, self.p, str(self.retired), ncl)
+        return 'id: %d gold: %d p: %.4f label: %s ncl: %s' % \
+            (self.id, self.gold, self.p, str(self.label), ncl)
 
     def __repr__(self):
         return '{%s}' % self.__str__()
@@ -155,8 +152,10 @@ class ScoreExport:
     def set_retired_flags(self):
         for score in self.sorted_scores:
             bogus, real = self.thresholds
-            if score.p < bogus or score.p > real:
-                score.retire()
+            if score.p < bogus:
+                score.retire(0)
+            elif score.p > real:
+                score.retire(1)
 
     def get_real_golds(self):
         """
@@ -235,6 +234,16 @@ class ScoreExport:
                     if _mdr < mdr:
                         bogus = score.p
                         break
+
+        if bogus >= config.p0:
+            logger.warning('bogus is greater than prior, '
+                           'setting bogus threshold to p0')
+            bogus = config.p0
+
+        if real <= config.p0:
+            logger.warning('real is less than prior, '
+                           'setting real threshold to p0')
+            real = config.p0
 
         logger.debug('bogus %.4f real %.4f, fpr %.4f mdr %.4f',
                      bogus, real, _fpr, _mdr)
