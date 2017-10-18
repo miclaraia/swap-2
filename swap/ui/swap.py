@@ -231,6 +231,9 @@ class SWAPInterface(Interface):
                 self.export_user_scores(swap, fname)
 
         if scores is not None:
+            if args.save_scores:
+                DB().subjects.save_scores(scores)
+
             if args.scores_to_csv:
                 self.scores_to_csv(scores, args.scores_to_csv[0])
 
@@ -261,9 +264,6 @@ class SWAPInterface(Interface):
                     history = swap.user_history_export()
                     plots.performance.plot_max_contributors(history, fname)
             if scores is not None:
-                if args.save_scores:
-                    DB().subjects.save_scores(scores)
-
                 if args.hist:
                     fname = self.f(args.hist[0])
                     plots.plot_class_histogram(fname, scores)

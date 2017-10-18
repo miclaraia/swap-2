@@ -30,6 +30,8 @@ class History:
             if check(score):
                 return (i, score)
 
+        return self.last()
+
     def _retire_back(self, thresholds):
 
         bogus, real = thresholds
@@ -80,7 +82,7 @@ class HistoryExport:
         if thresholds is None:
             retire = lambda h: h.last()
         else:
-            retire = lambda h: h.retire()
+            retire = lambda h: h.retire(thresholds)
 
         for history in self.history.values():
             id_ = history.id

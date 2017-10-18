@@ -254,7 +254,7 @@ class ScoreExport:
         return len(self.scores)
 
     def __iter__(self):
-        return iter(self.scores)
+        return iter(self.scores.values())
 
     def roc(self):
         """
