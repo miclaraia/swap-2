@@ -32,16 +32,6 @@ class Subjects(Collection):
 
     #######################################################################
 
-    def get_metadata(self, subject_id):
-        cursor = self.collection.find({'subject': subject_id}).sort('_id', -1)
-
-        try:
-            data = cursor.next()
-            data.pop('_id')
-            return data
-        except StopIteration:
-            pass
-
     def get_subjects(self):
         cursor = self.collection.find(projection={'subject': 1})
         subjects = []
@@ -80,31 +70,61 @@ class Subjects(Collection):
                 sys.stdout.write("Updated %d subjects\r" % count)
         print()
 
-    def upload_metadata_dump(self, fname):
-        self._rebuild()
 
-        logger.info('parsing csv dump')
-        data = []
+    #######################################################################
+    #####   Metadata   ####################################################
+    #######################################################################
+
+    def get_metadata(self, subject_id):
+        cursor = self.collection.find({'subject': subject_id}).sort('_id', -1)
+
+        try:
+            data = cursor.next()
+            return data['metadata']
+        except StopIteration:
+            pass
+
+    def update_metadata(self, subject, metadata, write=True):
+        updates = {}
+        for key, value in metadata.items():
+            updates['metadata.%s' % key] = value
+        request = {
+            'filter': {'subject': subject},
+            'update': {'$set': updates}
+        }
+
+        if write:
+            self.collection.update_one(**request)
+        else:
+            return UpdateOne(**request)
+
+    def upload_metadata_dump(self, fname):
+        logger.info('parsing csv metadata')
         parser = parsers.MetadataParser('csv')
 
         with open(fname, 'r') as file:
             reader = csv.DictReader(file)
+            requests = []
 
             for i, row in enumerate(reader):
-                item = parser.process(row)
-                print(item)
-                data.append(item)
+                subject, metadata = parser.process(row)
+                requests.append(self.update_metadata(subject, metadata, False))
 
-                sys.stdout.flush()
-                sys.stdout.write("%d records processed\r" % i)
+                if i % 100 == 0:
+                    sys.stdout.flush()
+                    sys.stdout.write("%d records processed\r" % i)
 
-                if len(data) > 100000:
-                    print(data)
-                    self.collection.insert_many(data)
-                    data = []
+                if len(requests) > 100000:
+                    print('uploading requests')
+                    self.collection.bulk_write(requests)
+                    requests = []
 
-        self.collection.insert_many(data)
+        self.collection.bulk_write(requests)
         logger.debug('done')
+
+    #######################################################################
+    #####   ###############################################################
+    #######################################################################
 
     def save_scores(self, scores):
         requests = []
