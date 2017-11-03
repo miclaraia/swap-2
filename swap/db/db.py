@@ -60,6 +60,9 @@ class Collection:
 
         self.collection.insert_many(data)
 
+    def bulk_write(self, requests):
+        self.collection.bulk_write(requests)
+
     def upload(self):
         pass
 
