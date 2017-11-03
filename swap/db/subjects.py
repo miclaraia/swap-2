@@ -149,7 +149,7 @@ class Subjects(Collection):
         scores = {}
         for item in cursor:
             s = item['subject']
-            g = item['gold']
+            g = item.get('gold', -1)
             p = item['score']
             label = item['retired_as']
             score = Score(s, g, p)
