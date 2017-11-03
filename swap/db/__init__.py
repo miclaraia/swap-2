@@ -31,19 +31,22 @@ class _DB:
     """
     # pylint: disable=R0902
 
-    def __init__(self):
+    def __init__(self, host=None, port=None, name=None):
         logger.info('opening mongo connection')
 
         # Get database configuration from config file
         cdb = config.database
-        host = cdb.host
-        db_name = cdb.name
-        port = cdb.port
+        if host is None:
+            host = cdb.host
+        if name is None:
+            name = cdb.name
+        if port is None:
+            port = cdb.port
 
-        print('Database Handler initializing:\nHost => {}\nDB => {}\nPort => {}'.format(host, db_name, port))
+        print('Database Handler initializing:\nHost => {}\nDB => {}\nPort => {}'.format(host, name, port))
 
         self._client = MongoClient('%s:%d' % (host, port))
-        self._db = self._client[db_name]
+        self._db = self._client[name]
         self.batch_size = int(cdb.max_batch_size)
 
         self.classifications = Classifications(self)
