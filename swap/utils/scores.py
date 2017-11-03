@@ -256,6 +256,12 @@ class ScoreExport:
     def __iter__(self):
         return iter(self.scores.values())
 
+    def __contains__(self, subject):
+        return subject in self.scores
+
+    def __getitem__(self, subject):
+        return self.scores[subject]
+
     def roc(self):
         """
         Generate iterator of information for a ROC curve
