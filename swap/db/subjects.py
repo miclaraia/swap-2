@@ -2,6 +2,7 @@
 from swap.db.db import Collection
 import swap.utils.parsers as parsers
 import swap.config as config
+import swap.utils.scores
 
 import sys
 import csv
@@ -90,7 +91,7 @@ class Subjects(Collection):
             updates['metadata.%s' % key] = value
         request = {
             'filter': {'subject': subject},
-            'update': {'$set': updates}
+            'update': {'$set': updates},
         }
 
         if write:
@@ -135,6 +136,28 @@ class Subjects(Collection):
             ))
 
         self.collection.bulk_write(requests)
+
+    def get_scores(self):
+        Score = swap.utils.scores.Score
+        ScoreExport = swap.utils.scores.ScoreExport
+
+        cursor = self.collection.find(
+            {},
+            {'subject': 1, 'gold': 1, 'score': 1, 'retired_as': 1}
+        )
+
+        scores = {}
+        for item in cursor:
+            s = item['subject']
+            g = item['gold']
+            p = item['score']
+            label = item['retired_as']
+            score = Score(s, g, p)
+            score.label = label
+
+            scores[s] = score
+
+        return ScoreExport(scores, False)
 
 
 class SubjectStats:
