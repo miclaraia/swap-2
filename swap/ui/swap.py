@@ -239,9 +239,6 @@ class SWAPInterface(Interface):
 
         self.plot(args, swap, scores)
 
-        if args.diff:
-            self.difference(args)
-
         if args.shell:
             import code
             code.interact(local=locals())
@@ -250,6 +247,9 @@ class SWAPInterface(Interface):
 
     def plot(self, args, swap, scores):
         if plots._active is True:
+            if args.diff:
+                self.difference(args)
+
             if swap is not None:
                 if args.subject:
                     fname = self.f(args.subject[0])
