@@ -157,7 +157,9 @@ class Subjects(Collection):
 
             scores[s] = score
 
-        return ScoreExport(scores, False)
+        se = ScoreExport(scores, False)
+        se.gold_getter = None
+        return se
 
 
 class SubjectStats:
