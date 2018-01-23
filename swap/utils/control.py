@@ -2,9 +2,12 @@
 import pickle
 import os
 
-from swap.utils.subject import Subject
-from swap.utils.user import User
+from swap.utils.subject import Subjects, ScoreStats, Thresholds
+from swap.utils.user import Users
 import swap.data
+
+import logging
+logger = logging.getLogger(__name__)
 
 
 class Config:
@@ -20,6 +23,8 @@ class Config:
         if 'annotation' in kwargs:
             annotation.update(kwargs['annotation'])
         self.annotation = annotation
+        self.mdr = kwargs.get('mdr', .1)
+        self.fpr = kwargs.get('fpr', .01)
 
 
 class SWAP:
@@ -28,57 +33,9 @@ class SWAP:
         self.name = name
         self.users = Users()
         self.subjects = Subjects()
-        self.cl = []
 
-    def classify_many(self, classifications):
-        for user, subject, cl in classifications:
-            self.classify(user, subject, cl)
-
-        self.apply_subjects()
-
-    def classify(self, user, subject, cl):
-        user = self.users[user]
-        subject = self.subjects[subject]
-
-        user.classify(subject, cl)
-
-        def apply():
-            subject.classify(user, cl)
-        self.cl.append(apply)
-
-    def apply_subjects(self):
-        for cl in self.cl:
-            cl()
-        self.cl = []
-
-    def score_users(self):
-        for u in self.users.iter():
-            u.update_score()
-
-    def score_subjects(self):
-        for s in self.subjects.iter():
-            s.update_score()
-
-    def transfer_user_scores(self):
-        for u in self.users.iter():
-            for subject, _, _ in u.history:
-                self.subjects[subject].update_user(u)
-
-    def apply_gold(self, subject, gold):
-        subject = self.subjects[subject]
-        subject.gold = gold
-        for user, _, _ in subject.history:
-            self.users[user].update_subject(subject)
-
-    def dump(self):
-        data = {
-            'users': self.users.dump(),
-            'subjects': self.subjects.dump(),
-        }
-
-        fname = self.name + '.pkl'
-        with open(swap.data.path(fname), 'wb') as file:
-            pickle.dump(data, file)
+        self.thresholds = None
+        self._performance = None
 
     @classmethod
     def load(cls, name):
@@ -91,75 +48,78 @@ class SWAP:
             swp = SWAP(name)
             swp.users = Users.load(data['users'])
             swp.subjects = Subjects.load(data['subjects'])
+
+            if data.get('thresholds'):
+                swp.thresholds = Thresholds.load(
+                    swp.subjects, data['thresholds'])
         else:
             swp = SWAP(name)
         return swp
 
+    def __call__(self):
+        print('score users')
+        self.score_users()
+        print('apply subjects')
+        self.apply_subjects()
+        print('score_subjects')
+        self.score_subjects()
 
-class Collection:
+    def classify(self, user, subject, cl):
+        user = self.users[user]
+        subject = self.subjects[subject]
 
-    def __init__(self):
-        self.items = {}
+        user.classify(subject, cl)
+        subject.classify(user, cl)
 
-    def add(self, item):
-        self.items[item.id] = item
+    def score_users(self):
+        for u in self.users.iter():
+            u.update_score()
 
-    def iter(self):
-        for i in self.items:
-            yield self.items[i]
+    def score_subjects(self):
+        for s in self.subjects.iter():
+            s.update_score()
 
-    def list(self):
-        return list(self.items.values())
+    def apply_subjects(self):
+        for u in self.users.iter():
+            for subject, _, _ in u.history:
+                self.subjects[subject].update_user(u)
 
-    def new(self, item):
-        pass
+    def apply_gold(self, subject, gold):
+        subject = self.subjects[subject]
+        subject.gold = gold
+        for user, _, _ in subject.history:
+            self.users[user].update_subject(subject)
 
-    def __getitem__(self, item):
-        if item not in self.items:
-            self.items[item] = self.new(item)
-        return self.items[item]
+    def apply_golds(self, golds):
+        for subject, gold in golds:
+            self.apply_gold(subject, gold)
 
-    def dump(self):
-        data = []
-        for item in self.items.values():
-            data.append(item.dump())
+    def retire(self, fpr, mdr):
+        t = Thresholds(self.subjects, fpr, mdr)
+        self.thresholds = t
+        bogus, real = t()
 
-        return data
+        for subject in self.subjects.iter():
+            subject.update_score((bogus, real))
 
-    @classmethod
-    def load(cls, data):
-        items = cls()
-        for item in data:
-            item = cls._load_item(item)
-            items.items[item.id] = item
-        return items
+    def save(self):
+        if self.thresholds is not None:
+            thresholds = self.thresholds.dump()
+        else:
+            thresholds = None
+        data = {
+            'users': self.users.dump(),
+            'subjects': self.subjects.dump(),
+            'thresholds': thresholds,
+        }
 
-    @classmethod
-    def _load_item(cls, data):
-        pass
+        fname = self.name + '.pkl'
+        with open(swap.data.path(fname), 'wb') as file:
+            pickle.dump(data, file)
 
-    def __str__(self):
-        return '%d items' % len(self.items)
-
-    def __repr__(self):
-        return str(self)
-
-
-class Subjects(Collection):
-
-    def new(self, subject):
-        return Subject.new(subject, -1)
-
-    @classmethod
-    def _load_item(cls, data):
-        return Subject.load(data)
-
-
-class Users(Collection):
-
-    def new(self, user):
-        return User.new(user, None)
-
-    @classmethod
-    def _load_item(cls, data):
-        return User.load(data)
+    @property
+    def performance(self):
+        if self._performance is None:
+            self._performance = ScoreStats(self.subjects, self.thresholds)
+            self._performance()
+        return self._performance

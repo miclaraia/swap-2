@@ -1,6 +1,8 @@
 
 from collections import OrderedDict
 
+from swap.utils.collection import Collection
+
 
 class User:
 
@@ -23,12 +25,10 @@ class User:
         self.history.append((subject.id, subject.gold, cl))
 
     def update_subject(self, subject):
-        h = None
-        i = 0
-        for i, h in self.history:
+        for i in range(len(self.history)):
+            h = self.history[i]
             if h[0] == subject.id:
-                break
-        self.history[i] = (subject.id, subject.gold, h[2])
+                self.history[i] = (h[0], subject.gold, h[2])
 
     def update_score(self):
         correct = [0, 0]
@@ -67,23 +67,11 @@ class User:
         return str(self)
 
 
-class Users:
+class Users(Collection):
 
-    def __init__(self):
-        self.subjects = {}
+    def new(self, user):
+        return User.new(user, None)
 
-    def add(self, subject):
-        self.subjects[subject.id] = subject
-
-    def iter(self):
-        for s in self.subjects:
-            yield self.subjects[s]
-
-    def list(self):
-        return list(self.subjects.values())
-
-    def __getitem__(self, subject):
-        return self.subjects[subject]
-
-
-
+    @classmethod
+    def _load_item(cls, data):
+        return User.load(data)

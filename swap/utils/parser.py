@@ -1,5 +1,7 @@
 
 import json
+import logging
+logger = logging.getLogger(__name__)
 
 
 class ClassificationParser:
@@ -13,10 +15,15 @@ class ClassificationParser:
             user = 0
         else:
             user = int(user)
+
+        annotation = self.annotation.parse(cl)
+        if annotation is None:
+            logger.error('Skipping classification %s', cl)
+            return None
         return {
             'user': user,
             'subject': int(cl['subject_ids']),
-            'cl': int(self.annotation.parse(cl))
+            'cl': annotation,
         }
 
 
@@ -28,13 +35,17 @@ class AnnotationParser:
     def parse(self, cl):
         annotations = json.loads(cl['annotations'])
         annotation = self._find_task(annotations)
+        if annotation is None:
+            return None
 
         value = self._parse_value(annotation['value'])
         if value is None:
             task = self.parser['task']
             value_key = self.parser['value_key']
-            print(task, value_key)
-            raise Exception
+
+            logger.error('Error parsing annotation %s %s',
+                         str(task), str(value_key))
+            return None
 
         return value
 
@@ -67,7 +78,8 @@ class AnnotationParser:
                 if annotation['task'] == task:
                     return annotation
 
-        raise Exception
+        logger.error('Can\' find task %s', annotations)
+        return None
         # raise self.AnnotationError(task, '', annotations)
 
     def _parse_value(self, value):
