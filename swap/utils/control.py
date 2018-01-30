@@ -26,16 +26,36 @@ class Config:
         self.mdr = kwargs.get('mdr', .1)
         self.fpr = kwargs.get('fpr', .01)
 
+    def dump(self):
+        return self.__dict__.copy()
+
+    @classmethod
+    def load(cls, dump):
+        config = cls()
+        config.__dict__.update(dump)
+        return config
+
+    def __str__(self):
+        return str(self.dump())
+
+    def __repr__(self):
+        return str(self)
+
 
 class SWAP:
 
-    def __init__(self, name):
+    def __init__(self, name, config=None):
         self.name = name
         self.users = Users()
         self.subjects = Subjects()
 
+        if config is None:
+            config = Config()
+        self.config = config
+
         self.thresholds = None
         self._performance = None
+        self.last_id = None
 
     @classmethod
     def load(cls, name):
@@ -45,7 +65,10 @@ class SWAP:
             with open(swap.data.path(fname), 'rb') as file:
                 data = pickle.load(file)
 
-            swp = SWAP(name)
+            config = Config.load(data['config'])
+
+            swp = SWAP(name, config)
+            swp.last_id = data['last_id']
             swp.users = Users.load(data['users'])
             swp.subjects = Subjects.load(data['subjects'])
 
@@ -53,7 +76,7 @@ class SWAP:
                 swp.thresholds = Thresholds.load(
                     swp.subjects, data['thresholds'])
         else:
-            swp = SWAP(name)
+            swp = SWAP(name, config)
         return swp
 
     def __call__(self):
@@ -64,7 +87,10 @@ class SWAP:
         print('score_subjects')
         self.score_subjects()
 
-    def classify(self, user, subject, cl):
+    def classify(self, user, subject, cl, id_):
+        if self.last_id is None or id_ > self.last_id:
+            self.last_id = id_
+
         user = self.users[user]
         subject = self.subjects[subject]
 
@@ -108,9 +134,11 @@ class SWAP:
         else:
             thresholds = None
         data = {
+            'config': self.config.dump(),
             'users': self.users.dump(),
             'subjects': self.subjects.dump(),
             'thresholds': thresholds,
+            'last_id': self.last_id,
         }
 
         fname = self.name + '.pkl'

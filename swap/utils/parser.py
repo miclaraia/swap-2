@@ -12,7 +12,7 @@ class ClassificationParser:
     def parse(self, cl):
         user = cl['user_id']
         if user == '':
-            user = 0
+            user = cl['user_name']
         else:
             user = int(user)
 
@@ -24,6 +24,7 @@ class ClassificationParser:
             'user': user,
             'subject': int(cl['subject_ids']),
             'cl': annotation,
+            'id_': int(cl['classification_id']),
         }
 
 
