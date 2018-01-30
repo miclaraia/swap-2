@@ -97,6 +97,10 @@ class SWAP:
         user.classify(subject, cl)
         subject.classify(user, cl)
 
+    def truncate(self):
+        self.users.truncate()
+        self.subjects.truncate()
+
     def score_users(self):
         for u in self.users.iter():
             u.update_score()

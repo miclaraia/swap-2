@@ -18,7 +18,7 @@ def swap():
     pass
 
 
-swap.command()
+@swap.command()
 @click.argument('name')
 def clear(name):
     swap = SWAP.load(name)
@@ -46,6 +46,12 @@ def run(name, data):
                 sys.stdout.write("%d records processed\r" % i)
 
             swap.classify(**row)
+
+            if i > 0 and i % 1e6 == 0:
+                print()
+                print('Applying records')
+                swap()
+                swap.truncate()
 
     swap()
     swap.retire(config.fpr, config.mdr)

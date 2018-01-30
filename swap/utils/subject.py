@@ -10,16 +10,17 @@ logger = logging.getLogger(__name__)
 class Subject:
     p0 = .12
 
-    def __init__(self, subject, gold, score, history, retired=None):
+    def __init__(self, subject, gold, score, retired=None):
         self.id = subject
         self.gold = gold
+        self.prior = score
         self.score = score
-        self.history = history
+        self.history = []
         self.retired = retired
 
     @classmethod
     def new(cls, subject, gold):
-        return cls(subject, gold, cls.p0, [])
+        return cls(subject, gold, cls.p0)
 
     def classify(self, user, cl):
         # Add classification to history
@@ -32,7 +33,7 @@ class Subject:
                 self.history[i] = (h[0], user.score, h[2])
 
     def update_score(self, thresholds=None, history=False):
-        score = self.p0
+        score = self.prior
         _history = []
         for _, (u0, u1), cl in self.history:
             if cl == 1:
@@ -71,9 +72,13 @@ class Subject:
             ('subject', self.id),
             ('gold', self.gold),
             ('score', self.score),
-            ('history', self.history),
+            #('history', self.history),
             ('retired', self.retired),
         ])
+
+    def truncate(self):
+        self.prior = self.score
+        self.history = []
 
     @classmethod
     def load(cls, data):

@@ -6,15 +6,18 @@ from swap.utils.collection import Collection
 
 class User:
 
-    def __init__(self, user, username, score, history):
+    def __init__(self, user, username, correct, seen):
         self.id = user
         self.name = username
-        self.score = score
-        self.history = history
+        self.history = []
+
+        self.prior = (correct, seen)
+        self.correct = correct
+        self.seen = seen
 
     @classmethod
     def new(cls, user, username):
-        return cls(user, username, None, [])
+        return cls(user, username, [0, 0], [0, 0])
 
     def save(self):
         # save user to file
@@ -30,30 +33,42 @@ class User:
             if h[0] == subject.id:
                 self.history[i] = (h[0], subject.gold, h[2])
 
-    def update_score(self):
-        correct = [0, 0]
-        seen = [0, 0]
-        for _, gold, cl in self.history:
-            if gold in [0, 1]:
-                seen[gold] += 1
-                if gold == cl:
-                    correct[gold] += 1
+    @property
+    def score(self):
+        correct = self.correct
+        seen = self.seen
 
         score = [.5, .5]
         for i in [0, 1]:
             if seen[i] > 0:
                 score[i] = correct[i] / seen[i]
 
-        self.score = score
         return score
+
+    def update_score(self):
+        correct = self.prior[0]
+        seen = self.prior[1]
+        for _, gold, cl in self.history:
+            if gold in [0, 1]:
+                seen[gold] += 1
+                if gold == cl:
+                    correct[gold] += 1
+
+        self.seen = seen
+        self.correct = correct
+        return self.score
 
     def dump(self):
         return OrderedDict([
             ('user', self.id),
             ('username', self.name),
-            ('score', self.score),
-            ('history', self.history),
+            ('correct', self.correct),
+            ('seen', self.seen),
         ])
+
+    def truncate(self):
+        self.prior = (self.correct, self.seen)
+        self.history = []
 
     @classmethod
     def load(cls, data):

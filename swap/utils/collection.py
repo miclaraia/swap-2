@@ -38,6 +38,10 @@ class Collection:
 
         return data
 
+    def truncate(self):
+        for item in self.iter():
+            item.truncate()
+
     @classmethod
     def load(cls, data):
         items = cls()
