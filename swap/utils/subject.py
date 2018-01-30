@@ -103,6 +103,13 @@ class Subjects(Collection):
                 subjects.append(subject.id)
         return self.subset(subjects)
 
+    def gold(self):
+        subjects = []
+        for subject in self.iter():
+            if subject.gold in [0, 1]:
+                subjects.append(subject.id)
+        return self.subset(subjects)
+
 
 class Thresholds:
 
