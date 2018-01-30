@@ -17,18 +17,21 @@ logger = logging.getLogger(__name__)
 def swap():
     pass
 
+
+swap.command()
+@click.argument('name')
+def clear(name):
+    swap = SWAP.load(name)
+    swap = SWAP(name, swap.config)
+    swap.save()
+
 @swap.command()
 @click.argument('name')
 @click.argument('data')
 def run(name, data):
-    annotation = {
-        'task': 'T1',
-        'true': ['Real', 'Yes', 1],
-        'false': ['Bogus', 'No', 0],
-    }
-    config = Config(annotation=annotation)
-    parser = ClassificationParser(config)
     swap = SWAP.load(name)
+    config = swap.config
+    parser = ClassificationParser(config)
 
     with open(data, 'r') as file:
         reader = csv.DictReader(file)
@@ -50,6 +53,18 @@ def run(name, data):
 
     code.interact(local={**globals(), **locals()})
 
+
+@swap.command()
+@click.argument('name')
+@click.option('--config', is_flag=True)
+def new(name, config):
+    if config:
+        config = Config()
+        code.interact(local=locals())
+        swap = SWAP(name, config)
+    else:
+        swap = SWAP(name)
+    swap.save()
 
 @swap.command()
 @click.argument('name')
