@@ -10,11 +10,12 @@ logger = logging.getLogger(__name__)
 class Subject:
     p0 = .12
 
-    def __init__(self, subject, gold, score, retired=None):
+    def __init__(self, subject, gold, score, seen=0, retired=None):
         self.id = subject
         self.gold = gold
         self.prior = score
         self.score = score
+        self.seen = seen
         self.history = []
         self.retired = retired
 
@@ -24,6 +25,7 @@ class Subject:
 
     def classify(self, user, cl):
         # Add classification to history
+        self.seen += 1
         self.history.append((user.id, user.score, cl))
 
     def update_user(self, user):
@@ -74,6 +76,7 @@ class Subject:
             ('score', self.score),
             #('history', self.history),
             ('retired', self.retired),
+            ('seen', self.seen),
         ])
 
     def truncate(self):
@@ -131,6 +134,12 @@ class Thresholds:
             'thresholds': self.thresholds
         }
 
+    def __str__(self):
+        return str(self.dump())
+
+    def __repr__(self):
+        return str(self)
+
     @classmethod
     def load(cls, subjects, data):
         data['subjects'] = subjects
@@ -139,8 +148,8 @@ class Thresholds:
     def get_scores(self):
         scores = []
         for subject in self.subjects.iter():
-            if len(subject.history) > 0:
-                scores.append((subject.gold, subject.score))
+            # if len(subject.history) > 0:
+            scores.append((subject.gold, subject.score))
 
         scores = sorted(scores, key=lambda item: item[1])
         return scores
@@ -275,7 +284,7 @@ class ScoreStats:
 
         self.purity = divide(high[1], self.total(high))
         self.retired = divide(
-            (self.total(low) + self.total(high)), self.total(total))
+            (self.total(low) + self.total(high)), len(self.subjects))
         self.retired_correct = divide(
             (high[1] + low[0]), (self.total(low) + self.total(high)))
 

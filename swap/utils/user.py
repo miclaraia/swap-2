@@ -76,8 +76,8 @@ class User:
         return cls(**data)
 
     def __str__(self):
-        return 'id %d name %14s score %s length %d' % \
-                (self.id, self.name, self.score, len(self.history))
+        return 'id %s name %14s score %s length %d' % \
+                (str(self.id), self.name, self.score, sum(self.seen))
 
     def __repr__(self):
         return str(self)

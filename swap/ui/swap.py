@@ -47,11 +47,11 @@ def run(name, data):
 
             swap.classify(**row)
 
-            if i > 0 and i % 1e6 == 0:
-                print()
-                print('Applying records')
-                swap()
-                swap.truncate()
+            # if i > 0 and i % 1e6 == 0:
+                # print()
+                # print('Applying records')
+                # swap()
+                # swap.truncate()
 
     swap()
     swap.retire(config.fpr, config.mdr)
