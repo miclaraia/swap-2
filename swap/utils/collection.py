@@ -23,6 +23,9 @@ class Collection:
     def list(self):
         return list(self.items.values())
 
+    def keys(self):
+        return list(self.items.keys())
+
     def new(self, item):
         pass
 
