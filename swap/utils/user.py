@@ -37,11 +37,12 @@ class User:
     def score(self):
         correct = self.correct
         seen = self.seen
+        gamma = 1
 
         score = [.5, .5]
         for i in [0, 1]:
             if seen[i] > 0:
-                score[i] = correct[i] / seen[i]
+                score[i] = (correct[i]+gamma) / (seen[i]+2*gamma)
 
         return score
 
