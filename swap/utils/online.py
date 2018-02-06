@@ -9,7 +9,7 @@ class Online:
     def send(swap):
         data = []
         for subject in swap.subjects.iter():
-            data.append((subject.id, subject.score))
+            data.append((subject.id, {'score': subject.score}))
 
         ce.Reducer.reduce(data)
 
