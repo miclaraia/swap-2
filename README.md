@@ -11,7 +11,7 @@ Configuration
 parser, pass the `--config` flag, and then enter the desired configuration.
 For example, for Supernova Hunters, enter:
 
-`config.annotations.update({'task': 'T1', 'true': ['Real', 'Yes', 1], 'false':
+`config.annotation.update({'task': 'T1', 'true': ['Real', 'Yes', 1], 'false':
 ['Bogus', 'No', 0]})`
 
 
