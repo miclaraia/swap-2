@@ -1,43 +1,33 @@
 README
 ======
 
-Documentation
+Make sure desired versions of panoptes_python_client and caesar_external are
+installed before attempting to install swap-2
+
+Configuration
 -------------
 
-Full documentation is available [here](https://zooniverse.github.io/swap/)
+`swap new ${NAME}` where ${NAME} is arbitrary. To configure the annotation
+parser, pass the `--config` flag, and then enter the desired configuration.
+For example, for Supernova Hunters, enter:
 
-Quick Start
------------
-
-Install SWAP
-
-`./bin/install`
-
-Run Online SWAP
-
-`./bin/run_online_swap`
+`config.annotations.update({'task': 'T1', 'true': ['Real', 'Yes', 1], 'false':
+['Bogus', 'No', 0]})`
 
 
-Using SWAP
-----------
+Running swap
+------------
 
-After installing, there are a number of commands available for running SWAP.
-These include tools to create plots and export SWAP scores to file.
+Start by initializing swap's gold labels by running `swap golds ${NAME}
+${GOLDS_CSV_FILE}` where ${NAME} is the name used to configure swap, and the
+golds csv file contains the gold labels with column labels 'subject', and
+'gold'.
 
-Basic syntax is
+Then run swap on a panoptes csv dump with `swap run ${NAME}
+${CLASSIFICATION_DUMP}`.
 
-    run_swap [options] COMMAND [options]
 
-Command can be one of `{roc, swap}`
-
-To run swap and pickle and save, run
-
-    run_swap swap --run 
-
-Find more details by running
-
-    run_swap -h
-
-or, for more details about SWAP specific commands, run
-
-    run_swap swap -h
+If memory is an issue, split the csv dump into batches, and run
+`swap.truncate()` in the python terminal between batches. This truncates the 
+score history from the user and subject agents, but maintains enough
+information for the swap algorithm to continue functioning.
