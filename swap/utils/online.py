@@ -1,12 +1,17 @@
 
 import caesar_external as ce
 from swap.utils.parser import AnnotationParser
+import sys
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Online:
 
     @staticmethod
     def send(swap):
+        logger.debug('Sending data')
         data = []
         for subject in swap.subjects.iter():
             data.append((subject.id, {'score': subject.score}))
@@ -19,7 +24,7 @@ class Online:
         parser = AnnotationParser(config)
 
         data = ce.Extractor.next()
-        for item in data:
+        for i, item in enumerate(data):
             cl = {
                 'user': item['user'],
                 'subject': item['subject'],
@@ -28,6 +33,10 @@ class Online:
             }
             if cl['cl'] is None:
                 continue
+
+            if i % 100 == 0:
+                sys.stdout.flush()
+                sys.stdout.write("%d records processed\r" % i)
 
             swap.classify(**cl)
 

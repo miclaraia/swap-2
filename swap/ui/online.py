@@ -13,6 +13,7 @@ import caesar_external as ce
 
 import logging
 logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
 
 @ui.cli.group()
