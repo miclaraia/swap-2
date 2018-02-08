@@ -61,8 +61,9 @@ class SWAP:
     def load(cls, name):
         fname = name + '.pkl'
 
-        if os.path.isfile(fname):
-            with open(swap.data.path(fname), 'rb') as file:
+        path = swap.data.path(fname)
+        if os.path.isfile(path):
+            with open(swap.data.path(path), 'rb') as file:
                 data = pickle.load(file)
 
             config = Config.load(data['config'])
@@ -76,7 +77,7 @@ class SWAP:
                 swp.thresholds = Thresholds.load(
                     swp.subjects, data['thresholds'])
         else:
-            swp = SWAP(name, config)
+            swp = SWAP(name)
         return swp
 
     def __call__(self):

@@ -13,19 +13,15 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-@ui.cli.group()
-def swap():
-    pass
-
-
-@swap.command()
+@ui.cli.command()
 @click.argument('name')
 def clear(name):
     swap = SWAP.load(name)
     swap = SWAP(name, swap.config)
     swap.save()
 
-@swap.command()
+
+@ui.cli.command()
 @click.argument('name')
 @click.argument('data')
 def run(name, data):
@@ -60,7 +56,7 @@ def run(name, data):
     code.interact(local={**globals(), **locals()})
 
 
-@swap.command()
+@ui.cli.command()
 @click.argument('name')
 @click.option('--config', is_flag=True)
 def new(name, config):
@@ -72,14 +68,15 @@ def new(name, config):
         swap = SWAP(name)
     swap.save()
 
-@swap.command()
+
+@ui.cli.command()
 @click.argument('name')
 def load(name):
     swap = SWAP.load(name)
     code.interact(local={**globals(), **locals()})
 
 
-@swap.command()
+@ui.cli.command()
 @click.argument('name')
 @click.argument('path')
 def golds(name, path):

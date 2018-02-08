@@ -33,7 +33,7 @@ setup(
     long_description=long_description,
 
     # The project's main homepage.
-    url='https://github.com/zooniverse/hco-experiments/tree/master/swap',
+    #url='',
 
     # Author details
     author='Michael Laraia',
@@ -84,6 +84,7 @@ setup(
     install_requires=[
         'h5py',
         'click',
+        'caesar_external',
     ],
 
     # List additional groups of dependencies here (e.g. development
@@ -91,18 +92,7 @@ setup(
     # for example:
     # $ pip install -e .[dev,test]
     extras_require={
-        'dev': [
-            'check-manifest',
-            'setuptools',
-            'wheel',
-            'sphinx',
-            'sphinxcontrib-napoleon',
-            'sphinx-rtd-theme',
-            'sphinx-argparse',
-            'pylint',
-            'coverage',
-            'pytest',
-        ],
+       
     },
 
     # If there are data files included in your packages that need to be
@@ -123,7 +113,7 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points={
         'console_scripts': [
-            'run_swap=swap.__main__:main',
+            'swap=swap.__main__:main',
         ],
     },
 )

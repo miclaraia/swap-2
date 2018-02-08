@@ -16,7 +16,7 @@ class ClassificationParser:
         else:
             user = int(user)
 
-        annotation = self.annotation.parse(cl)
+        annotation = self.annotation.parse(cl['annotations'])
         if annotation is None:
             logger.error('Skipping classification %s', cl)
             return None
@@ -33,8 +33,9 @@ class AnnotationParser:
     def __init__(self, config):
         self.parser = config.annotation
 
-    def parse(self, cl):
-        annotations = json.loads(cl['annotations'])
+    def parse(self, annotations):
+        if type(annotations) is str:
+            annotations = json.loads(annotations)
         annotation = self._find_task(annotations)
         if annotation is None:
             return None
