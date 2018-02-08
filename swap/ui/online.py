@@ -21,19 +21,41 @@ def online():
     pass
 
 
-@online.command()
+@online.command
 @click.argument('name')
-@click.option('--online-name')
-def run(name, online_name):
-    if not online_name:
-        online_name = name
-
-    ce.Config.load(online_name)
+@click.argument('online-name')
+def config(name, online_name):
     swap = SWAP.load(name)
-
-    Online.receive(swap)
-    Online.send(swap)
+    config = swap.config
+    config.online_name = online_name
+    code.interact(local={**globals(), **locals()})
     swap.save()
 
-    code.interact(local={**globals(), **locals()})
+
+@online.command()
+@click.argument('name')
+def run(name):
+    swap = SWAP.load(name)
+    ce.Config.load(swap.config.online_name)
+
+    Online.receive(swap)
+    swap.save()
     ce.Config.instance().save()
+    logger.debug('Saved swap status')
+    logger.info('Sending reductions to caesar')
+    Online.send(swap)
+
+    logger.debug('Done sending reductions to caesar')
+    code.interact(local={**globals(), **locals()})
+
+
+@online.command()
+@click.argument('name')
+def send(name):
+    swap = SWAP.load(name)
+    ce.Config.load(swap.config.online_name)
+    logger.info('Sending reductions to caesar')
+    Online.send(swap)
+
+    logger.debug('Done sending reductions to caesar')
+    code.interact(local={**globals(), **locals()})

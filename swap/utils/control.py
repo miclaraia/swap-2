@@ -26,6 +26,8 @@ class Config:
         self.mdr = kwargs.get('mdr', .1)
         self.fpr = kwargs.get('fpr', .01)
 
+        self.online_name = kwargs.get('online_name', None)
+
     def dump(self):
         return self.__dict__.copy()
 

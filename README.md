@@ -31,3 +31,15 @@ If memory is an issue, split the csv dump into batches, and run
 `swap.truncate()` in the python terminal between batches. This truncates the 
 score history from the user and subject agents, but maintains enough
 information for the swap algorithm to continue functioning.
+
+
+Online swap
+-----------
+
+Online swap queries classifications from the panoptes api and sends them
+to a placeholder reducer in caesar. Make sure caesar_external is properly 
+setup for this project, then configure online swap with:
+`swap online config ${NAME} ${CAESAR_NAME}` Where `${CAESAR_NAME}` is the name
+used to configure the caesar_external library for this project.
+
+Then run swap online with `swap online run ${NAME}`.
