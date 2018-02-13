@@ -21,7 +21,7 @@ def online():
     pass
 
 
-@online.command
+@online.command()
 @click.argument('name')
 @click.argument('online-name')
 def config(name, online_name):
