@@ -68,8 +68,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'SWAP'
-copyright = '2017, Michael Laraia, Marco Willi, Darryl Wright, Hugh Dickinson'
-author = 'Michael Laraia, Marco Willi, Darryl Wright, Hugh Dickinson'
+copyright = '2015, Phil Marshall; 2016, Phil Marshall, Chris Davis; 2017, Michael Laraia, Marco Willi, Darryl Wright, Hugh Dickinson; 2018, Phil Marshall, Chris Davis'
+author = 'Phil Marshall, Chris Davis, Michael Laraia, Marco Willi, Darryl Wright, Hugh Dickinson'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -164,7 +164,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'SWAP.tex', 'SWAP Documentation',
-     'Michael Laraia, Marco Willi, Darryl Wright, Hugh Dickinson', 'manual'),
+     'Michael Laraia, Marco Willi, Darryl Wright, Hugh Dickinson, Phil Marshall, Chris Davis', 'manual'),
 ]
 
 
