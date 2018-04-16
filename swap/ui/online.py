@@ -8,7 +8,10 @@ from swap.utils.control import SWAP
 from swap.utils.online import Online
 
 
-import caesar_external as ce
+try:
+    import caesar_external as ce
+except ModuleNotFoundError:
+    pass
 
 
 import logging

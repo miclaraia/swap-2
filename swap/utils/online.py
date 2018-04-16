@@ -1,6 +1,9 @@
 
-import caesar_external as ce
 from swap.utils.parser import AnnotationParser
+try:
+    import caesar_external as ce
+except ModuleNotFoundError:
+    pass
 import sys
 import logging
 
