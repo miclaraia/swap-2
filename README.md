@@ -1,8 +1,11 @@
 README
 ======
 
-Make sure desired versions of panoptes_python_client and caesar_external are
-installed before attempting to install swap-2
+Full documentation is available [here](https://zooniverse.github.io/swap/)
+
+The SWAP algorithm was developed by [Phil Marshall et al.](https://github.com/drphilmarshall/SpaceWarps/raw/master/doc/sw-system-published.pdf), and the original implementation of the algorithm that provided the motivation for this work can be found [here](https://github.com/drphilmarshall/SpaceWarps).
+
+The [caesar_external](https://github.com/miclaraia/caesar_external) library provides functionality for interacting with live classifications from Panoptes and Caesar in the Zooniverse. Installing this library activates these features in swap.
 
 Configuration
 -------------
