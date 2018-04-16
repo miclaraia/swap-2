@@ -82,9 +82,8 @@ setup(
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        'h5py',
+        'numpy',
         'click',
-        'caesar_external',
     ],
 
     # List additional groups of dependencies here (e.g. development
@@ -92,7 +91,14 @@ setup(
     # for example:
     # $ pip install -e .[dev,test]
     extras_require={
-       
+        'online': ['caesar_external'],
+        'docs': [
+            'sphinx',
+            'sphinxcontrib-napoleon',
+            'sphinx-rtd-theme',
+            'sphinx-argparse',
+        ],
+
     },
 
     # If there are data files included in your packages that need to be
