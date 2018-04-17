@@ -26,7 +26,8 @@ class Collection:
     def keys(self):
         return list(self.items.keys())
 
-    def new(self, item):
+    @staticmethod
+    def new(item):
         pass
 
     def __getitem__(self, item):

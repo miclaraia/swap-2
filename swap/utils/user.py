@@ -85,7 +85,8 @@ class User:
 
 class Users(Collection):
 
-    def new(self, user):
+    @staticmethod
+    def new(user):
         return User.new(user, None)
 
     @classmethod
