@@ -8,6 +8,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 class Subject:
+    """
+    Class to track an individual subject, its gold status, and its
+    score.
+    """
     p0 = .12
 
     def __init__(self, subject, gold, score, seen=0, retired=None):
@@ -21,20 +25,46 @@ class Subject:
 
     @classmethod
     def new(cls, subject, gold):
+        """
+        Create a new Subject
+        """
         return cls(subject, gold, cls.p0)
 
     def classify(self, user, cl):
+        """
+        Add a classification to this subject
+
+        Params
+        ------
+
+        user: user that made the classification
+        cl: classification, 1 or 0
+        """
         # Add classification to history
         self.seen += 1
         self.history.append((user.id, user.score, cl))
 
     def update_user(self, user):
+        """
+        Update the history of this subject when a user's score has changed
+        """
         for i in range(len(self.history)):
             h = self.history[i]
             if h[0] == user.id:
                 self.history[i] = (h[0], user.score, h[2])
 
     def update_score(self, thresholds=None, history=False):
+        """
+        Recalculate the score for this subject from its stored classification
+        history.
+
+        Params
+        ------
+
+        thresholds: Also update retirement status of this subject given
+                    threshold parameters. (bogus, real)
+        history: (bool) Return list of score history
+        """
         score = self.prior
         _history = []
         for _, (u0, u1), cl in self.history:
@@ -70,6 +100,9 @@ class Subject:
         return score
 
     def dump(self):
+        """
+        Dump this subject
+        """
         return OrderedDict([
             ('subject', self.id),
             ('gold', self.gold),
@@ -80,11 +113,17 @@ class Subject:
         ])
 
     def truncate(self):
+        """
+        Clear the history of this subject, and update the prior to the
+        current score."""
         self.prior = self.score
         self.history = []
 
     @classmethod
     def load(cls, data):
+        """
+        Load a subject from dumped data
+        """
         return cls(**data)
 
     def __str__(self):
@@ -96,8 +135,15 @@ class Subject:
 
 
 class Subjects(Collection):
+    """
+    Collection of Subjects
+    """
 
-    def new(self, subject):
+    @staticmethod
+    def new(subject):
+        """
+        Create and return a new Subject
+        """
         return Subject.new(subject, -1)
 
     @classmethod
@@ -105,6 +151,9 @@ class Subjects(Collection):
         return Subject.load(data)
 
     def retired(self):
+        """
+        Return all retired subjects
+        """
         subjects = []
         for subject in self.iter():
             if subject.retired in [0, 1]:
@@ -112,6 +161,9 @@ class Subjects(Collection):
         return self.subset(subjects)
 
     def gold(self):
+        """
+        Return subjects that have a gold label
+        """
         subjects = []
         for subject in self.iter():
             if subject.gold in [0, 1]:
@@ -120,6 +172,16 @@ class Subjects(Collection):
 
 
 class Thresholds:
+    """
+    Class to determine retirement thresholds
+
+    Thresholds are determined from the false positive rate (fpr) and the
+    missed detection rate (mdr), considering only the subjects with gold
+    labels. The bogus retirement threshold is set such that a rate equal
+    to mdr of real subjects are mislabeled as bogus. The real retirement
+    threshold is set such that a rate equal to fpr of bogus subjects are
+    labeled as real.
+    """
 
     def __init__(self, subjects, fpr, mdr, thresholds=None):
         self.subjects = subjects
@@ -128,6 +190,9 @@ class Thresholds:
         self.thresholds = thresholds
 
     def dump(self):
+        """
+        Dump thresholds object
+        """
         return {
             'fpr': self.fpr,
             'mdr': self.mdr,
@@ -142,10 +207,16 @@ class Thresholds:
 
     @classmethod
     def load(cls, subjects, data):
+        """
+        Load threwholds from dumped data
+        """
         data['subjects'] = subjects
         return cls(**data)
 
     def get_scores(self):
+        """
+        Generate sorted list of subject scores and gold labels
+        """
         scores = []
         for subject in self.subjects.iter():
             # if len(subject.history) > 0:
@@ -155,12 +226,18 @@ class Thresholds:
         return scores
 
     def get_counts(self, scores):
+        """
+        Get number of subjects in each gold label class (-1,0,1)
+        """
         counts = {k: 0 for k in [-1, 0, 1]}
         for score in scores:
             counts[score[0]] += 1
         return counts
 
     def __call__(self):
+        """
+        Determine retirement tresholds
+        """
         if self.thresholds is not None:
             return self.thresholds
 
