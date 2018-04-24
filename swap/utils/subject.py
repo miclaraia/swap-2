@@ -2,7 +2,7 @@
 from collections import OrderedDict
 
 from swap.utils.collection import Collection
-from swap.utils.control import Config
+from swap.utils.config import Config
 
 
 import logging
