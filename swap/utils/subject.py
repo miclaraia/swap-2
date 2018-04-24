@@ -2,6 +2,7 @@
 from collections import OrderedDict
 
 from swap.utils.collection import Collection
+from swap.utils.control import Config
 
 
 import logging
@@ -12,13 +13,12 @@ class Subject:
     Class to track an individual subject, its gold status, and its
     score.
     """
-    p0 = .12
 
-    def __init__(self, subject, gold, score, seen=0, retired=None):
+    def __init__(self, subject, gold, score=None, seen=0, retired=None):
         self.id = subject
         self.gold = gold
         self.prior = score
-        self.score = score
+        self.score = score or Config.instance().p0
         self.seen = seen
         self.history = []
         self.retired = retired
@@ -28,7 +28,7 @@ class Subject:
         """
         Create a new Subject
         """
-        return cls(subject, gold, cls.p0)
+        return cls(subject, gold)
 
     def classify(self, user, cl):
         """
@@ -286,15 +286,16 @@ class Thresholds:
                         bogus = score
                         break
 
-        if bogus >= Subject.p0:
+        p0 = Config.instance().p0
+        if bogus >= p0:
             logger.warning('bogus is greater than prior, '
                            'setting bogus threshold to p0')
-            bogus = Subject.p0
+            bogus = p0
 
-        if real <= Subject.p0:
+        if real <= p0:
             logger.warning('real is less than prior, '
                            'setting real threshold to p0')
-            real = Subject.p0
+            real = p0
 
         logger.debug('bogus %.4f real %.4f, fpr %.4f mdr %.4f',
                      bogus, real, _fpr, _mdr)

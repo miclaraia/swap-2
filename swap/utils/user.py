@@ -2,6 +2,7 @@
 from collections import OrderedDict
 
 from swap.utils.collection import Collection
+from swap.utils.control import Config
 
 
 class User:
@@ -47,9 +48,11 @@ class User:
     def score(self):
         numer = self.numer
         denom = self.denom
-        gamma = 1
 
-        score = [.5, .5]
+        config = Config.instance()
+        gamma = config.gamma  # defaults to 1
+        score = config.user_default  # defaults to [.5, .5]
+
         for i in [0, 1]:
             if denom[i] > 0:
                 score[i] = (numer[i]+gamma) / (denom[i]+2*gamma)

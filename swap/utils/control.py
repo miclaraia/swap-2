@@ -12,6 +12,8 @@ logger = logging.getLogger(__name__)
 
 class Config:
 
+    _instance = None
+
     def __init__(self, **kwargs):
         annotation = {
             'task': 'T1',
@@ -26,7 +28,19 @@ class Config:
         self.mdr = kwargs.get('mdr', .1)
         self.fpr = kwargs.get('fpr', .01)
 
+        self.gamma = kwargs.get('gamma', 1)
+        self.p0 = kwargs.get('p0', .12)
+        self.user_default = kwargs.get('user_default', [.5, .5])
+
         self.online_name = kwargs.get('online_name', None)
+
+        self._instance = self
+
+    @classmethod
+    def instance(cls):
+        if isinstance(cls._instance, cls):
+            return cls._instance
+        raise Exception('Config was never initialized')
 
     def dump(self):
         return self.__dict__.copy()
