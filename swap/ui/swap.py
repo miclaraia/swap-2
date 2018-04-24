@@ -6,7 +6,8 @@ import code
 import sys
 
 from swap.ui import ui
-from swap.utils.control import SWAP, Config, Thresholds
+from swap.utils.control import SWAP, Thresholds
+from swap.utils.config import Config
 from swap.utils.parser import ClassificationParser
 
 import logging
