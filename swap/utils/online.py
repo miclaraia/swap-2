@@ -19,7 +19,8 @@ class Online:
         for subject in swap.subjects.iter():
             data.append((subject.id, {'score': subject.score}))
 
-        ce.Reducer.reduce(data)
+        logger.debug('Dummy mode: No data sent: Payload: {}'.format(data))
+        # ce.Reducer.reduce(data)
 
     @staticmethod
     def receive(swap):
@@ -28,6 +29,7 @@ class Online:
 
         data = ce.Extractor.next()
         for i, item in enumerate(data):
+            logger.debug('Received annotation: Type ({}): {}'.format(type(item['annotations']), item['annotations']))
             cl = {
                 'user': item['user'],
                 'subject': item['subject'],
@@ -40,6 +42,8 @@ class Online:
             if i % 100 == 0:
                 sys.stdout.flush()
                 sys.stdout.write("%d records processed\r" % i)
+
+            logger.debug('Received classification: {}'.format(cl))
 
             swap.classify(**cl)
 
