@@ -19,8 +19,8 @@ class Online:
         for subject in swap.subjects.iter():
             data.append((subject.id, {'score': subject.score}))
 
-        logger.debug('Dummy mode: No data sent: Payload: {}'.format(data))
-        # ce.Reducer.reduce(data)
+        logger.debug('Active mode. Data Sent: Payload: {}'.format(data[:10]))
+        ce.Reducer.reduce(data[:10])
 
     @staticmethod
     def receive(swap):
