@@ -2,7 +2,15 @@
 =========================
 
 .. automodule:: swap.utils.control
-    :members: SWAP, Config, 
+    :members: SWAP, 
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`swap.utils.config`
+=========================
+
+.. automodule:: swap.utils.config
+    :members: Config, 
     :undoc-members:
     :show-inheritance:
 

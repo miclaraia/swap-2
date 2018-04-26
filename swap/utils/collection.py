@@ -2,7 +2,8 @@
 
 class Collection:
 
-    def __init__(self, items=None):
+    def __init__(self, config, items=None):
+        self.config = config
         if items is None:
             items = {}
         if type(items) is list:
@@ -14,7 +15,7 @@ class Collection:
 
     def subset(self, items):
         subset = [self.items[i] for i in items]
-        return self.__class__(subset)
+        return self.__class__(self.config, subset)
 
     def iter(self):
         for i in self.items:
@@ -28,7 +29,7 @@ class Collection:
 
     @staticmethod
     def new(item):
-        pass
+        return None
 
     def __getitem__(self, item):
         if item not in self.items:
@@ -46,13 +47,10 @@ class Collection:
         for item in self.iter():
             item.truncate()
 
-    @classmethod
-    def load(cls, data):
-        items = cls()
+    def load(self, data):
         for item in data:
-            item = cls._load_item(item)
-            items.items[item.id] = item
-        return items
+            item = self._load_item(item)
+            self.items[item.id] = item
 
     @classmethod
     def _load_item(cls, data):

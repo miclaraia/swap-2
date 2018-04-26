@@ -1,5 +1,6 @@
 
 from collections import OrderedDict
+import json
 
 from swap.utils.collection import Collection
 
@@ -12,11 +13,14 @@ class Subject:
     Class to track an individual subject, its gold status, and its
     score.
     """
-    p0 = .12
 
-    def __init__(self, subject, gold, score, seen=0, retired=None):
+    def __init__(self, subject, gold, config,
+                 score=None, seen=0, retired=None):
         self.id = subject
         self.gold = gold
+        self.config = config
+
+        score = score or config.p0
         self.prior = score
         self.score = score
         self.seen = seen
@@ -24,11 +28,11 @@ class Subject:
         self.retired = retired
 
     @classmethod
-    def new(cls, subject, gold):
+    def new(cls, subject, gold, config):
         """
         Create a new Subject
         """
-        return cls(subject, gold, cls.p0)
+        return cls(subject, gold, config)
 
     def classify(self, user, cl):
         """
@@ -52,6 +56,14 @@ class Subject:
             h = self.history[i]
             if h[0] == user.id:
                 self.history[i] = (h[0], user.score, h[2])
+
+    def _retire(self, thresholds, score):
+        bogus, real = thresholds
+        if score < bogus:
+            return 0
+        elif score > real:
+            return 1
+        return -1
 
     def update_score(self, thresholds=None, history=False):
         """
@@ -84,16 +96,13 @@ class Subject:
             if history:
                 _history.append(score)
 
-            self.retired = None
             if thresholds is not None:
-                bogus, real = thresholds
-                if score < bogus:
-                    self.retired = 0
-                    break
-                elif score > real:
-                    self.retired = 1
+                retired = self._retire(thresholds, score)
+                if retired in [0, 1]:
                     break
 
+        if thresholds is not None:
+            self.retired = self._retire(thresholds, score)
         self.score = score
         if history:
             return score, _history
@@ -103,14 +112,15 @@ class Subject:
         """
         Dump this subject
         """
-        return OrderedDict([
-            ('subject', self.id),
-            ('gold', self.gold),
-            ('score', self.score),
-            #('history', self.history),
-            ('retired', self.retired),
-            ('seen', self.seen),
-        ])
+        return self.id, self.gold, self.score, self.retired, self.seen
+        # return OrderedDict([
+            # ('subject', self.id),
+            # ('gold', self.gold),
+            # ('score', self.score),
+            # #('history', self.history),
+            # ('retired', self.retired),
+            # ('seen', self.seen),
+        # ])
 
     def truncate(self):
         """
@@ -124,6 +134,8 @@ class Subject:
         """
         Load a subject from dumped data
         """
+        keys = 'subject', 'gold', 'score', 'retired', 'seen', 'config'
+        data = {k: data[k] for k in keys}
         return cls(**data)
 
     def __str__(self):
@@ -139,16 +151,14 @@ class Subjects(Collection):
     Collection of Subjects
     """
 
-    @staticmethod
-    def new(subject):
+    def new(self, subject):
         """
         Create and return a new Subject
         """
-        return Subject.new(subject, -1)
+        return Subject.new(subject, -1, self.config)
 
-    @classmethod
-    def _load_item(cls, data):
-        return Subject.load(data)
+    def _load_item(self, data):
+        return Subject.load({'config': self.config, **data})
 
     def retired(self):
         """
@@ -193,11 +203,12 @@ class Thresholds:
         """
         Dump thresholds object
         """
-        return {
-            'fpr': self.fpr,
-            'mdr': self.mdr,
-            'thresholds': self.thresholds
-        }
+        return self.fpr, self.mdr, json.dumps(self.thresholds)
+        # return {
+            # 'fpr': self.fpr,
+            # 'mdr': self.mdr,
+            # 'thresholds': json.dumps(self.thresholds)
+        # }
 
     def __str__(self):
         return str(self.dump())
@@ -208,9 +219,12 @@ class Thresholds:
     @classmethod
     def load(cls, subjects, data):
         """
-        Load threwholds from dumped data
+        Load thresholds from dumped data
         """
+        keys = 'fpr', 'mdr', 'thresholds'
+        data = {k: data[k] for k in keys}
         data['subjects'] = subjects
+        data['thresholds'] = json.loads(data['thresholds'])
         return cls(**data)
 
     def get_scores(self):
@@ -286,15 +300,16 @@ class Thresholds:
                         bogus = score
                         break
 
-        if bogus >= Subject.p0:
+        p0 = self.subjects.config.p0
+        if bogus >= p0:
             logger.warning('bogus is greater than prior, '
                            'setting bogus threshold to p0')
-            bogus = Subject.p0
+            bogus = p0
 
-        if real <= Subject.p0:
+        if real <= p0:
             logger.warning('real is less than prior, '
                            'setting real threshold to p0')
-            real = Subject.p0
+            real = p0
 
         logger.debug('bogus %.4f real %.4f, fpr %.4f mdr %.4f',
                      bogus, real, _fpr, _mdr)

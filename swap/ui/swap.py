@@ -6,8 +6,10 @@ import code
 import sys
 
 from swap.ui import ui
-from swap.utils.control import SWAP, Config, Thresholds
+from swap.utils.control import SWAP, Thresholds
+from swap.utils.config import Config
 from swap.utils.parser import ClassificationParser
+import swap.data
 
 import logging
 logger = logging.getLogger(__name__)
@@ -15,10 +17,9 @@ logger = logging.getLogger(__name__)
 
 @ui.cli.command()
 @click.argument('name')
-def clear(name):
-    swap = SWAP.load(name)
-    swap = SWAP(name, swap.config)
-    swap.save()
+@click.option('--all', is_flag=True)
+def clear(name, all):
+    swap.data.clear(name, all)
 
 
 @ui.cli.command()
@@ -50,7 +51,7 @@ def run(name, data):
                 # swap.truncate()
 
     swap()
-    swap.retire(config.fpr, config.mdr)
+    swap.retire()
     swap.save()
 
     code.interact(local={**globals(), **locals()})
@@ -60,12 +61,12 @@ def run(name, data):
 @click.argument('name')
 @click.option('--config', is_flag=True)
 def new(name, config):
-    if config:
-        config = Config()
+    _c = config
+    config = Config(name)
+    if _c:
         code.interact(local=locals())
-        swap = SWAP(name, config)
-    else:
-        swap = SWAP(name)
+    swap = SWAP(config)
+    print(config)
     swap.save()
 
 
@@ -74,6 +75,11 @@ def new(name, config):
 def load(name):
     swap = SWAP.load(name)
     code.interact(local={**globals(), **locals()})
+
+@ui.cli.command()
+def list():
+    for row, config in swap.data.list_config():
+        print('%s: %s' % (row, config))
 
 
 @ui.cli.command()
