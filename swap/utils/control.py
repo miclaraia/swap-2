@@ -1,6 +1,7 @@
 
 import pickle
 import os
+import json
 
 from swap.utils.subject import Subjects, ScoreStats, Thresholds
 from swap.utils.user import Users
@@ -11,43 +12,20 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+
+
 class SWAP:
 
-    def __init__(self, name, config=None):
-        self.name = name
-        self.users = Users()
-        self.subjects = Subjects()
-
-        if config is None:
-            config = Config()
+    def __init__(self, config):
+        self.name = config.name
+        self.users = Users(config)
+        self.subjects = Subjects(config)
         self.config = config
 
         self.thresholds = None
         self._performance = None
-        self.last_id = None
+        self.last_id = config.last_id
 
-    @classmethod
-    def load(cls, name):
-        fname = name + '.pkl'
-
-        path = swap.data.path(fname)
-        if os.path.isfile(path):
-            with open(swap.data.path(path), 'rb') as file:
-                data = pickle.load(file)
-
-            config = Config.load(data['config'])
-
-            swp = SWAP(name, config)
-            swp.last_id = data['last_id']
-            swp.users = Users.load(data['users'])
-            swp.subjects = Subjects.load(data['subjects'])
-
-            if data.get('thresholds'):
-                swp.thresholds = Thresholds.load(
-                    swp.subjects, data['thresholds'])
-        else:
-            swp = SWAP(name)
-        return swp
 
     def __call__(self):
         print('score users')
@@ -94,7 +72,9 @@ class SWAP:
         for subject, gold in golds:
             self.apply_gold(subject, gold)
 
-    def retire(self, fpr, mdr):
+    def retire(self):
+        fpr = self.config.fpr
+        mdr = self.config.mdr
         t = Thresholds(self.subjects, fpr, mdr)
         self.thresholds = t
         bogus, real = t()
@@ -102,22 +82,71 @@ class SWAP:
         for subject in self.subjects.iter():
             subject.update_score((bogus, real))
 
-    def save(self):
-        if self.thresholds is not None:
-            thresholds = self.thresholds.dump()
-        else:
-            thresholds = None
-        data = {
-            'config': self.config.dump(),
-            'users': self.users.dump(),
-            'subjects': self.subjects.dump(),
-            'thresholds': thresholds,
-            'last_id': self.last_id,
-        }
+    @classmethod
+    def load(cls, name):
+        conn = swap.data.sqlite()
+        conn.row_factory = swap.data.sqlite3.Row
+        c = conn.cursor()
+        c.execute('SELECT config FROM config WHERE swap=?', (name,))
+        config = json.loads(c.fetchone()[0])
+        config = Config.load(config)
+        swp = SWAP(config)
 
-        fname = self.name + '.pkl'
-        with open(swap.data.path(fname), 'wb') as file:
-            pickle.dump(data, file)
+        def it(rows):
+            for item in rows:
+                yield dict(item)
+
+        c.execute('SELECT * FROM users where swap=?', (name,))
+        swp.users.load(it(c.fetchall()))
+
+        c.execute('SELECT * FROM subjects where swap=?', (name,))
+        swp.subjects.load(it(c.fetchall()))
+
+        c.execute('SELECT * FROM thresholds WHERE swap=?', (name,))
+        t = c.fetchone()
+        if t:
+            swp.thresholds = Thresholds.load(swp.subjects, t)
+
+        conn.close()
+        return swp
+
+    def save(self):
+        conn = swap.data.sqlite()
+        c = conn.cursor()
+        name = self.config.name
+        self.config.last_id = self.last_id
+
+        def zip_name(data):
+            return [(name, *d) for d in data]
+
+        swap.data.clear(name, True)
+        c.executemany('INSERT INTO users VALUES (?,?,?,?)',
+                      zip_name(self.users.dump()))
+        c.executemany('INSERT INTO subjects VALUES (?,?,?,?,?,?)',
+                      zip_name(self.subjects.dump()))
+        if self.thresholds:
+            c.execute('INSERT INTO thresholds VALUES (?,?,?,?)',
+                      (name, *self.thresholds.dump()))
+
+        c = conn.cursor()
+        c.execute('INSERT INTO config VALUES (?,?)',
+                  (name, json.dumps(self.config.dump())))
+        conn.commit()
+        conn.close()
+
+
+
+        # data = {
+            # 'config': self.config.__dict__,
+            # 'users': self.users.dump(),
+            # 'subjects': self.subjects.dump(),
+            # 'thresholds': thresholds,
+            # 'last_id': self.last_id,
+        # }
+
+        # fname = self.name + '.pkl'
+        # with open(swap.data.path(fname), 'wb') as file:
+            # pickle.dump(data, file)
 
     @property
     def performance(self):
