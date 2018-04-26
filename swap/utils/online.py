@@ -19,6 +19,7 @@ class Online:
         for subject in swap.subjects.iter():
             data.append((subject.id, {'score': subject.score}))
 
+        # TODO: Remove data throttle
         logger.debug('Active mode. Data Sent: Payload: {}'.format(data[:10]))
         ce.Reducer.reduce(data[:10])
 
@@ -28,8 +29,10 @@ class Online:
         parser = AnnotationParser(config)
 
         data = ce.Extractor.next()
+        haveItems = False
         for i, item in enumerate(data):
             logger.debug('Received annotation: Type ({}): {}'.format(type(item['annotations']), item['annotations']))
+            haveItems = True
             cl = {
                 'user': item['user'],
                 'subject': item['subject'],
@@ -47,6 +50,7 @@ class Online:
 
             swap.classify(**cl)
 
-        swap()
-        swap.retire(config.fpr, config.mdr)
-        return swap, len(data)
+        if haveItems:
+            swap()
+            swap.retire()
+        return swap, haveItems
