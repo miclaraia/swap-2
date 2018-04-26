@@ -51,6 +51,30 @@ def run(name):
     logger.debug('Done sending reductions to caesar')
     code.interact(local={**globals(), **locals()})
 
+@online.command()
+@click.argument('name')
+def run_continuous(name):
+    swap = SWAP.load(name)
+    ce.Config.load(swap.config.online_name)
+
+    try :
+        logger.info('Starting SWAP ({}) in continuous online mode...'.format(name))
+        while True :
+            _, numReceived = Online.receive(swap)
+            if numReceived > 0 :
+                swap.save()
+                ce.Config.instance().save()
+                logger.debug('Saved swap status')
+
+                logger.info('Sending reductions to caesar')
+                Online.send(swap)
+                logger.debug('Done sending reductions to caesar')
+    except KeyboardInterrupt as e:
+        logger.debug('Received {}'.format(e))
+        logger.debug('Terminating SWAP instance ({}).'.format(name))
+        return
+    # code.interact(local={**globals(), **locals()})
+
 
 @online.command()
 @click.argument('name')

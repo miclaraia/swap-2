@@ -49,4 +49,4 @@ class Online:
 
         swap()
         swap.retire(config.fpr, config.mdr)
-        return swap
+        return swap, len(data)
