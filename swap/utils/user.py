@@ -1,13 +1,13 @@
 
 from collections import OrderedDict
+import json
 
 from swap.utils.collection import Collection
-from swap.utils.config import Config
 
 
 class User:
 
-    def __init__(self, user, username, confusion):
+    def __init__(self, user, username, confusion, config):
         """
         Parameters
         ----------
@@ -17,14 +17,15 @@ class User:
         self.id = user
         self.name = username
         self.history = []
+        self.config = config
 
         self.prior = confusion
         self.numer = confusion[0]
         self.denom = confusion[1]
 
     @classmethod
-    def new(cls, user, username):
-        return cls(user, username, ([0, 0], [0, 0]))
+    def new(cls, user, username, config):
+        return cls(user, username, ([0, 0], [0, 0]), config)
 
     def save(self):
         # save user to file
@@ -49,9 +50,8 @@ class User:
         numer = self.numer
         denom = self.denom
 
-        config = Config.instance()
-        gamma = config.gamma  # defaults to 1
-        score = config.user_default  # defaults to [.5, .5]
+        gamma = self.config.gamma  # defaults to 1
+        score = self.config.user_default  # defaults to [.5, .5]
 
         for i in [0, 1]:
             if denom[i] > 0:
@@ -73,11 +73,7 @@ class User:
         return self.score
 
     def dump(self):
-        return OrderedDict([
-            ('user', self.id),
-            ('username', self.name),
-            ('confusion', self.confusion)
-        ])
+        return (self.id, self.name, json.dumps(self.confusion))
 
     def truncate(self):
         self.prior = self.confusion
@@ -85,6 +81,9 @@ class User:
 
     @classmethod
     def load(cls, data):
+        keys = 'user', 'username', 'confusion', 'config'
+        data = {k: data[k] for k in keys}
+        data['confusion'] = json.loads(data['confusion'])
         return cls(**data)
 
     def __str__(self):
@@ -97,10 +96,8 @@ class User:
 
 class Users(Collection):
 
-    @staticmethod
-    def new(user):
-        return User.new(user, None)
+    def new(self, user):
+        return User.new(user, None, self.config)
 
-    @classmethod
-    def _load_item(cls, data):
-        return User.load(data)
+    def _load_item(self, data):
+        return User.load({'config': self.config, **data})
