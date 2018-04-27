@@ -92,6 +92,7 @@ ENV/
 
 # data
 #data/
+swap/data/swap.db
 *.mat
 *.jpeg
 *.png
