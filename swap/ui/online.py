@@ -70,7 +70,7 @@ def run_continuous(name):
                 Online.send(swap)
                 logger.debug('Done sending reductions to caesar')
     except KeyboardInterrupt as e:
-        logger.debug('Received {}'.format(e))
+        logger.debug('Received KeyboardInterrupt {}'.format(e))
         logger.debug('Terminating SWAP instance ({}).'.format(name))
         return
     # code.interact(local={**globals(), **locals()})

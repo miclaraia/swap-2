@@ -34,8 +34,8 @@ class Subject:
 
     @score.setter
     def score(self, new):
+        self.has_changed = self.has_changed or self._score != new
         self._score = new
-        self.has_changed = True
 
     @classmethod
     def new(cls, subject, gold, config):
