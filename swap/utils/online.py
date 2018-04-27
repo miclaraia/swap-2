@@ -16,12 +16,13 @@ class Online:
     def send(swap):
         logger.debug('Sending data')
         data = []
-        for subject in swap.subjects.iter():
+        subjects = swap.subjects.get_changed()
+        for subject in subjects.iter():
             data.append((subject.id, {'score': subject.score}))
 
-        # TODO: Remove data throttle
-        logger.debug('Active mode. Data Sent: Payload: {}'.format(data[:10]))
-        ce.Reducer.reduce(data[:10])
+        ce.Reducer.reduce(data)
+        for subject in subjects.iter():
+            subject.has_changed = False
 
     @staticmethod
     def receive(swap):

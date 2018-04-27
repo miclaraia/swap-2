@@ -22,10 +22,20 @@ class Subject:
 
         score = score or config.p0
         self.prior = score
-        self.score = score
+        self._score = score
+        self.has_changed = False
         self.seen = seen
         self.history = []
         self.retired = retired
+
+    @property
+    def score(self):
+        return self._score
+
+    @score.setter
+    def score(self, new):
+        self._score = new
+        self.has_changed = True
 
     @classmethod
     def new(cls, subject, gold, config):
@@ -167,6 +177,13 @@ class Subjects(Collection):
         subjects = []
         for subject in self.iter():
             if subject.retired in [0, 1]:
+                subjects.append(subject.id)
+        return self.subset(subjects)
+
+    def get_changed(self):
+        subjects = []
+        for subject in self.iter():
+            if subject.has_changed:
                 subjects.append(subject.id)
         return self.subset(subjects)
 
