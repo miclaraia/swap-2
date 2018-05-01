@@ -125,3 +125,4 @@ _vimrc_local.vim
 # SWAP specific stuff
 logs/
 conf/
+swap/data/swap.db
