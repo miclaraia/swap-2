@@ -6,4 +6,5 @@ API Documentation
 .. toctree::
     
     autodoc
+    commands
     

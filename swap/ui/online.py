@@ -28,6 +28,15 @@ def online():
 @click.argument('name')
 @click.argument('online-name')
 def config(name, online_name):
+    """
+    Configure swap to use caesar external configuration
+    
+    \b
+    Arguments
+    ---------
+    name - Name of swap configuration
+    online-name - Name of caesar_external configuration
+    """
     swap = SWAP.load(name)
     config = swap.config
     config.online_name = online_name
@@ -57,11 +66,11 @@ def run_continuous(name):
     swap = SWAP.load(name)
     ce.Config.load(swap.config.online_name)
 
-    try :
-        logger.info('Starting SWAP ({}) in continuous online mode...'.format(name))
-        while True :
+    try:
+        logger.info('Starting SWAP (%s) in continuous online mode...' % name)
+        while True:
             _, haveItems = Online.receive(swap)
-            if haveItems :
+            if haveItems
                 swap.save()
                 ce.Config.instance().save()
                 logger.debug('Saved swap status')
