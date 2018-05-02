@@ -97,6 +97,7 @@ setup(
             'sphinxcontrib-napoleon',
             'sphinx-rtd-theme',
             'sphinx-argparse',
+            'sphinx-click',
         ],
 
     },
