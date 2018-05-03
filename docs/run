@@ -18,7 +18,7 @@ publish () {
     BUILDDIR="/tmp/swap-pages-$$"
     echo "Building to $BUILDDIR"
 
-    GIT=$(git remote -v | grep push | grep origin | awk '{print $2}')
+    GIT=$(git remote -v | grep push | grep zoo | awk '{print $2}')
     echo "Using git origin address $GIT"
 
     mkdir $BUILDDIR
@@ -47,7 +47,7 @@ setup_gh_pages () {
     BUILDDIR="/tmp/swap-pages-$$"
     echo "Building to $BUILDDIR"
 
-    GIT=$(git remote -v | grep push | grep origin | awk '{print $2}')
+    GIT=$(git remote -v | grep push | grep zoo | awk '{print $2}')
     echo "Using git origin address $GIT"
 
     mkdir $BUILDDIR
@@ -62,7 +62,7 @@ setup_gh_pages () {
     git commit -m "Initial commit"
 
     read -p "Push empty gh-pages branch to origin?" -n 1 -r
-    git push origin gh-pages:gh-pages
+    git push -f origin gh-pages:gh-pages
 
 }
 
