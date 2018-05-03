@@ -72,6 +72,7 @@ class AnnotationParser:
         classifications with different formats
         """
         task = self.parser['task']
+        logger.debug('Searching for task: {}'.format(task))
         if type(annotations) is dict and task in annotations:
             return annotations[task][0]
 
@@ -80,7 +81,7 @@ class AnnotationParser:
                 if annotation['task'] == task:
                     return annotation
 
-        logger.error('Can\' find task %s', annotations)
+        logger.error('Can\'t find task %s', annotations)
         return None
         # raise self.AnnotationError(task, '', annotations)
 

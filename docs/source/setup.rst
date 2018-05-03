@@ -34,7 +34,9 @@ To configure a new project with swap, start with the command::
 
 This will bring up a python interpreter, which you can use to interact with the `config` object. The config object lets you set configure how swap should parse the csv classification dump from panoptes. Each project will have a different task key, and different labels that are used in the actual classification. The config annotation field has subfields `'task'`, `'true'`, and `'false'` to configure this. This is an example of how this might be set up::
 
-    config.annotation.update({'task': 'T1', 'true': ['Real', 'Yes', 1], 'false': ['Bogus', 'No', 0]})
+    config.annotation.update({
+        'task': 'T1', 'true': ['Real', 'Yes', 1], 'false': ['Bogus', 'No', 0]
+    })
 
 Other configuration options:
 
@@ -70,7 +72,7 @@ a `1` for real subjects and a `0` for bogus subjects. Only one row per subject.
 
 Then run swap on a panoptes csv dump with::
 
-    `swap run ${NAME} ${CLASSIFICATION_DUMP}
+    swap run ${NAME} ${CLASSIFICATION_DUMP}
 
 
 If swap runs out of memory during the process, you can split the csv into batches in a script
@@ -91,15 +93,65 @@ and the score thresholds used for retirement decisions.
 Online swap
 -----------
 
-Online swap queries classifications from the panoptes api and sends them
-to a placeholder reducer in caesar. Make sure caesar_external is properly 
-setup for this project, then configure online swap with:
-`swap online config ${NAME} ${CAESAR_NAME}` Where `${CAESAR_NAME}` is the name
-used to configure the caesar_external library for this project.
+Swap can be configured to run in online mode, where it queries classifications from zooniverse and sends swap scores as reductions to caesar. The classifications can either be queried through the panoptes api, or through caesar in conjunction with Amazon's Simple Queue Service.
 
-Then run swap online with::
+Start by deciding how you will authenticate with zooniverse. You'll probably either want to configure this to use environment variables containing your Zooniverse username and password, or configure to use an OAuth client id and secret pair. Alternatively you will be asked for your zooniverse username and password every time a command is run. Store username and password in :code:`$PANOPTES_USERNAME` and :code:`$PANOPTES_PASSWORD`, and store client id and secret in :code:`$PANOPTES_CLIENT_SECRET` and :code:`$PANOPTES_CLIENT_ID`. API keys can be generated through the `Zooniverse OAuth provider <https://panoptes.zooniverse.org/oauth/applications>`_ with :code:`urn:ietf:wg:oauth:2.0:oob` as the callback URI.
+
+Next you should run the configuration command. The syntax for the command is described below. To configure this module to get classifications from caesar, specify the sqs queue caesar has been configured to dump classifications into. If this is not specified then classifications will be fetched from panoptes. Caesar must be configured to accept reductions from an external source using a placeholder reducer. The name given to the reducer in caesar's config should be entered for :code:`caeesar_name`.
+
+
+Caesar Config Command Reference
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: none
+
+    Usage: caesar config new [OPTIONS] NAME PROJECT WORKFLOW
+
+      Generate new configuration for a project.
+
+      Arguments
+      ---------
+      name - Arbitrary name used to store configuration
+      project - Zooniverse project id
+      workflow - Zooniverse workflow id
+
+    Options:
+      --last_id INTEGER   Exclude classifications before this classification id.
+      --caesar_name TEXT  Name used for swap as a reducer in caesar's
+                          configuration, see
+                          https://zooniverse.github.io/caesar/#introduction about
+                          setting up a reducer in caesar.
+      --sqs_queue TEXT    Specify whether caesar should subscribe to an SQS queue
+                          for classifications. If left blank will default to
+                          panoptes api as classification source.
+      --staging           Flag to use staging endpoints for panoptes and caesar
+      --auth_mode TEXT    interactive,environment,api_key
+                          If api_key is selected,
+                          make sure client id and client secret are stored in
+                          environment variables in PANOPTES_CLIENT_ID and
+                          PANOPTES_CLIENT_SECRET
+      --help              Show this message and exit.
+
+Now point swap to the right caesar_external configuration you just set up. The command to do this is specified below.
+
+.. code-block:: none
+
+    Usage: swap online config [OPTIONS] NAME ONLINE_NAME
+
+      Configure swap to use caesar external configuration
+
+      Arguments
+      ---------
+      name - Name of swap configuration
+      online-name - Name of caesar_external configuration
+
+    Options:
+      --help  Show this message and exit.
+
+
+Finally run swap in online mode. You can use either of the following commands. The first fetches all classifications and posts reductions. The second runs the process in a loop (WARNING this is still experimental).
+
+.. code-block:: bash
 
     swap online run ${NAME}
-
-This will fetch the most recent classifications from the panoptes api, run swap on the data,
-then determine retirement thresholds, and send swap scores back to caesar.
+    swap online run_continuous ${NAME}
